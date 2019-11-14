@@ -6,3 +6,8 @@
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
+#ifndef DemuxThread_H
+#define DemuxThread_H
+
+
+#endif // DemuxThread_H

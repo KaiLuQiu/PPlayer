@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36091BCD237D131D00551509 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 36091BC1237D131D00551509 /* libx264.a */; };
+		36091BCE237D131D00551509 /* libfdk-aac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 36091BCC237D131D00551509 /* libfdk-aac.a */; };
 		36B09238237CCC43004D7D84 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 36B09237237CCC43004D7D84 /* AppDelegate.m */; };
 		36B0923B237CCC43004D7D84 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36B0923A237CCC43004D7D84 /* ViewController.m */; };
 		36B0923E237CCC43004D7D84 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36B0923C237CCC43004D7D84 /* Main.storyboard */; };
@@ -50,6 +52,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		36091BBE237D131D00551509 /* x264_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264_config.h; sourceTree = "<group>"; };
+		36091BBF237D131D00551509 /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
+		36091BC1237D131D00551509 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
+		36091BC5237D131D00551509 /* syslib_channelMapDescr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = syslib_channelMapDescr.h; sourceTree = "<group>"; };
+		36091BC6237D131D00551509 /* aacdecoder_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aacdecoder_lib.h; sourceTree = "<group>"; };
+		36091BC7237D131D00551509 /* machine_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = machine_type.h; sourceTree = "<group>"; };
+		36091BC8237D131D00551509 /* aacenc_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aacenc_lib.h; sourceTree = "<group>"; };
+		36091BC9237D131D00551509 /* genericStds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = genericStds.h; sourceTree = "<group>"; };
+		36091BCA237D131D00551509 /* FDK_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FDK_audio.h; sourceTree = "<group>"; };
+		36091BCC237D131D00551509 /* libfdk-aac.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libfdk-aac.a"; sourceTree = "<group>"; };
 		36B09233237CCC43004D7D84 /* PPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36B09236237CCC43004D7D84 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		36B09237237CCC43004D7D84 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -290,10 +302,12 @@
 				36B09357237CD965004D7D84 /* libswresample.a in Frameworks */,
 				36B092CB237CD5F6004D7D84 /* libiconv.tbd in Frameworks */,
 				36B092C9237CD269004D7D84 /* VideoToolbox.framework in Frameworks */,
+				36091BCD237D131D00551509 /* libx264.a in Frameworks */,
 				36B09352237CD965004D7D84 /* libavutil.a in Frameworks */,
 				36B092C7237CD263004D7D84 /* AudioToolbox.framework in Frameworks */,
 				36B09356237CD965004D7D84 /* libavdevice.a in Frameworks */,
 				36B09358237CD965004D7D84 /* libswscale.a in Frameworks */,
+				36091BCE237D131D00551509 /* libfdk-aac.a in Frameworks */,
 				36B092C4237CD251004D7D84 /* libSDL2.a in Frameworks */,
 				36B09354237CD965004D7D84 /* libavcodec.a in Frameworks */,
 			);
@@ -316,6 +330,70 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		36091BBC237D131D00551509 /* x264-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				36091BBD237D131D00551509 /* include */,
+				36091BC0237D131D00551509 /* lib */,
+			);
+			path = "x264-iOS";
+			sourceTree = "<group>";
+		};
+		36091BBD237D131D00551509 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				36091BBE237D131D00551509 /* x264_config.h */,
+				36091BBF237D131D00551509 /* x264.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		36091BC0237D131D00551509 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				36091BC1237D131D00551509 /* libx264.a */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		36091BC2237D131D00551509 /* fdk-aac-ios */ = {
+			isa = PBXGroup;
+			children = (
+				36091BC3237D131D00551509 /* include */,
+				36091BCB237D131D00551509 /* lib */,
+			);
+			path = "fdk-aac-ios";
+			sourceTree = "<group>";
+		};
+		36091BC3237D131D00551509 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				36091BC4237D131D00551509 /* fdk-aac */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		36091BC4237D131D00551509 /* fdk-aac */ = {
+			isa = PBXGroup;
+			children = (
+				36091BC5237D131D00551509 /* syslib_channelMapDescr.h */,
+				36091BC6237D131D00551509 /* aacdecoder_lib.h */,
+				36091BC7237D131D00551509 /* machine_type.h */,
+				36091BC8237D131D00551509 /* aacenc_lib.h */,
+				36091BC9237D131D00551509 /* genericStds.h */,
+				36091BCA237D131D00551509 /* FDK_audio.h */,
+			);
+			path = "fdk-aac";
+			sourceTree = "<group>";
+		};
+		36091BCB237D131D00551509 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				36091BCC237D131D00551509 /* libfdk-aac.a */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		36B0922A237CCC43004D7D84 = {
 			isa = PBXGroup;
 			children = (
@@ -340,6 +418,8 @@
 		36B09235237CCC43004D7D84 /* PPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				36091BC2237D131D00551509 /* fdk-aac-ios */,
+				36091BBC237D131D00551509 /* x264-iOS */,
 				36B092D0237CD965004D7D84 /* FFmpeg-iOS */,
 				36B0926A237CD250004D7D84 /* SDL2 */,
 				36B09236237CCC43004D7D84 /* AppDelegate.h */,
@@ -999,6 +1079,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 233YFHV8C6;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/PPlayer/FFmpeg-iOS/include\"",
+					"\"$(SRCROOT)/PPlayer/SDL2/include\"",
+					"\"$(SRCROOT)/PPlayer/x264-iOS/include\"",
+					"\"$(SRCROOT)/PPlayer/fdk-aac-ios/include\"",
+				);
 				INFOPLIST_FILE = PPlayer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1009,6 +1096,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/PPlayer/SDL2/lib",
 					"$(PROJECT_DIR)/PPlayer/FFmpeg-iOS/lib",
+					"$(PROJECT_DIR)/PPlayer/x264-iOS/lib",
+					"$(PROJECT_DIR)/PPlayer/fdk-aac-ios/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = KevinQiu.PPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1022,6 +1111,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 233YFHV8C6;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/PPlayer/FFmpeg-iOS/include\"",
+					"\"$(SRCROOT)/PPlayer/SDL2/include\"",
+					"\"$(SRCROOT)/PPlayer/x264-iOS/include\"",
+					"\"$(SRCROOT)/PPlayer/fdk-aac-ios/include\"",
+				);
 				INFOPLIST_FILE = PPlayer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1032,6 +1128,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/PPlayer/SDL2/lib",
 					"$(PROJECT_DIR)/PPlayer/FFmpeg-iOS/lib",
+					"$(PROJECT_DIR)/PPlayer/x264-iOS/lib",
+					"$(PROJECT_DIR)/PPlayer/fdk-aac-ios/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = KevinQiu.PPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -8,5 +8,12 @@
 #ifndef MediaDefineInfo_H
 #define MediaDefineInfo_H
 
+extern "C"{
+#include<libavformat/avformat.h>
+#include<libswscale/swscale.h>
+#include<libswresample/swresample.h>
+#include<libavutil/rational.h>
+}
+
 
 #endif // MediaDefineInfo_H

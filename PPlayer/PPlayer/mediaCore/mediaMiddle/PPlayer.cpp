@@ -5,3 +5,73 @@
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
+#include "PPlayer.h"
+
+SDL_mutex *PPlayer::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
+
+
+
+bool PPlayer::setDataSource(std::string url)
+{
+    return true;
+}
+
+bool PPlayer::prepareAsync()
+{
+    return true;
+}
+
+bool PPlayer::prepare()
+{
+    return true;
+}
+
+bool PPlayer::start()
+{
+    return true;
+}
+
+bool PPlayer::pause()
+{
+    return true;
+}
+
+bool PPlayer::seek(int64_t pos)
+{
+    return true;
+}
+
+bool PPlayer::resume()
+{
+    return true;
+}
+
+bool PPlayer::stop()
+{
+    return true;
+}
+
+void PPlayer::flush()
+{
+    
+}
+
+bool PPlayer::setLoop(bool loop)
+{
+    return true;
+}
+
+int PPlayer::getCurPos()
+{
+    return 0;
+}
+
+bool PPlayer::setSpeed()
+{
+    return true;
+}
+
+float PPlayer::getSpeed()
+{
+    return 0;
+}

@@ -18,7 +18,7 @@
 		3609D56D237D984100D7286F /* MediaDefineInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3609D56B237D984100D7286F /* MediaDefineInfo.cpp */; };
 		3609D5B9237DA34100D7286F /* AyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3609D5B8237DA34000D7286F /* AyncClock.cpp */; };
 		36B09238237CCC43004D7D84 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 36B09237237CCC43004D7D84 /* AppDelegate.m */; };
-		36B0923B237CCC43004D7D84 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36B0923A237CCC43004D7D84 /* ViewController.m */; };
+		36B0923B237CCC43004D7D84 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 36B0923A237CCC43004D7D84 /* ViewController.mm */; };
 		36B0923E237CCC43004D7D84 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36B0923C237CCC43004D7D84 /* Main.storyboard */; };
 		36B09240237CCC44004D7D84 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 36B0923F237CCC44004D7D84 /* Assets.xcassets */; };
 		36B09243237CCC44004D7D84 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36B09241237CCC44004D7D84 /* LaunchScreen.storyboard */; };
@@ -90,7 +90,7 @@
 		36B09236237CCC43004D7D84 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		36B09237237CCC43004D7D84 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		36B09239237CCC43004D7D84 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		36B0923A237CCC43004D7D84 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		36B0923A237CCC43004D7D84 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		36B0923D237CCC43004D7D84 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		36B0923F237CCC44004D7D84 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		36B09242237CCC44004D7D84 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -489,7 +489,7 @@
 				36B09236237CCC43004D7D84 /* AppDelegate.h */,
 				36B09237237CCC43004D7D84 /* AppDelegate.m */,
 				36B09239237CCC43004D7D84 /* ViewController.h */,
-				36B0923A237CCC43004D7D84 /* ViewController.m */,
+				36B0923A237CCC43004D7D84 /* ViewController.mm */,
 				36B0923C237CCC43004D7D84 /* Main.storyboard */,
 				36B0923F237CCC44004D7D84 /* Assets.xcassets */,
 				36B09241237CCC44004D7D84 /* LaunchScreen.storyboard */,
@@ -968,7 +968,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				36B0923B237CCC43004D7D84 /* ViewController.m in Sources */,
+				36B0923B237CCC43004D7D84 /* ViewController.mm in Sources */,
 				3609D567237D975C00D7286F /* VedioDecodeThread.cpp in Sources */,
 				3609D5B9237DA34100D7286F /* AyncClock.cpp in Sources */,
 				3609D563237D975C00D7286F /* VideoRefreshThread.cpp in Sources */,

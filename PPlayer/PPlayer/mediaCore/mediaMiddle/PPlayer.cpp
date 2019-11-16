@@ -27,6 +27,7 @@ void PPlayer::setDataSource(std::string url)        //这边暂时只保留url�
 void PPlayer::prepareAsync()
 {
     mediaCore::getIntanse()->StreamOpen(pUrl);
+    
 }
 
 void PPlayer::prepare()

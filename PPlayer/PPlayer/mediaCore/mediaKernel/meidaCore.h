@@ -35,9 +35,13 @@ public:
     
     void Init(PlayerContext *p_PlayerContext);
     bool StreamOpen(std::string pUrl);
+
+
     mediaCore();
     virtual ~mediaCore();
 private:
+    bool OpenVideoDecode(int streamIndex);
+    bool OpenAudioDecode(int streamIndex);
     static mediaCore *p_Core;
     static SDL_mutex *mutex;
     AVFormatContext *avFormatContext;

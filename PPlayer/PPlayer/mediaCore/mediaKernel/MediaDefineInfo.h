@@ -104,6 +104,8 @@ typedef struct PlayerContext_T {
     AudioInfo audioInfo;   // SDL支持的音频参数，重采样转换;
     int audio_hw_buf_size;          // SDL音频缓冲区大小(单位字节)
     bool keep_last;                   //是否保存最后一帧
+    int width;                      
+    int height;
     AVCodecContext *video_avctx = NULL;
     AVCodecContext *audio_avctx = NULL;
 }PlayerContext;

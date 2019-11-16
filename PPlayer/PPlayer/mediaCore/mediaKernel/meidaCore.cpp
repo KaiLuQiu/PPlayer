@@ -93,11 +93,11 @@ bool mediaCore::StreamOpen(std::string pUrl)
     for (unsigned int i = 0; i < p_PlayerContext->ic->nb_streams; i++)
     {
         AVCodecContext *p_CodecContex = p_PlayerContext->ic->streams[i]->codec;
-        if ((p_CodecContex->codec_type == AVMEDIA_TYPE_VIDEO) && (st_index[AVMEDIA_TYPE_VIDEO] > 0))//视频流
+        if ((p_CodecContex->codec_type == AVMEDIA_TYPE_VIDEO) && (st_index[AVMEDIA_TYPE_VIDEO] >= 0))//视频流
         {
             OpenVideoDecode(i);
         }
-        else if ((p_CodecContex->codec_type == AVMEDIA_TYPE_AUDIO) && (st_index[AVMEDIA_TYPE_AUDIO] > 0))//音频流
+        else if ((p_CodecContex->codec_type == AVMEDIA_TYPE_AUDIO) && (st_index[AVMEDIA_TYPE_AUDIO] >= 0))//音频流
         {
             OpenAudioDecode(i);
         }
@@ -110,6 +110,9 @@ bool mediaCore::OpenVideoDecode(int streamIndex)
 {
     p_PlayerContext->video_avctx = avcodec_alloc_context3(NULL);
     int ret = avcodec_parameters_to_context(p_PlayerContext->video_avctx, p_PlayerContext->ic->streams[streamIndex]->codecpar);
+    
+    if(ret < 0)
+        return false;
     
     av_codec_set_pkt_timebase(p_PlayerContext->video_avctx, p_PlayerContext->ic->streams[streamIndex]->time_base);
     
@@ -143,6 +146,9 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
         return false;
     
     int ret = avcodec_parameters_to_context(p_PlayerContext->audio_avctx, p_PlayerContext->ic->streams[streamIndex]->codecpar);
+    
+    if(ret < 0)
+        return false;
     
     AVCodec *codec = avcodec_find_decoder(p_PlayerContext->audio_avctx->codec_id);
     if (!codec)

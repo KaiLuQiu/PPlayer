@@ -7,8 +7,9 @@
 //
 #ifndef MediaDefineInfo_H
 #define MediaDefineInfo_H
-#include <SDL_mutex.h>
 #include <list>
+#include <string.h>
+#include <stdlib.h>
 
 extern "C"{
 #include<libavformat/avformat.h>
@@ -16,28 +17,74 @@ extern "C"{
 #include<libswresample/swresample.h>
 #include<libavutil/rational.h>
 }
+#include <SDL_mutex.h>
+#include <SDL_thread.h>
+#include <SDL_timer.h>
+#include <SDL_mutex.h>
+#include <SDL_audio.h>
+#include <SDL_main.h>
+#include <SDL_pixels.h>
 
-
-//enum AVMediaType {
-//    AVMEDIA_TYPE_UNKNOWN = -1,  ///< Usually treated as AVMEDIA_TYPE_DATA
-//    AVMEDIA_TYPE_VIDEO,
-//    AVMEDIA_TYPE_AUDIO,
-//    AVMEDIA_TYPE_DATA,          ///< Opaque data information usually continuous
-//    AVMEDIA_TYPE_SUBTITLE,
-//    AVMEDIA_TYPE_ATTACHMENT,    ///< Opaque data information usually sparse
-//    AVMEDIA_TYPE_NB
-//};
 
 
 #define FRAME_QUEUE_SIZE 24
 
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(x) { if (x) delete (x); (x) = NULL; }    //定义安全释放函数
+#endif
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(x) { if (x) delete [] (x); (x) = NULL; }    //定义安全释放函数
+#endif
+#ifndef SAFE_FREE
+#define SAFE_FREE(p) if(p != NULL) {free(p); p = NULL;}
+#endif
+
 typedef struct P_AVPacket_T {
+    P_AVPacket_T()
+    {
+        memset(&pkt, 0, sizeof(AVPacket));
+        serial = 0;
+    }
+    ~P_AVPacket_T()
+    {
+        serial = 0;
+    }
     AVPacket pkt;           //demuxer parse出来的包信息
     int serial;             //序号信息
 } P_AVPacket;
 
 //packtet队列信息
 typedef struct PacketQueue_T {
+    PacketQueue_T()
+    {
+        AvPacketList.clear();
+        nb_packets = -1;
+        size = -1;
+        duration = -1;
+        abort_request = -1;
+        serial = -1;
+        mutex = SDL_CreateMutex();
+        cond = SDL_CreateCond();
+    }
+    ~PacketQueue_T()
+    {
+        std::list<P_AVPacket *>::iterator item = AvPacketList.begin();
+        for(; item != AvPacketList.end(); )
+        {
+            std::list<P_AVPacket *>::iterator item_e = item++;
+            SAFE_DELETE(*item_e);
+            AvPacketList.erase(item_e);
+        }
+        AvPacketList.clear();
+        
+        nb_packets = -1;
+        size = -1;
+        duration = -1;
+        abort_request = -1;
+        serial = -1;
+        SDL_DestroyMutex(mutex);
+        SDL_DestroyCond(cond);
+    }
     std::list<P_AVPacket *> AvPacketList;
     int nb_packets;         // 队列中packet的数量
     int size;               // 队列所占内存空间大小
@@ -49,6 +96,24 @@ typedef struct PacketQueue_T {
 } PacketQueue;
 
 typedef struct AudioInfo_T {
+    AudioInfo_T()
+    {
+        freq = -1;
+        channels = -1;
+        channel_layout = -1;
+        fmt = AV_SAMPLE_FMT_NONE;
+        frame_size = -1;
+        bytes_per_sec = -1;
+    }
+    ~AudioInfo_T()
+    {
+        freq = -1;
+        channels = -1;
+        channel_layout = -1;
+        fmt = AV_SAMPLE_FMT_NONE;
+        frame_size = -1;
+        bytes_per_sec = -1;
+    }
     int freq;
     int channels;
     int64_t channel_layout;
@@ -59,6 +124,36 @@ typedef struct AudioInfo_T {
 
 //解码帧信息
 typedef struct Frame {
+    Frame()
+    {
+        frame = NULL;
+        memset(&sub, 0, sizeof(AVSubtitle));
+        serial = -1;
+        pts = -1;
+        duration = -1;
+        pos = -1;
+        width = -1;
+        height = -1;
+        format = -1;
+        memset(&sar, 0, sizeof(AVRational));
+        uploaded = -1;
+        flip_v = -1;
+    }
+    ~Frame()
+    {
+        SAFE_DELETE(frame);
+        memset(&sub, 0, sizeof(AVSubtitle));
+        serial = -1;
+        pts = -1;
+        duration = -1;
+        pos = -1;
+        width = -1;
+        height = -1;
+        format = -1;
+        memset(&sar, 0, sizeof(AVRational));
+        uploaded = -1;
+        flip_v = -1;
+    }
     AVFrame *frame;
     AVSubtitle sub;
     int serial;
@@ -74,6 +169,30 @@ typedef struct Frame {
 } Frame;
 
 typedef struct FrameQueue {
+    FrameQueue()
+    {
+        rindex = -1;
+        windex = -1;
+        size = -1;
+        max_size = -1;
+        keep_last = -1;
+        rindex_shown = -1;
+        mutex = SDL_CreateMutex();
+        cond = SDL_CreateCond();
+        pktq = NULL;
+    }
+    ~FrameQueue()
+    {
+        rindex = -1;
+        windex = -1;
+        size = -1;
+        max_size = -1;
+        keep_last = -1;
+        rindex_shown = -1;
+        SDL_DestroyMutex(mutex);
+        SDL_DestroyCond(cond);
+        SAFE_DELETE(pktq);
+    }
     Frame queue[FRAME_QUEUE_SIZE];
     int rindex;
     int windex;
@@ -87,6 +206,36 @@ typedef struct FrameQueue {
 } FrameQueue;
 
 typedef struct PlayerContext_T {
+    PlayerContext_T()
+    {
+        avformat = NULL;
+        seek_request = -1;
+        seek_flags = -1;
+        seek_pos = -1;
+        seek_rel = -1;
+        ic = NULL;
+        audio_hw_buf_size = -1;
+        keep_last = -1;                   //是否保存最后一帧
+        width = -1;
+        height = -1;
+        video_avctx = NULL;
+        audio_avctx = NULL;
+    }
+    ~PlayerContext_T()
+    {
+        SAFE_DELETE(avformat);
+        seek_request = -1;
+        seek_flags = -1;
+        seek_pos = -1;
+        seek_rel = -1;
+        SAFE_DELETE(ic);
+        audio_hw_buf_size = -1;
+        keep_last = -1;                   //是否保存最后一帧
+        width = -1;
+        height = -1;
+        SAFE_DELETE(video_avctx);
+        SAFE_DELETE(audio_avctx);
+    }
     AVInputFormat *avformat;        //
     int seek_request;               // 标识一次SEEK请求
     int seek_flags;                 // SEEK标志，诸如AVSEEK_FLAG_BYTE等
@@ -106,8 +255,8 @@ typedef struct PlayerContext_T {
     bool keep_last;                   //是否保存最后一帧
     int width;                      
     int height;
-    AVCodecContext *video_avctx = NULL;
-    AVCodecContext *audio_avctx = NULL;
+    AVCodecContext *video_avctx;
+    AVCodecContext *audio_avctx;
 }PlayerContext;
 
 

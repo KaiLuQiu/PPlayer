@@ -12,7 +12,7 @@ SDL_mutex* PPlayer::mutex = SDL_CreateMutex();      //类的静态指针需要�
 
 PPlayer::PPlayer()
 {
-    
+    pPlayerContext = new PlayerContext();
 }
 PPlayer::~PPlayer()
 {
@@ -26,8 +26,9 @@ void PPlayer::setDataSource(std::string url)        //这边暂时只保留url�
 
 void PPlayer::prepareAsync()
 {
+    mediaCore::getIntanse()->Init(pPlayerContext);
     mediaCore::getIntanse()->StreamOpen(pUrl);
-    
+
 }
 
 void PPlayer::prepare()

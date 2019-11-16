@@ -30,7 +30,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSString* path = [self getFileFromMainbundleAbsolutePath:@"video/13-sample.mp4"];
-    [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
+    PPlayerMidlle *player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
+    [player prepareAsync];
 }
 
 - (void)dealloc{

@@ -10,7 +10,7 @@
 
 @interface PPlayerMidlle : NSObject
 
--(void)initPlayer:(const char*)URL;
+-(id) initPlayer:(const char*)URL;
 
 -(void)prepareAsync;
 

@@ -15,12 +15,18 @@
 
 @implementation PPlayerMidlle
 
--(void) initPlayer:(const char*)URL {
+
+-(id) initPlayer:(const char*)URL {
+    if(!(self = [super init])) {
+        return nil;
+    }
     PPlayer::getInstance()->setDataSource(URL);
+    return self;
 }
 
 -(void) prepareAsync {
     
+    PPlayer::getInstance()->prepareAsync();
 }
 
 -(void) start {

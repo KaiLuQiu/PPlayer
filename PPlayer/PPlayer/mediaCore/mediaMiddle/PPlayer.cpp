@@ -7,23 +7,31 @@
 //
 #include "PPlayer.h"
 
-SDL_mutex *PPlayer::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
+PPlayer* PPlayer::p_Player = nullptr;
+SDL_mutex* PPlayer::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
 
-
-
-bool PPlayer::setDataSource(std::string url)
+PPlayer::PPlayer()
 {
-    return true;
+    
+}
+PPlayer::~PPlayer()
+{
+    
 }
 
-bool PPlayer::prepareAsync()
+void PPlayer::setDataSource(std::string url)        //这边暂时只保留url信息
 {
-    return true;
+    pUrl = url;
 }
 
-bool PPlayer::prepare()
+void PPlayer::prepareAsync()
 {
-    return true;
+    mediaCore::getIntanse()->StreamOpen(pUrl);
+}
+
+void PPlayer::prepare()
+{
+    
 }
 
 bool PPlayer::start()

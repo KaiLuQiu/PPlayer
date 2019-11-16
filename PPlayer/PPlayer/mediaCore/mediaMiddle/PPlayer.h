@@ -12,6 +12,7 @@
 #include <string>
 #include "MediaDefineInfo.h"
 #include "meidaCore.h"
+#include "Demuxthread.h"
 
 class PPlayer
 {

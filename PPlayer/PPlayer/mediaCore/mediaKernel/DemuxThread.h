@@ -27,10 +27,13 @@ public:
         }
         return pDemuxer;
     }
+    void init(PlayerContext *playerContext);
     void run();
     void seek();
     void start();
     void stop();
+    void flush();
+
     void setSeekType(int type);
 
     virtual ~DemuxThread();
@@ -39,6 +42,9 @@ private:
     static SDL_mutex *mutex;
     static DemuxThread* pDemuxer;
     bool pNeedStop;
+    PacketQueue *videoRingBuffer;    // 存储demuxer出来的未解码的序列帧
+    PacketQueue *audioRingBuffer;    // 存储demuxer出来的未解码的序列帧
+    PlayerContext *pPlayerContext;
     int seek_by_bytes;  //流seek的方式有by byte也有by time
 };
 

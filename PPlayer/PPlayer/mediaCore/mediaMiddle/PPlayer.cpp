@@ -27,8 +27,13 @@ void PPlayer::setDataSource(std::string url)        //这边暂时只保留url�
 void PPlayer::prepareAsync()
 {
     mediaCore::getIntanse()->Init(pPlayerContext);
-    mediaCore::getIntanse()->StreamOpen(pUrl);
-
+    bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
+    if(ret == true)                     //avformat和avcodec都打开了，
+    {
+        DemuxThread::getIntanse()->init(pPlayerContext);      //对
+        DemuxThread::getIntanse()->start();     //开启demuxer线程读取数据包
+        
+    }
 }
 
 void PPlayer::prepare()

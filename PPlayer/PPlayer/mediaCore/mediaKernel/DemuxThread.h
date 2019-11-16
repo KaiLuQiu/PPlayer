@@ -31,8 +31,8 @@ public:
     void seek();
     void start();
     void stop();
-    void setSeekType();
-    
+    void setSeekType(int type);
+
     virtual ~DemuxThread();
     DemuxThread();
 private:

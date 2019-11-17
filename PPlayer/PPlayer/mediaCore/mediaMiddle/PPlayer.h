@@ -13,6 +13,8 @@
 #include "MediaDefineInfo.h"
 #include "meidaCore.h"
 #include "Demuxthread.h"
+#include "VideoDecodeThread.h"
+
 NS_MEDIA_BEGIN
 
 class PPlayer

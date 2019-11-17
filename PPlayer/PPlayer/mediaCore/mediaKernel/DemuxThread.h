@@ -10,7 +10,7 @@
 #define DemuxThread_H
 #include <thread>
 #include "MediaDefineInfo.h"
-#include "PacketQueue.h"
+#include "PacketQueueFunc.h"
 
 NS_MEDIA_BEGIN
 #define MAX_SIZE (2 * 512 *1024)  //2M

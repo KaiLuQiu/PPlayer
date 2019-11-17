@@ -41,19 +41,26 @@ void DemuxThread::init(PlayerContext *playerContext)
     
     if(pPlayerContext->videoStreamIndex >= 0)
     {
-        videoPackeQueueFunc = new PacketQueueFunc(&video_flush_pkt);
+        pPlayerContext->videoPacketQueueFunc = new (std::nothrow)PacketQueueFunc(&video_flush_pkt);
+        if(!pPlayerContext->videoPacketQueueFunc)
+        {
+            printf("pPlayerContext->videoPackeQueueFunc error!\n");
+        }
+        videoPackeQueueFunc = pPlayerContext->videoPacketQueueFunc;
+        
     }
     if(pPlayerContext->audioStreamIndex >= 0)
     {
-        audioPackeQueueFunc = new PacketQueueFunc(&audio_flush_pkt);
+        pPlayerContext->audioPacketQueueFunc = new (std::nothrow)PacketQueueFunc(&audio_flush_pkt);
+        if(!pPlayerContext->audioPacketQueueFunc)
+        {
+            printf("pPlayerContext->audioPacketQueueFunc error!\n");
+        }
+        audioPackeQueueFunc = pPlayerContext->audioPacketQueueFunc;
     }
     
     videoPackeQueueFunc->packet_queue_init(videoRingBuffer);
     audioPackeQueueFunc->packet_queue_init(audioRingBuffer);
-    
-    videoPackeQueueFunc->packet_queue_start(videoRingBuffer);
-    videoPackeQueueFunc->packet_queue_start(audioRingBuffer);
-
 }
 
 void DemuxThread::flush()
@@ -125,10 +132,7 @@ void DemuxThread::run()
         {
             pPlayerContext->eof = 0;
         }
-        
-//        stream_start_time = pPlayerContext->ic->streams[pkt.stream_index]->start_time;
-//        int64_t pkt_ts = pkt.pts == AV_NOPTS_VALUE ? pkt.dts : pkt.pts;
-//
+
         if (pkt.stream_index == pPlayerContext->audioStreamIndex)
         {
             audioPackeQueueFunc->packet_queue_put(audioRingBuffer, &pkt);

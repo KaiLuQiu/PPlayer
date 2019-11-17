@@ -23,7 +23,7 @@
 		19200DFA216F677C00EF7D6F /* SDL_config.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 19200DEC216F677C00EF7D6F /* SDL_config.h.in */; };
 		197EF9A4221AAF850015F02F /* PPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 197EF9A3221AAF850015F02F /* PPlayerController.m */; };
 		3604E91E23801C6300E693D4 /* video in Resources */ = {isa = PBXBuildFile; fileRef = 3604E91D23801C6300E693D4 /* video */; };
-		3625584C2380C3CF00BB843F /* PacketQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3625584A2380C3CE00BB843F /* PacketQueue.cpp */; };
+		3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */; };
 		369BDCFF237FAE68001A9EBC /* MediaCommon.h in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEC237FAE68001A9EBC /* MediaCommon.h */; };
 		369BDD00237FAE68001A9EBC /* meidaCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEE237FAE68001A9EBC /* meidaCore.cpp */; };
 		369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */; };
@@ -171,8 +171,8 @@
 		197EF9A2221AAF850015F02F /* PPlayerController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PPlayerController.h; sourceTree = "<group>"; };
 		197EF9A3221AAF850015F02F /* PPlayerController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PPlayerController.m; sourceTree = "<group>"; };
 		3604E91D23801C6300E693D4 /* video */ = {isa = PBXFileReference; lastKnownFileType = folder; path = video; sourceTree = "<group>"; };
-		3625584A2380C3CE00BB843F /* PacketQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PacketQueue.cpp; sourceTree = "<group>"; };
-		3625584B2380C3CE00BB843F /* PacketQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueue.h; sourceTree = "<group>"; };
+		3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PacketQueueFunc.cpp; sourceTree = "<group>"; };
+		3625584B2380C3CE00BB843F /* PacketQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueueFunc.h; sourceTree = "<group>"; };
 		369BDCEA237FAE68001A9EBC /* AudioRefreshThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRefreshThread.h; sourceTree = "<group>"; };
 		369BDCEB237FAE68001A9EBC /* FrameQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameQueue.h; sourceTree = "<group>"; };
 		369BDCEC237FAE68001A9EBC /* MediaCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaCommon.h; sourceTree = "<group>"; };
@@ -569,8 +569,8 @@
 				369BDCED237FAE68001A9EBC /* DemuxThread.h */,
 				369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */,
 				369BDCEE237FAE68001A9EBC /* meidaCore.cpp */,
-				3625584A2380C3CE00BB843F /* PacketQueue.cpp */,
-				3625584B2380C3CE00BB843F /* PacketQueue.h */,
+				3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */,
+				3625584B2380C3CE00BB843F /* PacketQueueFunc.h */,
 				369BDCF5237FAE68001A9EBC /* meidaCore.h */,
 				369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */,
 				369BDCF0237FAE68001A9EBC /* VideoDecodeThread.h */,
@@ -1002,7 +1002,7 @@
 				19200BD0216F65B000EF7D6F /* AppDelegate.m in Sources */,
 				369BDD05237FAE68001A9EBC /* VideoRefreshThread.cpp in Sources */,
 				369BDD08237FAE68001A9EBC /* PPlayer.cpp in Sources */,
-				3625584C2380C3CF00BB843F /* PacketQueue.cpp in Sources */,
+				3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */,
 				369BDD04237FAE68001A9EBC /* FrameQueue.cpp in Sources */,
 				642857D923766C45003DFEE5 /* PPlayerMidlle.mm in Sources */,
 			);

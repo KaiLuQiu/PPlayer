@@ -8,7 +8,11 @@
 #ifndef MediaDefineInfo_H
 #define MediaDefineInfo_H
 #include "MediaCommon.h"
+#include "PacketQueueFunc.h"
+
 NS_MEDIA_BEGIN
+
+
 typedef struct PlayerContext_T {
     PlayerContext_T()
     {
@@ -24,6 +28,8 @@ typedef struct PlayerContext_T {
         height = -1;
         video_avctx = NULL;
         audio_avctx = NULL;
+        videoPacketQueueFunc = NULL;
+        audioPacketQueueFunc = NULL;
         eof = 0;
     }
     ~PlayerContext_T()
@@ -40,6 +46,8 @@ typedef struct PlayerContext_T {
         height = -1;
         SAFE_DELETE(video_avctx);
         SAFE_DELETE(audio_avctx);
+        SAFE_DELETE(videoPacketQueueFunc);
+        SAFE_DELETE(audioPacketQueueFunc);
         eof = 0;
     }
     AVInputFormat *avformat;        //
@@ -64,10 +72,15 @@ typedef struct PlayerContext_T {
     int videoStreamIndex;
     int audioStreamIndex;
     int eof;                    //是否parse到类eof标识位
+    
+    PacketQueueFunc *videoPacketQueueFunc;
+    PacketQueueFunc *audioPacketQueueFunc;
 
     AVCodecContext *video_avctx;
     AVCodecContext *audio_avctx;
 }PlayerContext;
+
+
 
 NS_MEDIA_END
 #endif // MediaDefineInfo_H

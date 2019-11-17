@@ -31,7 +31,10 @@ void PPlayer::prepareAsync()
     bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
     if(ret == true)                     //avformat和avcodec都打开了，
     {
-        DemuxThread::getIntanse()->init(pPlayerContext);      //对
+        DemuxThread::getIntanse()->init(pPlayerContext);      //
+        VideoDecodeThread::getIntanse()->init(pPlayerContext);  //初始化videodecoder，主要是startPacketQueue
+        VideoDecodeThread::getIntanse()->start();
+        
         DemuxThread::getIntanse()->start();     //开启demuxer线程读取数据包
         
     }

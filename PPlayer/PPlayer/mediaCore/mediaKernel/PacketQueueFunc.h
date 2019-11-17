@@ -1,14 +1,14 @@
 //
-//  PacketQueue.h
+//  PacketQueueFunc.h
 //  PPlayer
 //
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
-#ifndef PacketQueue_H
-#define PacketQueue_H
-#include "MediaDefineInfo.h"
+#ifndef PacketQueueFunc_H
+#define PacketQueueFunc_H
+#include "MediaCommon.h"
 NS_MEDIA_BEGIN
 
 class PacketQueueFunc
@@ -36,4 +36,4 @@ private:
 
 
 NS_MEDIA_END
-#endif // FrameQueue.h
+#endif // PacketQueueFunc.h

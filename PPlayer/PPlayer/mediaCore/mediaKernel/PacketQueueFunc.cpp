@@ -6,7 +6,7 @@
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
-#include "PacketQueue.h"
+#include "PacketQueueFunc.h"
 NS_MEDIA_BEGIN
 
 PacketQueueFunc::PacketQueueFunc(AVPacket *flush_pkt)

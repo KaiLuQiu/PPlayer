@@ -24,7 +24,7 @@
 		197EF9A4221AAF850015F02F /* PPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 197EF9A3221AAF850015F02F /* PPlayerController.m */; };
 		3604E91E23801C6300E693D4 /* video in Resources */ = {isa = PBXBuildFile; fileRef = 3604E91D23801C6300E693D4 /* video */; };
 		3625584C2380C3CF00BB843F /* PacketQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3625584A2380C3CE00BB843F /* PacketQueue.cpp */; };
-		369BDCFF237FAE68001A9EBC /* MediaDefineInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEC237FAE68001A9EBC /* MediaDefineInfo.cpp */; };
+		369BDCFF237FAE68001A9EBC /* MediaCommon.h in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEC237FAE68001A9EBC /* MediaCommon.h */; };
 		369BDD00237FAE68001A9EBC /* meidaCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEE237FAE68001A9EBC /* meidaCore.cpp */; };
 		369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */; };
 		369BDD02237FAE68001A9EBC /* DemuxThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */; };
@@ -175,7 +175,7 @@
 		3625584B2380C3CE00BB843F /* PacketQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueue.h; sourceTree = "<group>"; };
 		369BDCEA237FAE68001A9EBC /* AudioRefreshThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRefreshThread.h; sourceTree = "<group>"; };
 		369BDCEB237FAE68001A9EBC /* FrameQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameQueue.h; sourceTree = "<group>"; };
-		369BDCEC237FAE68001A9EBC /* MediaDefineInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MediaDefineInfo.cpp; sourceTree = "<group>"; };
+		369BDCEC237FAE68001A9EBC /* MediaCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaCommon.h; sourceTree = "<group>"; };
 		369BDCED237FAE68001A9EBC /* DemuxThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemuxThread.h; sourceTree = "<group>"; };
 		369BDCEE237FAE68001A9EBC /* meidaCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = meidaCore.cpp; sourceTree = "<group>"; };
 		369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoDecodeThread.cpp; sourceTree = "<group>"; };
@@ -564,7 +564,7 @@
 				369BDCFB237FAE68001A9EBC /* AudioRefreshThread.cpp */,
 				369BDCEB237FAE68001A9EBC /* FrameQueue.h */,
 				369BDCF6237FAE68001A9EBC /* FrameQueue.cpp */,
-				369BDCEC237FAE68001A9EBC /* MediaDefineInfo.cpp */,
+				369BDCEC237FAE68001A9EBC /* MediaCommon.h */,
 				369BDCF1237FAE68001A9EBC /* MediaDefineInfo.h */,
 				369BDCED237FAE68001A9EBC /* DemuxThread.h */,
 				369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */,
@@ -996,7 +996,7 @@
 				369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */,
 				369BDD06237FAE68001A9EBC /* AvSyncClock.cpp in Sources */,
 				369BDD00237FAE68001A9EBC /* meidaCore.cpp in Sources */,
-				369BDCFF237FAE68001A9EBC /* MediaDefineInfo.cpp in Sources */,
+				369BDCFF237FAE68001A9EBC /* MediaCommon.h in Sources */,
 				19200BD3216F65B100EF7D6F /* ViewController.m in Sources */,
 				19200BDE216F65B200EF7D6F /* main.m in Sources */,
 				19200BD0216F65B000EF7D6F /* AppDelegate.m in Sources */,

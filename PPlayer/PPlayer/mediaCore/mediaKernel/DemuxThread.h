@@ -10,8 +10,11 @@
 #define DemuxThread_H
 #include <thread>
 #include "MediaDefineInfo.h"
+#include "PacketQueue.h"
 
 NS_MEDIA_BEGIN
+#define MAX_SIZE (2 * 512 *1024)  //2M
+
 class DemuxThread : public std::thread
 {
 public:
@@ -28,6 +31,11 @@ public:
         }
         return pDemuxer;
     }
+    static double av_q2d(AVRational a){
+        return a.num / (double) a.den;
+    }
+    
+    
     void init(PlayerContext *playerContext);
     void run();
     void seek();
@@ -46,6 +54,14 @@ private:
     PacketQueue *videoRingBuffer;    // 存储demuxer出来的未解码的序列帧
     PacketQueue *audioRingBuffer;    // 存储demuxer出来的未解码的序列帧
     PlayerContext *pPlayerContext;
+    PacketQueueFunc *videoPackeQueueFunc;
+    PacketQueueFunc *audioPackeQueueFunc;
+
+    AVPacket video_flush_pkt;
+    AVPacket audio_flush_pkt;
+    int duration = AV_NOPTS_VALUE;
+    int start_time = AV_NOPTS_VALUE;
+
     int seek_by_bytes;  //流seek的方式有by byte也有by time
 };
 

@@ -9,6 +9,16 @@
 #include "PacketQueue.h"
 NS_MEDIA_BEGIN
 
+PacketQueueFunc::PacketQueueFunc(AVPacket *flush_pkt)
+{
+    this->flush_pkt = flush_pkt;
+}
+
+PacketQueueFunc::~PacketQueueFunc()
+{
+    
+}
+
 void PacketQueueFunc::packet_queue_init(PacketQueue *q)
 {
 
@@ -30,11 +40,11 @@ void PacketQueueFunc::packet_queue_init(PacketQueue *q)
     return ;
 }
 
-void PacketQueueFunc::packet_queue_start(PacketQueue *q, AVPacket *flush_pkt)
+void PacketQueueFunc::packet_queue_start(PacketQueue *q)
 {
     SDL_LockMutex(q->mutex);
     q->abort_request = 0;
-    packet_queue_put_private(q, flush_pkt, flush_pkt);
+    packet_queue_put_private(q, flush_pkt);
     SDL_UnlockMutex(q->mutex);
 }
 
@@ -75,7 +85,7 @@ int PacketQueueFunc::packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, 
     return ret;
 }
 
-int PacketQueueFunc::packet_queue_put_private(PacketQueue *q, AVPacket *pkt, AVPacket *flush_pkt)
+int PacketQueueFunc::packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
 {
     if (q->abort_request)//如果已中止，则放入失败
         return -1;
@@ -98,11 +108,11 @@ int PacketQueueFunc::packet_queue_put_private(PacketQueue *q, AVPacket *pkt, AVP
     return 0;
 }
 
-int PacketQueueFunc::packet_queue_put(PacketQueue *q, AVPacket *pkt, AVPacket *flush_pkt)
+int PacketQueueFunc::packet_queue_put(PacketQueue *q, AVPacket *pkt)
 {
     int ret;
     SDL_LockMutex(q->mutex);
-    ret = packet_queue_put_private(q, pkt, flush_pkt);//主要实现在这里
+    ret = packet_queue_put_private(q, pkt);//主要实现在这里
     SDL_UnlockMutex(q->mutex);
     if (pkt != flush_pkt && ret < 0)
         av_packet_unref(pkt);//放入失败，释放AVPacket
@@ -110,14 +120,14 @@ int PacketQueueFunc::packet_queue_put(PacketQueue *q, AVPacket *pkt, AVPacket *f
     
 }
 
-int PacketQueueFunc::packet_queue_put_nullpacket(PacketQueue *q, int stream_index, AVPacket *flush_pkt)
+int PacketQueueFunc::packet_queue_put_nullpacket(PacketQueue *q, int stream_index)
 {
     AVPacket pkt1, *pkt = &pkt1;
     av_init_packet(pkt);
     pkt->data = NULL;
     pkt->size = 0;
     pkt->stream_index = stream_index;
-    return packet_queue_put(q, pkt, flush_pkt);
+    return packet_queue_put(q, pkt);
 }
 
 void PacketQueueFunc::packet_queue_flush(PacketQueue *q)

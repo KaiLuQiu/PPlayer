@@ -112,6 +112,7 @@ bool mediaCore::StreamOpen(std::string pUrl)
 
 bool mediaCore::OpenVideoDecode(int streamIndex)
 {
+    p_PlayerContext->videoStreamIndex = streamIndex;
     p_PlayerContext->video_avctx = avcodec_alloc_context3(NULL);
     int ret = avcodec_parameters_to_context(p_PlayerContext->video_avctx, p_PlayerContext->ic->streams[streamIndex]->codecpar);
     
@@ -145,6 +146,7 @@ bool mediaCore::OpenVideoDecode(int streamIndex)
 
 bool mediaCore::OpenAudioDecode(int streamIndex)
 {
+    p_PlayerContext->audioStreamIndex = streamIndex;
     p_PlayerContext->audio_avctx = avcodec_alloc_context3(NULL);
     if (!p_PlayerContext->audio_avctx)
         return false;
@@ -176,6 +178,26 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
     }
     return true;
 }
+
+//AVPacket mediaCore::ReadPacket()
+//{
+//    AVPacket pkt;
+//    memset(&pkt, 0, sizeof(AVPacket));
+//    SDL_LockMutex(mutex);
+//    if (!p_PlayerContext->ic)
+//    {
+//        SDL_UnlockMutex(mutex);
+//        return pkt;
+//    }
+//    int err = av_read_frame(p_PlayerContext->ic, &pkt);
+//    if (err != 0)
+//    {
+//        printf("read packet err!");
+////        av_strerror(err, errorbuf, sizeof(errorbuf));
+//    }
+//    SDL_UnlockMutex(mutex);
+//    return pkt;
+//}
 
 
 NS_MEDIA_END

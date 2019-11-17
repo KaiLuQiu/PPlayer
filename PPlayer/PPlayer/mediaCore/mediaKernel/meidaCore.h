@@ -36,6 +36,7 @@ public:
     
     void Init(PlayerContext *p_PlayerContext);
     bool StreamOpen(std::string pUrl);
+    AVPacket ReadPacket();
 
 
     mediaCore();

@@ -14,12 +14,13 @@ DemuxThread* DemuxThread::pDemuxer = nullptr;
 
 // 对于packetQueue中我们需要在一个向队列中先放置一个flush_pkt，主要用来作为非连续的两端数据的“分界”标记
 // 大概是为了每次seek操作后插入flush_pkt，更新serial，开启新的播放序列
-static AVPacket flush_pkt;
 
 DemuxThread::DemuxThread()
 {
     seek_by_bytes = -1;
     pNeedStop = false;
+    videoPackeQueueFunc = NULL;
+    audioPackeQueueFunc = NULL;
 }
 
 DemuxThread::~DemuxThread()
@@ -31,37 +32,33 @@ void DemuxThread::init(PlayerContext *playerContext)
     pPlayerContext = playerContext;
     videoRingBuffer = &playerContext->videoRingBuffer;
     audioRingBuffer = &playerContext->audioRingBuffer;
-    av_init_packet(&flush_pkt);
-    flush_pkt.data = (uint8_t *)&flush_pkt;
+
+    av_init_packet(&video_flush_pkt);
+    video_flush_pkt.data = (uint8_t *)&video_flush_pkt;
+    
+    av_init_packet(&audio_flush_pkt);
+    audio_flush_pkt.data = (uint8_t *)&audio_flush_pkt;
+    
+    if(pPlayerContext->videoStreamIndex >= 0)
+    {
+        videoPackeQueueFunc = new PacketQueueFunc(&video_flush_pkt);
+    }
+    if(pPlayerContext->audioStreamIndex >= 0)
+    {
+        audioPackeQueueFunc = new PacketQueueFunc(&audio_flush_pkt);
+    }
+    
+    videoPackeQueueFunc->packet_queue_init(videoRingBuffer);
+    audioPackeQueueFunc->packet_queue_init(audioRingBuffer);
+    
+    videoPackeQueueFunc->packet_queue_start(videoRingBuffer);
+    videoPackeQueueFunc->packet_queue_start(audioRingBuffer);
+
 }
 
 void DemuxThread::flush()
 {
     
-}
-
-void flushPacketQueue(PacketQueue *pPacketQueue)
-{
-    int i;
-    int tmp = 0;
-    P_AVPacket *pMyPkt = NULL;
-    int listSize = pPacketQueue->AvPacketList.size();
-    for (i = 0; i < listSize; i++)
-    {
-        if (!pPacketQueue->AvPacketList.empty())
-        {
-            pMyPkt = pPacketQueue->AvPacketList.front();
-            pPacketQueue->AvPacketList.pop_front();
-            if (pMyPkt && (pMyPkt->pkt.data != flush_pkt.data))
-            {
-                av_free_packet(&pMyPkt->pkt);
-                free(pMyPkt);
-            }
-        }
-    }
-    pPacketQueue->AvPacketList.clear();
-    
-    return;
 }
 
 void DemuxThread::start()
@@ -83,10 +80,69 @@ void DemuxThread::run()
     int64_t stream_start_time;          //流的开始时间
     int pkt_in_play_range = 0;          //当前的duation时间
     AVDictionaryEntry *t;
+    AVPacket pkt;
+    memset(&pkt, 0, sizeof(AVPacket));
     
     while(!pNeedStop)
     {
-        int a = 0;
+        if(!pPlayerContext)             //表示当前的播放器上下文还没有准备好，可以先delay10ms
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            printf("pPlayerContext is NUll");
+            continue;
+        }
+        if(videoPackeQueueFunc == NULL || audioPackeQueueFunc == NULL)
+        {
+            printf("PackeQueueFunc is NUll");
+            break;
+        }
+        if(videoRingBuffer->size + audioRingBuffer->size > MAX_SIZE)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            printf("ringbuffer is full");
+            continue;
+        }
+        
+        int ret = av_read_frame(pPlayerContext->ic, &pkt);
+        if(ret < 0)
+        {
+            if ((ret == AVERROR_EOF || avio_feof(pPlayerContext->ic->pb)) && !pPlayerContext->eof) {
+                if (pPlayerContext->videoStreamIndex >= 0)
+                    videoPackeQueueFunc->packet_queue_put_nullpacket(videoRingBuffer, pPlayerContext->videoStreamIndex);
+                if (pPlayerContext->audioStreamIndex >= 0)
+                    audioPackeQueueFunc->packet_queue_put_nullpacket(audioRingBuffer, pPlayerContext->audioStreamIndex);
+                pPlayerContext->eof = 1;
+            }
+            if (pPlayerContext->ic->pb && pPlayerContext->ic->pb->error)
+                break;
+            //让线程等待10ms
+            SDL_LockMutex(mutex);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            SDL_UnlockMutex(mutex);
+            continue;
+        }
+        else
+        {
+            pPlayerContext->eof = 0;
+        }
+        
+//        stream_start_time = pPlayerContext->ic->streams[pkt.stream_index]->start_time;
+//        int64_t pkt_ts = pkt.pts == AV_NOPTS_VALUE ? pkt.dts : pkt.pts;
+//
+        if (pkt.stream_index == pPlayerContext->audioStreamIndex)
+        {
+            audioPackeQueueFunc->packet_queue_put(audioRingBuffer, &pkt);
+        }
+        else if (pkt.stream_index == pPlayerContext->videoStreamIndex)
+        {
+            videoPackeQueueFunc->packet_queue_put(videoRingBuffer, &pkt);
+        }
+        else
+        {
+            av_packet_unref(&pkt);
+        }
+                
+        
     }
 }
 

@@ -12,8 +12,10 @@ NS_MEDIA_BEGIN
 SDL_mutex *DemuxThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
 DemuxThread* DemuxThread::pDemuxer = nullptr;
 
-static AVPacket flush_pkt;                      //对于packetQueue中我们需要在一个向队列中先放置一个flush_pkt
-                                                // 大概是为了每次seek操作后插入flush_pkt，更新serial，开启新的播放序列
+// 对于packetQueue中我们需要在一个向队列中先放置一个flush_pkt，主要用来作为非连续的两端数据的“分界”标记
+// 大概是为了每次seek操作后插入flush_pkt，更新serial，开启新的播放序列
+static AVPacket flush_pkt;
+
 DemuxThread::DemuxThread()
 {
     seek_by_bytes = -1;

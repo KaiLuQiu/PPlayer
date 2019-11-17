@@ -9,6 +9,148 @@
 #include "PacketQueue.h"
 NS_MEDIA_BEGIN
 
+void PacketQueueFunc::packet_queue_init(PacketQueue *q)
+{
+
+    if(!q->mutex) {
+        q->mutex = SDL_CreateMutex();
+        if (!q->mutex) {
+            printf("SDL_CreateMutex() : %s\n",SDL_GetError());
+            return ;
+        }
+    }
+    if(!q->cond) {
+        q->cond = SDL_CreateCond();
+        if (!q->cond) {
+            printf("SDL_CreateCond() : %s\n",SDL_GetError());
+            return ;
+        }
+    }
+    q->abort_request = 1;
+    return ;
+}
+
+void PacketQueueFunc::packet_queue_start(PacketQueue *q, AVPacket *flush_pkt)
+{
+    SDL_LockMutex(q->mutex);
+    q->abort_request = 0;
+    packet_queue_put_private(q, flush_pkt, flush_pkt);
+    SDL_UnlockMutex(q->mutex);
+}
+
+int PacketQueueFunc::packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
+{
+    int ret;
+    P_AVPacket  *p_pkt;
+    SDL_LockMutex(q->mutex);
+
+    for(;;)
+    {
+        if (q->abort_request) {
+            ret = -1;
+            break;
+        }
+        
+        p_pkt = q->AvPacketList.front();
+        if(p_pkt){
+            q->AvPacketList.pop_front();
+            q->nb_packets--;
+            q->size = q->AvPacketList.size() * sizeof(p_pkt);
+            q->duration -= p_pkt->pkt.duration;
+            *pkt = p_pkt->pkt;
+            if(serial)
+                *serial = p_pkt->serial;
+            av_free(p_pkt);
+            ret = 1;
+            break;
+        } else if(!block) {
+            ret = 0;
+            break;
+        } else {
+            ret = -1;
+        }
+    }
+
+    SDL_UnlockMutex(q->mutex);
+    return ret;
+}
+
+int PacketQueueFunc::packet_queue_put_private(PacketQueue *q, AVPacket *pkt, AVPacket *flush_pkt)
+{
+    if (q->abort_request)//如果已中止，则放入失败
+        return -1;
+    
+    q->AvPacketList;
+    P_AVPacket *p_pkt = new P_AVPacket();       //创建一个新的P_AVPacket节点
+    if(!p_pkt)
+        return -1;
+    p_pkt->pkt = *pkt;
+    if(pkt == flush_pkt)                        //
+        q->serial++;
+    p_pkt->serial = q->serial;              //使用同一个序列号
+    
+    q->AvPacketList.push_back(p_pkt);       //把当前的这个P_AVPacket丢进队列中
+    q->nb_packets++;                        //添加节点数据
+    q->size = sizeof(p_pkt) * q->AvPacketList.size();
+    q->duration += p_pkt->pkt.duration;
+    
+//    SDL_CondSignal(q->cond);
+    return 0;
+}
+
+int PacketQueueFunc::packet_queue_put(PacketQueue *q, AVPacket *pkt, AVPacket *flush_pkt)
+{
+    int ret;
+    SDL_LockMutex(q->mutex);
+    ret = packet_queue_put_private(q, pkt, flush_pkt);//主要实现在这里
+    SDL_UnlockMutex(q->mutex);
+    if (pkt != flush_pkt && ret < 0)
+        av_packet_unref(pkt);//放入失败，释放AVPacket
+    return ret;
+    
+}
+
+int PacketQueueFunc::packet_queue_put_nullpacket(PacketQueue *q, int stream_index, AVPacket *flush_pkt)
+{
+    AVPacket pkt1, *pkt = &pkt1;
+    av_init_packet(pkt);
+    pkt->data = NULL;
+    pkt->size = 0;
+    pkt->stream_index = stream_index;
+    return packet_queue_put(q, pkt, flush_pkt);
+}
+
+void PacketQueueFunc::packet_queue_flush(PacketQueue *q)
+{
+    SDL_LockMutex(q->mutex);
+
+    std::list<P_AVPacket *>::iterator item = q->AvPacketList.begin();
+    for(; item != q->AvPacketList.end(); )
+    {
+        std::list<P_AVPacket *>::iterator item_e = item++;
+//        SAFE_DELETE(*item_e);
+        av_packet_unref(&(*item_e)->pkt);           //先释放avpacket
+        av_freep(&(*item_e));
+        q->AvPacketList.erase(item_e);
+    }
+    q->AvPacketList.clear();
+    q->nb_packets = 0;
+    q->size = 0;
+    q->duration = 0;
+    SDL_UnlockMutex(q->mutex);
+}
+
+void PacketQueueFunc::packet_queue_destroy(PacketQueue *q)
+{
+    packet_queue_flush(q);
+}
+
+void PacketQueueFunc::packet_queue_abort(PacketQueue *q)
+{
+    SDL_LockMutex(q->mutex);
+    q->abort_request = 1;
+    SDL_UnlockMutex(q->mutex);
+}
 
 
 NS_MEDIA_END

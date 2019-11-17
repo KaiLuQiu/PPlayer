@@ -59,11 +59,11 @@ typedef struct PacketQueue_T {
     PacketQueue_T()
     {
         AvPacketList.clear();
-        nb_packets = -1;
-        size = -1;
-        duration = -1;
-        abort_request = -1;
-        serial = -1;
+        nb_packets = 0;
+        size = 0;
+        duration = 0;
+        abort_request = 0;
+        serial = 0;
         mutex = SDL_CreateMutex();
         cond = SDL_CreateCond();
     }
@@ -78,11 +78,11 @@ typedef struct PacketQueue_T {
         }
         AvPacketList.clear();
         
-        nb_packets = -1;
-        size = -1;
-        duration = -1;
-        abort_request = -1;
-        serial = -1;
+        nb_packets = 0;
+        size = 0;
+        duration = 0;
+        abort_request = 0;
+        serial = 0;
         SDL_DestroyMutex(mutex);
         SDL_DestroyCond(cond);
     }

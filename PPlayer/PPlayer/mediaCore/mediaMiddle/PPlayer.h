@@ -13,6 +13,7 @@
 #include "MediaDefineInfo.h"
 #include "meidaCore.h"
 #include "Demuxthread.h"
+NS_MEDIA_BEGIN
 
 class PPlayer
 {
@@ -59,5 +60,5 @@ private:
     std::string pUrl;
 };
 
-
+NS_MEDIA_END
 #endif // PPLAYER_H

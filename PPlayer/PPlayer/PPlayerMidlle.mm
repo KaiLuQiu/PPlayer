@@ -20,13 +20,13 @@
     if(!(self = [super init])) {
         return nil;
     }
-    PPlayer::getInstance()->setDataSource(URL);
+    media::PPlayer::getInstance()->setDataSource(URL);
     return self;
 }
 
 -(void) prepareAsync {
     
-    PPlayer::getInstance()->prepareAsync();
+    media::PPlayer::getInstance()->prepareAsync();
 }
 
 -(void) start {

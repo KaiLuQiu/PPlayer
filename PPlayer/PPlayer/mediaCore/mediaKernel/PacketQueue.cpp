@@ -1,13 +1,14 @@
 //
-//  VedioDecodeThread.h
+//  PacketQueue.cpp
 //  PPlayer
 //
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
-#ifndef VedioDecodeThread_H
-#define VedioDecodeThread_H
+#include "PacketQueue.h"
+NS_MEDIA_BEGIN
 
 
-#endif // VedioDecodeThread_H
+
+NS_MEDIA_END

@@ -7,6 +7,8 @@
 //
 
 #include "Demuxthread.h"
+
+NS_MEDIA_BEGIN
 SDL_mutex *DemuxThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
 DemuxThread* DemuxThread::pDemuxer = nullptr;
 
@@ -90,3 +92,5 @@ void DemuxThread::setSeekType(int type)
 {
     seek_by_bytes = type;
 }
+
+NS_MEDIA_END

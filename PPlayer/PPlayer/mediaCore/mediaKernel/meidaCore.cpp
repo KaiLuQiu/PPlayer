@@ -8,6 +8,10 @@
 
 #include "meidaCore.h"
 #include "PPlayer.h"
+NS_MEDIA_BEGIN
+
+
+
 mediaCore* mediaCore::p_Core = nullptr;
 SDL_mutex *mediaCore::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
 
@@ -172,3 +176,6 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
     }
     return true;
 }
+
+
+NS_MEDIA_END

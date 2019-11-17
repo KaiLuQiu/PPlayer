@@ -7,3 +7,10 @@
 //
 
 
+#include "VideoDecodeThread.h"
+
+NS_MEDIA_BEGIN
+
+
+
+NS_MEDIA_END

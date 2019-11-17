@@ -8,6 +8,10 @@
 
 #ifndef VideoRefreshThread_H
 #define VideoRefreshThread_H
+#include "MediaDefineInfo.h"
+NS_MEDIA_BEGIN
 
 
+
+NS_MEDIA_END
 #endif // VideoRefreshThread_H

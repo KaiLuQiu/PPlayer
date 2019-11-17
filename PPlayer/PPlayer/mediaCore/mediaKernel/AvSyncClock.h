@@ -1,13 +1,13 @@
 //
-//  AudioRefreshThread.h
+//  AyncClock.h
 //  PPlayer
 //
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
-#ifndef AudioRefreshThread_H
-#define AudioRefreshThread_H
+#ifndef AyncClock_H
+#define AyncClock_H
 #include "MediaDefineInfo.h"
 NS_MEDIA_BEGIN
 
@@ -15,4 +15,4 @@ NS_MEDIA_BEGIN
 
 NS_MEDIA_END
 
-#endif // AudioRefreshThread_H
+#endif // AyncClock.h

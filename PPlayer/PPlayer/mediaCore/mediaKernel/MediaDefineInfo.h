@@ -25,7 +25,8 @@ extern "C"{
 #include <SDL_main.h>
 #include <SDL_pixels.h>
 
-
+#define NS_MEDIA_BEGIN namespace media {
+#define NS_MEDIA_END  }
 
 #define FRAME_QUEUE_SIZE 24
 

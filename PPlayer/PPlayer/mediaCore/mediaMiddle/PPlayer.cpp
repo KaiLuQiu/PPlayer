@@ -6,6 +6,7 @@
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 #include "PPlayer.h"
+NS_MEDIA_BEGIN
 
 PPlayer* PPlayer::p_Player = nullptr;
 SDL_mutex* PPlayer::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
@@ -90,3 +91,5 @@ float PPlayer::getSpeed()
 {
     return 0;
 }
+
+NS_MEDIA_END

@@ -8,6 +8,12 @@
 
 #ifndef FrameQueue_H
 #define FrameQueue_H
+#include "MediaDefineInfo.h"
+NS_MEDIA_BEGIN
+
+
+
+NS_MEDIA_END
 
 
 #endif // FrameQueue.h

@@ -7,6 +7,10 @@
 //
 #ifndef AudioDecodeThread_H
 #define AudioDecodeThread_H
+#include "MediaDefineInfo.h"
+NS_MEDIA_BEGIN
 
 
+
+NS_MEDIA_END
 #endif // AudioDecodeThread_H

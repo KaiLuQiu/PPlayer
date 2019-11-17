@@ -11,6 +11,7 @@
 #include <thread>
 #include "MediaDefineInfo.h"
 
+NS_MEDIA_BEGIN
 class DemuxThread : public std::thread
 {
 public:
@@ -49,4 +50,5 @@ private:
 };
 
 
+NS_MEDIA_END
 #endif // DemuxThread_H

@@ -10,6 +10,7 @@
 #define meidaCore_H
 #include "MediaDefineInfo.h"
 #include <string>
+NS_MEDIA_BEGIN
 
 #define Debug 0
 class mediaCore {
@@ -50,4 +51,5 @@ private:
     
 };
 
+NS_MEDIA_END
 #endif // meidaCore.h

@@ -209,6 +209,40 @@ typedef struct FrameQueue {
     PacketQueue *pktq;
 } FrameQueue;
 
+typedef struct DecoderContext_T {
+    DecoderContext_T()
+    {
+        
+        codecContext = NULL;
+        pkt_serial = 0;
+        finished = 0;
+        packet_pending = 0;
+        start_pts = 0;
+        next_pts = 0;
+    }
+    ~DecoderContext_T()
+    {
+        if(codecContext) {
+            avcodec_free_context(&codecContext);
+            codecContext = NULL;
+        }
+        pkt_serial = 0;
+        finished = 0;
+        packet_pending = 0;
+        start_pts = 0;
+        next_pts = 0;
+    }
+    AVCodecContext *codecContext;
+    AVPacket pkt;
+    int pkt_serial;
+    int finished;
+    int packet_pending;
+    int64_t start_pts;
+    AVRational start_pts_tb;
+    int64_t next_pts;
+    AVRational next_pts_tb;
+} DecoderContext;
+
 enum {
     MESSAGE_CMD_NONE,
     MESSAGE_CMD_PAUSE,

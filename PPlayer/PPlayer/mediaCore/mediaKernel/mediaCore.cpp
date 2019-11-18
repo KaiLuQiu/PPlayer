@@ -113,32 +113,31 @@ bool mediaCore::StreamOpen(std::string pUrl)
 bool mediaCore::OpenVideoDecode(int streamIndex)
 {
     p_PlayerContext->videoStreamIndex = streamIndex;
-    p_PlayerContext->video_avctx = avcodec_alloc_context3(NULL);
-    int ret = avcodec_parameters_to_context(p_PlayerContext->video_avctx, p_PlayerContext->ic->streams[streamIndex]->codecpar);
+    p_PlayerContext->videoDecoder->codecContext = avcodec_alloc_context3(NULL);
+    int ret = avcodec_parameters_to_context(p_PlayerContext->videoDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->codecpar);
     
     if(ret < 0)
         return false;
     
-    av_codec_set_pkt_timebase(p_PlayerContext->video_avctx, p_PlayerContext->ic->streams[streamIndex]->time_base);
+    av_codec_set_pkt_timebase(p_PlayerContext->videoDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->time_base);
     
-    //            p_PlayerContext->video_avctx = p_PlayerContext->ic->streams[i]->codec;
     float fps = r2d(p_PlayerContext->ic->streams[streamIndex]->r_frame_rate);
-    AVCodec *codec = avcodec_find_decoder(p_PlayerContext->video_avctx->codec_id);
+    AVCodec *codec = avcodec_find_decoder(p_PlayerContext->videoDecoder->codecContext->codec_id);
     if (!codec)
     {
         return false;
     }
     else
     {
-        int ret = avcodec_open2(p_PlayerContext->video_avctx, codec, NULL);
+        int ret = avcodec_open2(p_PlayerContext->videoDecoder->codecContext, codec, NULL);
         if (ret != 0)
         {
             char buff[1024] = { 0 };
             av_strerror(ret, buff, sizeof(buff));
             return false;
         }
-        p_PlayerContext->width = p_PlayerContext->video_avctx->width;
-        p_PlayerContext->height = p_PlayerContext->video_avctx->height;
+        p_PlayerContext->width = p_PlayerContext->videoDecoder->codecContext->width;
+        p_PlayerContext->height = p_PlayerContext->videoDecoder->codecContext->height;
     }
     return true;
 }
@@ -147,23 +146,23 @@ bool mediaCore::OpenVideoDecode(int streamIndex)
 bool mediaCore::OpenAudioDecode(int streamIndex)
 {
     p_PlayerContext->audioStreamIndex = streamIndex;
-    p_PlayerContext->audio_avctx = avcodec_alloc_context3(NULL);
-    if (!p_PlayerContext->audio_avctx)
+    p_PlayerContext->audioDecoder->codecContext = avcodec_alloc_context3(NULL);
+    if (!p_PlayerContext->audioDecoder->codecContext)
         return false;
     
-    int ret = avcodec_parameters_to_context(p_PlayerContext->audio_avctx, p_PlayerContext->ic->streams[streamIndex]->codecpar);
+    int ret = avcodec_parameters_to_context(p_PlayerContext->audioDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->codecpar);
     
     if(ret < 0)
         return false;
     
-    AVCodec *codec = avcodec_find_decoder(p_PlayerContext->audio_avctx->codec_id);
+    AVCodec *codec = avcodec_find_decoder(p_PlayerContext->audioDecoder->codecContext->codec_id);
     if (!codec)
     {
         return false;
     }
     else
     {
-        int ret = avcodec_open2(p_PlayerContext->audio_avctx, codec, NULL);
+        int ret = avcodec_open2(p_PlayerContext->audioDecoder->codecContext, codec, NULL);
         if (ret != 0)
         {
             char buff[1024] = { 0 };
@@ -171,9 +170,9 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
             return false;
         }
         
-        p_PlayerContext->audioInfo.freq = p_PlayerContext->audio_avctx->sample_rate;
-        p_PlayerContext->audioInfo.channels = p_PlayerContext->audio_avctx->channels;
-        p_PlayerContext->audioInfo.frame_size = p_PlayerContext->audio_avctx->frame_size;
+        p_PlayerContext->audioInfo.freq = p_PlayerContext->audioDecoder->codecContext->sample_rate;
+        p_PlayerContext->audioInfo.channels = p_PlayerContext->audioDecoder->codecContext->channels;
+        p_PlayerContext->audioInfo.frame_size = p_PlayerContext->audioDecoder->codecContext->frame_size;
         
     }
     return true;

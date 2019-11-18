@@ -26,10 +26,10 @@ typedef struct PlayerContext_T {
         keep_last = -1;                   //是否保存最后一帧
         width = -1;
         height = -1;
-        video_avctx = NULL;
-        audio_avctx = NULL;
         videoPacketQueueFunc = NULL;
         audioPacketQueueFunc = NULL;
+        videoDecoder = NULL;
+        audioDecoder = NULL;
         eof = 0;
     }
     ~PlayerContext_T()
@@ -44,10 +44,10 @@ typedef struct PlayerContext_T {
         keep_last = -1;                   //是否保存最后一帧
         width = -1;
         height = -1;
-        SAFE_DELETE(video_avctx);
-        SAFE_DELETE(audio_avctx);
         SAFE_DELETE(videoPacketQueueFunc);
         SAFE_DELETE(audioPacketQueueFunc);
+        SAFE_DELETE(videoDecoder);
+        SAFE_DELETE(audioDecoder);
         eof = 0;
     }
     AVInputFormat *avformat;        //
@@ -73,11 +73,12 @@ typedef struct PlayerContext_T {
     int audioStreamIndex;
     int eof;                    //是否parse到类eof标识位
     
+    DecoderContext *videoDecoder;       //
+    DecoderContext *audioDecoder;       //
+    
     PacketQueueFunc *videoPacketQueueFunc;
     PacketQueueFunc *audioPacketQueueFunc;
 
-    AVCodecContext *video_avctx;
-    AVCodecContext *audio_avctx;
 }PlayerContext;
 
 

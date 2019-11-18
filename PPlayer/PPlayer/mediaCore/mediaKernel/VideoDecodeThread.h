@@ -32,6 +32,8 @@ public:
     void run();
     void start();
     void stop();
+    int get_video_frame(const AVPacket *VideoPkt, AVFrame *frame);
+    int decoder_decode_frame(const AVPacket *VideoPkt, AVFrame *frame);
 
     virtual ~VideoDecodeThread();
     VideoDecodeThread();

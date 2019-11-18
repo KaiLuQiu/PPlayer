@@ -11,7 +11,7 @@
 
 #include <string>
 #include "MediaDefineInfo.h"
-#include "meidaCore.h"
+#include "mediaCore.h"
 #include "Demuxthread.h"
 #include "VideoDecodeThread.h"
 

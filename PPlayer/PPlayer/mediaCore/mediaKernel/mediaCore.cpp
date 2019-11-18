@@ -6,7 +6,7 @@
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
-#include "meidaCore.h"
+#include "mediaCore.h"
 #include "PPlayer.h"
 NS_MEDIA_BEGIN
 
@@ -179,25 +179,44 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
     return true;
 }
 
-//AVPacket mediaCore::ReadPacket()
-//{
-//    AVPacket pkt;
-//    memset(&pkt, 0, sizeof(AVPacket));
-//    SDL_LockMutex(mutex);
-//    if (!p_PlayerContext->ic)
-//    {
-//        SDL_UnlockMutex(mutex);
-//        return pkt;
-//    }
-//    int err = av_read_frame(p_PlayerContext->ic, &pkt);
-//    if (err != 0)
-//    {
-//        printf("read packet err!");
-////        av_strerror(err, errorbuf, sizeof(errorbuf));
-//    }
-//    SDL_UnlockMutex(mutex);
-//    return pkt;
-//}
+int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
+{
+    SDL_LockMutex(mutex);
+    if (!p_PlayerContext->ic || pkt == NULL || frame == NULL)
+    {
+        SDL_UnlockMutex(mutex);
+        return -1;
+    }
+    
+    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
+    {
+        SDL_UnlockMutex(mutex);
+        return -1;
+    }
+    
+    if (avcodec_send_packet(p_PlayerContext->ic->streams[pkt->stream_index]->codec, pkt) != 0)
+    {
+        SDL_UnlockMutex(mutex);
+        return -1;
+    }
+    
+    if (avcodec_receive_frame(p_PlayerContext->ic->streams[pkt->stream_index]->codec, frame) != 0)
+    {
+        SDL_UnlockMutex(mutex);
+        return -1;
+    }
+    AVRational playTimeBase;
+    playTimeBase.num = 1;
+    playTimeBase.den = 1000;
+    frame->pts = av_rescale_q_rnd(frame->pts,p_PlayerContext->ic->streams[pkt->stream_index]->time_base,
+                                  p_PlayerContext->ic->streams[pkt->stream_index]->codec->time_base, AV_ROUND_NEAR_INF);
+    frame->pts = av_rescale_q_rnd(frame->pts,p_PlayerContext->ic->streams[pkt->stream_index]->codec->time_base,
+                                  playTimeBase, AV_ROUND_NEAR_INF);
+    
+    SDL_UnlockMutex(mutex);
+    
+    return 1;
+}
 
 
 NS_MEDIA_END

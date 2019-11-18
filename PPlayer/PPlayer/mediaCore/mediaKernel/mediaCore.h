@@ -1,13 +1,13 @@
 //
-//  meidaCore.h
+//  mediaCore.h
 //  PPlayer
 //
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 
-#ifndef meidaCore_H
-#define meidaCore_H
+#ifndef mediaCore_H
+#define mediaCore_H
 #include "MediaDefineInfo.h"
 #include <string>
 NS_MEDIA_BEGIN
@@ -36,7 +36,7 @@ public:
     
     void Init(PlayerContext *p_PlayerContext);
     bool StreamOpen(std::string pUrl);
-    AVPacket ReadPacket();
+    int Decode(const AVPacket *pkt, AVFrame *frame);
 
 
     mediaCore();

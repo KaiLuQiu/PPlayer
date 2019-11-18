@@ -8,6 +8,7 @@
 
 
 #include "VideoDecodeThread.h"
+#include "mediaCore.h"
 
 NS_MEDIA_BEGIN
 SDL_mutex *VideoDecodeThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
@@ -23,9 +24,25 @@ VideoDecodeThread::~VideoDecodeThread()
     
 }
 
+int VideoDecodeThread::get_video_frame(const AVPacket *VideoPkt, AVFrame *frame)
+{
+    int ret = 0;
+    ret = decoder_decode_frame(VideoPkt, frame);
+    return ret;
+}
+
+int VideoDecodeThread::decoder_decode_frame(const AVPacket *VideoPkt, AVFrame *frame)
+{
+    int ret = mediaCore::getIntanse()->Decode(VideoPkt, frame);
+    return ret;
+}
+
 bool VideoDecodeThread::init(PlayerContext *playerContext)
 {
     pPlayerContext = playerContext;
+    
+    pPlayerContext->videoDecoder = new DecoderContext();
+    
     if(pPlayerContext->videoPacketQueueFunc == NULL)
     {
         printf("pPlayerContext videoPacketQueueFunc is NULL \n");
@@ -53,9 +70,46 @@ void VideoDecodeThread::start()
 
 void VideoDecodeThread::run()
 {
-    while(1)
+    bStop = 0;
+    AVPacket *VideoPkt = NULL;
+    AVFrame *frame = NULL;
+    int serial = 0;
+    
+    while(bStop)
     {
-        int a = 0;
+        if(!pPlayerContext)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+        }
+        if (pPlayerContext->videoRingBuffer.size < 0 || pPlayerContext->videoRingBuffer.AvPacketList.empty())
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+        }
+        if (pPlayerContext->videoRingBuffer.abort_request)          //
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+        }
+        int ret = pPlayerContext->videoPacketQueueFunc->packet_queue_get(&pPlayerContext->videoRingBuffer, VideoPkt, 1, &serial);
+        if (ret < 0)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+        }
+        
+        if(get_video_frame(VideoPkt, frame) < 0)
+        {
+            av_free_packet(VideoPkt);
+            
+        }
+        av_free_packet(VideoPkt);
+        
+        
+        
+
+        
     }
 }
 

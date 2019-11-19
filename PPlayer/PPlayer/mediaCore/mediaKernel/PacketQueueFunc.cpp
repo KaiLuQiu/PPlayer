@@ -68,8 +68,8 @@ int PacketQueueFunc::packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, 
         }
         
         p_pkt = q->AvPacketList.front();
+        q->AvPacketList.pop_front();
         if(p_pkt){
-            q->AvPacketList.pop_front();
             q->nb_packets--;
             q->size = q->AvPacketList.size() * sizeof(p_pkt);
             q->duration -= p_pkt->pkt.duration;

@@ -57,8 +57,9 @@ private:
     PacketQueueFunc *videoPackeQueueFunc;
     PacketQueueFunc *audioPackeQueueFunc;
 
-    AVPacket video_flush_pkt;
-    AVPacket audio_flush_pkt;
+    AVPacket* video_flush_pkt;
+    AVPacket* audio_flush_pkt;
+
     int duration = AV_NOPTS_VALUE;
     int start_time = AV_NOPTS_VALUE;
 

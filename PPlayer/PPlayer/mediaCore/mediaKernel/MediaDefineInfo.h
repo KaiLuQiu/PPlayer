@@ -30,6 +30,16 @@ typedef struct PlayerContext_T {
         audioPacketQueueFunc = NULL;
         videoDecoder = NULL;
         audioDecoder = NULL;
+        
+        
+        video_flush_pkt = new AVPacket();
+        audio_flush_pkt = new AVPacket();
+        
+        av_init_packet(video_flush_pkt);
+        video_flush_pkt->data = (uint8_t *)video_flush_pkt;
+        
+        av_init_packet(audio_flush_pkt);
+        audio_flush_pkt->data = (uint8_t *)audio_flush_pkt;
         eof = 0;
     }
     ~PlayerContext_T()
@@ -44,10 +54,21 @@ typedef struct PlayerContext_T {
         keep_last = -1;                   //是否保存最后一帧
         width = -1;
         height = -1;
+   
         SAFE_DELETE(videoPacketQueueFunc);
         SAFE_DELETE(audioPacketQueueFunc);
         SAFE_DELETE(videoDecoder);
         SAFE_DELETE(audioDecoder);
+        if(video_flush_pkt != NULL)
+        {
+            av_free_packet(video_flush_pkt);
+            SAFE_DELETE(video_flush_pkt);
+        }
+        if(audio_flush_pkt != NULL)
+        {
+            av_free_packet(audio_flush_pkt);
+            SAFE_DELETE(audio_flush_pkt);
+        }
         eof = 0;
     }
     AVInputFormat *avformat;        //
@@ -75,6 +96,9 @@ typedef struct PlayerContext_T {
     
     DecoderContext *videoDecoder;       //
     DecoderContext *audioDecoder;       //
+    
+    AVPacket *video_flush_pkt;          //flush pkt,用来区分不同序列的packet
+    AVPacket *audio_flush_pkt;
     
     PacketQueueFunc *videoPacketQueueFunc;
     PacketQueueFunc *audioPacketQueueFunc;

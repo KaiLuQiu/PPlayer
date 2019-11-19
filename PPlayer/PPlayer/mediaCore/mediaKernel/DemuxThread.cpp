@@ -33,15 +33,13 @@ void DemuxThread::init(PlayerContext *playerContext)
     videoRingBuffer = &playerContext->videoRingBuffer;
     audioRingBuffer = &playerContext->audioRingBuffer;
 
-    av_init_packet(&video_flush_pkt);
-    video_flush_pkt.data = (uint8_t *)&video_flush_pkt;
-    
-    av_init_packet(&audio_flush_pkt);
-    audio_flush_pkt.data = (uint8_t *)&audio_flush_pkt;
+    video_flush_pkt = pPlayerContext->video_flush_pkt;
+
+    audio_flush_pkt = pPlayerContext->audio_flush_pkt;
     
     if(pPlayerContext->videoStreamIndex >= 0)
     {
-        pPlayerContext->videoPacketQueueFunc = new (std::nothrow)PacketQueueFunc(&video_flush_pkt);
+        pPlayerContext->videoPacketQueueFunc = new (std::nothrow)PacketQueueFunc(video_flush_pkt);
         if(!pPlayerContext->videoPacketQueueFunc)
         {
             printf("pPlayerContext->videoPackeQueueFunc error!\n");
@@ -51,7 +49,7 @@ void DemuxThread::init(PlayerContext *playerContext)
     }
     if(pPlayerContext->audioStreamIndex >= 0)
     {
-        pPlayerContext->audioPacketQueueFunc = new (std::nothrow)PacketQueueFunc(&audio_flush_pkt);
+        pPlayerContext->audioPacketQueueFunc = new (std::nothrow)PacketQueueFunc(audio_flush_pkt);
         if(!pPlayerContext->audioPacketQueueFunc)
         {
             printf("pPlayerContext->audioPacketQueueFunc error!\n");

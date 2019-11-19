@@ -109,10 +109,10 @@ void VideoDecodeThread::run()
             continue;
         }
         
-//        if(pPlayerContext->videoDecoder->pkt_serial != pPlayerContext->videoRingBuffer.serial);
-//        {
-//            continue;
-//        }
+        if(pPlayerContext->videoDecoder->pkt_serial != pPlayerContext->videoRingBuffer.serial);
+        {
+            continue;
+        }
    
         
         ret = get_video_frame(VideoPkt, frame);

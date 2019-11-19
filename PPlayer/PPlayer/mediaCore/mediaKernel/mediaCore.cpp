@@ -20,7 +20,6 @@ mediaCore::mediaCore()
     avFormatContext = NULL;
     
     av_register_all();      //挂载demuxer filter muxer decoder等
-    avcodec_register_all();
     avformat_network_init();
 }
 
@@ -31,7 +30,6 @@ mediaCore::~mediaCore()
 
 void mediaCore::Init(PlayerContext *playerContext)
 {
-//    avFormatContext = p_PlayerContext->ic;
     p_PlayerContext = playerContext;
 }
 
@@ -54,15 +52,7 @@ bool mediaCore::StreamOpen(std::string pUrl)
         return false;
     }
     
-//    AVDictionary **opts = setup_find_stream_info_opts(p_PlayerContext->ic, codec_opts);
-//    int orig_nb_streams = p_PlayerContext->ic->nb_streams;
-//
     err = avformat_find_stream_info(p_PlayerContext->ic, NULL);     //去parse流的相关信息
-    
-//    for (int i = 0; i < orig_nb_streams; i++)
-//        av_dict_free(&opts[i]);
-//    av_freep(&opts);
-    
     if (err < 0) {
         
         printf("avformat_find_stream_info  fail/n");
@@ -187,16 +177,28 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
 int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 {
     SDL_LockMutex(mutex);
-    if (!p_PlayerContext->ic || pkt == NULL || frame == NULL)
+    if (!p_PlayerContext->ic || pkt == NULL || frame == NULL )
     {
         SDL_UnlockMutex(mutex);
         return -1;
     }
+    if(pkt->data == p_PlayerContext->video_flush_pkt->data)         // 这个video flush pkt 目前我时直接指向demuxer线程创建的那个
+    {
+        // 表明当前这个pkt为flush_pkt，
+        // 每当我们seek后，会在packet queue中先插入一个flush_pkt，更新当前serial，开启新的播放序列
+        // 那么就要复位解码内部的状态，刷新内部的缓冲区。因为有时候一个frame并不是由一个packet解出来的，那么可能当要播放新的序列
+        // 信息时，还存有之前的packet包信息，所以要avcodec flush buffers
+        avcodec_flush_buffers(p_PlayerContext->videoDecoder->codecContext); //
+        p_PlayerContext->videoDecoder->finished = 0;
+        p_PlayerContext->videoDecoder->next_pts = p_PlayerContext->videoDecoder->start_pts;
+        p_PlayerContext->videoDecoder->next_pts_tb = p_PlayerContext->videoDecoder->start_pts_tb;
+    }
     
-//    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
-
-    if (!avcodec_is_open(p_PlayerContext->videoDecoder->codecContext) || !av_codec_is_decoder(p_PlayerContext->videoDecoder->codecContext->codec))
-        return AVERROR(EINVAL);
+    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
+    {
+        SDL_UnlockMutex(mutex);
+        return -1;
+    }
     
     
     int ret = avcodec_send_packet(p_PlayerContext->videoDecoder->codecContext, pkt);

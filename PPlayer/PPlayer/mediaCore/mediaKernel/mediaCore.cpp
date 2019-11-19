@@ -182,17 +182,6 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         SDL_UnlockMutex(mutex);
         return -1;
     }
-    if(pkt->data == p_PlayerContext->video_flush_pkt->data)         // 这个video flush pkt 目前我时直接指向demuxer线程创建的那个
-    {
-        // 表明当前这个pkt为flush_pkt，
-        // 每当我们seek后，会在packet queue中先插入一个flush_pkt，更新当前serial，开启新的播放序列
-        // 那么就要复位解码内部的状态，刷新内部的缓冲区。因为有时候一个frame并不是由一个packet解出来的，那么可能当要播放新的序列
-        // 信息时，还存有之前的packet包信息，所以要avcodec flush buffers
-        avcodec_flush_buffers(p_PlayerContext->videoDecoder->codecContext); //
-        p_PlayerContext->videoDecoder->finished = 0;
-        p_PlayerContext->videoDecoder->next_pts = p_PlayerContext->videoDecoder->start_pts;
-        p_PlayerContext->videoDecoder->next_pts_tb = p_PlayerContext->videoDecoder->start_pts_tb;
-    }
     
     if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
     {

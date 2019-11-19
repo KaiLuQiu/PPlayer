@@ -111,6 +111,7 @@ void DemuxThread::run()
         }
         
         int ret = av_read_frame(pPlayerContext->ic, &pkt);
+
         if(ret < 0)
         {
             if ((ret == AVERROR_EOF || avio_feof(pPlayerContext->ic->pb)) && !pPlayerContext->eof) {

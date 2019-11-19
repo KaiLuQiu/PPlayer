@@ -20,6 +20,7 @@ mediaCore::mediaCore()
     avFormatContext = NULL;
     
     av_register_all();      //挂载demuxer filter muxer decoder等
+    avcodec_register_all();
     avformat_network_init();
 }
 
@@ -99,10 +100,12 @@ bool mediaCore::StreamOpen(std::string pUrl)
         AVCodecContext *p_CodecContex = p_PlayerContext->ic->streams[i]->codec;
         if ((p_CodecContex->codec_type == AVMEDIA_TYPE_VIDEO) && (st_index[AVMEDIA_TYPE_VIDEO] >= 0))//视频流
         {
+            p_PlayerContext->videoDecoder = new DecoderContext();
             OpenVideoDecode(i);
         }
         else if ((p_CodecContex->codec_type == AVMEDIA_TYPE_AUDIO) && (st_index[AVMEDIA_TYPE_AUDIO] >= 0))//音频流
         {
+            p_PlayerContext->audioDecoder = new DecoderContext();
             OpenAudioDecode(i);
         }
     }
@@ -112,9 +115,11 @@ bool mediaCore::StreamOpen(std::string pUrl)
 
 bool mediaCore::OpenVideoDecode(int streamIndex)
 {
+    
     p_PlayerContext->videoStreamIndex = streamIndex;
-    p_PlayerContext->videoDecoder->codecContext = avcodec_alloc_context3(NULL);
-    int ret = avcodec_parameters_to_context(p_PlayerContext->videoDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->codecpar);
+    p_PlayerContext->videoDecoder->codecContext = avcodec_alloc_context3(NULL); //申请AVCodecContext空间,可以选择性传递一个解码器，不传直接NULL
+    
+    int ret = avcodec_parameters_to_context(p_PlayerContext->videoDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->codecpar); //将流的信息直接复制到解码器上
     
     if(ret < 0)
         return false;
@@ -122,6 +127,7 @@ bool mediaCore::OpenVideoDecode(int streamIndex)
     av_codec_set_pkt_timebase(p_PlayerContext->videoDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->time_base);
     
     float fps = r2d(p_PlayerContext->ic->streams[streamIndex]->r_frame_rate);
+    
     AVCodec *codec = avcodec_find_decoder(p_PlayerContext->videoDecoder->codecContext->codec_id);
     if (!codec)
     {
@@ -187,23 +193,58 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         return -1;
     }
     
-    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
+//    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
+
+    if (!avcodec_is_open(p_PlayerContext->videoDecoder->codecContext) || !av_codec_is_decoder(p_PlayerContext->videoDecoder->codecContext->codec))
+        return AVERROR(EINVAL);
+    
+    
+    if(pkt)
     {
+        if(!pkt->size)
+        {
+            if(pkt->data)
+            {
+                return AVERROR(EINVAL);
+            }
+        }
+    }
+    int ret = avcodec_send_packet(p_PlayerContext->videoDecoder->codecContext, pkt);
+
+    if (ret < 0)
+    {
+        if(ret == AVERROR(EAGAIN))
+        {
+            int a= 0;
+        }
+        if(ret == AVERROR_EOF)
+        {
+            int b = 0;
+        }
+        if(ret == AVERROR(EINVAL))
+        {
+            int c = 0;
+        }
+//        if(ret == AVERRO(ENOMEN))
+//        {
+//            int d = 0;
+//        }
+//        AVERROR(EAGAIN)：当前不接受输出，必须重新发送
+//        AVERROR_EOF：已经刷新×××，没有新的包可以被刷新
+//        AVERROR(EINVAL)：没有打开×××，或者这是一个编码器，或者要求刷新
+//        AVERRO(ENOMEN)：无法添加包到内部队列
+//
         SDL_UnlockMutex(mutex);
         return -1;
     }
     
-    if (avcodec_send_packet(p_PlayerContext->ic->streams[pkt->stream_index]->codec, pkt) != 0)
-    {
+    ret = avcodec_receive_frame(p_PlayerContext->ic->streams[pkt->stream_index]->codec, frame);
+    if (ret == AVERROR_EOF) {
+        
         SDL_UnlockMutex(mutex);
-        return -1;
+        return ret;
     }
     
-    if (avcodec_receive_frame(p_PlayerContext->ic->streams[pkt->stream_index]->codec, frame) != 0)
-    {
-        SDL_UnlockMutex(mutex);
-        return -1;
-    }
     AVRational playTimeBase;
     playTimeBase.num = 1;
     playTimeBase.den = 1000;

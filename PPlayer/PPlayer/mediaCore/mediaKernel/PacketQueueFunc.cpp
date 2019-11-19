@@ -29,13 +29,13 @@ void PacketQueueFunc::packet_queue_init(PacketQueue *q)
             return ;
         }
     }
-    if(!q->cond) {
-        q->cond = SDL_CreateCond();
-        if (!q->cond) {
-            printf("SDL_CreateCond() : %s\n",SDL_GetError());
-            return ;
-        }
-    }
+//    if(!q->cond) {
+//        q->cond = SDL_CreateCond();
+//        if (!q->cond) {
+//            printf("SDL_CreateCond() : %s\n",SDL_GetError());
+//            return ;
+//        }
+//    }
     q->abort_request = 1;
     return ;
 }

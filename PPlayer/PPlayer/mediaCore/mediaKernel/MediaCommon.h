@@ -68,7 +68,6 @@ typedef struct PacketQueue_T {
         abort_request = 0;
         serial = 0;
         mutex = SDL_CreateMutex();
-        cond = SDL_CreateCond();
     }
     ~PacketQueue_T()
     {
@@ -87,7 +86,6 @@ typedef struct PacketQueue_T {
         abort_request = 0;
         serial = 0;
         SDL_DestroyMutex(mutex);
-        SDL_DestroyCond(cond);
     }
     std::list<P_AVPacket *> AvPacketList;
     int nb_packets;         // 队列中packet的数量
@@ -96,7 +94,6 @@ typedef struct PacketQueue_T {
     int abort_request;
     int serial;             // 播放序列，所谓播放序列就是一段连续的播放动作，一个seek操作会启动一段新的播放序列
     SDL_mutex *mutex;
-    SDL_cond *cond;
 } PacketQueue;
 
 typedef struct AudioInfo_T {
@@ -175,6 +172,7 @@ typedef struct Frame {
 typedef struct FrameQueue {
     FrameQueue()
     {
+        Queue.clear();
         rindex = -1;
         windex = -1;
         size = -1;
@@ -182,11 +180,18 @@ typedef struct FrameQueue {
         keep_last = -1;
         rindex_shown = -1;
         mutex = SDL_CreateMutex();
-        cond = SDL_CreateCond();
         pktq = NULL;
     }
     ~FrameQueue()
     {
+        std::list<Frame *>::iterator item = Queue.begin();
+        for(; item != Queue.end(); )
+        {
+            std::list<Frame *>::iterator item_e = item++;
+            SAFE_DELETE(*item_e);
+            Queue.erase(item_e);
+        }
+        Queue.clear();
         rindex = -1;
         windex = -1;
         size = -1;
@@ -194,10 +199,10 @@ typedef struct FrameQueue {
         keep_last = -1;
         rindex_shown = -1;
         SDL_DestroyMutex(mutex);
-        SDL_DestroyCond(cond);
         SAFE_DELETE(pktq);
     }
-    Frame queue[FRAME_QUEUE_SIZE];
+    std::list<Frame *> Queue;
+//    Frame queue[FRAME_QUEUE_SIZE];
     int rindex;
     int windex;
     int size;             // 总帧数
@@ -205,7 +210,6 @@ typedef struct FrameQueue {
     int keep_last;
     int rindex_shown;
     SDL_mutex *mutex;
-    SDL_cond *cond;
     PacketQueue *pktq;
 } FrameQueue;
 
@@ -214,7 +218,7 @@ typedef struct DecoderContext_T {
     {
         
         codecContext = NULL;
-        pkt_serial = 0;
+        pkt_serial = -1;
         finished = 0;
         packet_pending = 0;
         start_pts = 0;
@@ -226,7 +230,7 @@ typedef struct DecoderContext_T {
             avcodec_free_context(&codecContext);
             codecContext = NULL;
         }
-        pkt_serial = 0;
+        pkt_serial = -1;
         finished = 0;
         packet_pending = 0;
         start_pts = 0;

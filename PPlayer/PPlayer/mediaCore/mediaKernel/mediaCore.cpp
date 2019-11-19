@@ -199,16 +199,6 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         return AVERROR(EINVAL);
     
     
-    if(pkt)
-    {
-        if(!pkt->size)
-        {
-            if(pkt->data)
-            {
-                return AVERROR(EINVAL);
-            }
-        }
-    }
     int ret = avcodec_send_packet(p_PlayerContext->videoDecoder->codecContext, pkt);
 
     if (ret < 0)
@@ -225,21 +215,16 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         {
             int c = 0;
         }
-//        if(ret == AVERRO(ENOMEN))
-//        {
-//            int d = 0;
-//        }
 //        AVERROR(EAGAIN)：当前不接受输出，必须重新发送
 //        AVERROR_EOF：已经刷新×××，没有新的包可以被刷新
 //        AVERROR(EINVAL)：没有打开×××，或者这是一个编码器，或者要求刷新
 //        AVERRO(ENOMEN)：无法添加包到内部队列
-//
         SDL_UnlockMutex(mutex);
-        return -1;
+        return ret;
     }
     
-    ret = avcodec_receive_frame(p_PlayerContext->ic->streams[pkt->stream_index]->codec, frame);
-    if (ret == AVERROR_EOF) {
+    ret = avcodec_receive_frame(p_PlayerContext->videoDecoder->codecContext, frame);
+    if (ret < 0) {
         
         SDL_UnlockMutex(mutex);
         return ret;

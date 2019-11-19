@@ -53,6 +53,12 @@ int PacketQueueFunc::packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, 
     int ret;
     P_AVPacket  *p_pkt;
     SDL_LockMutex(q->mutex);
+    
+    if(q == NULL || pkt == NULL)        //添加容错处理
+    {
+        SDL_UnlockMutex(q->mutex);
+        return -1;
+    }
 
     for(;;)
     {

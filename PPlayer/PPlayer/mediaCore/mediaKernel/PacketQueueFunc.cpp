@@ -71,7 +71,7 @@ int PacketQueueFunc::packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, 
         q->AvPacketList.pop_front();
         if(p_pkt){
             q->nb_packets--;
-            q->size = q->AvPacketList.size() * sizeof(p_pkt);
+            q->size -= p_pkt->pkt.size + sizeof(*p_pkt);
             q->duration -= p_pkt->pkt.duration;
             *pkt = p_pkt->pkt;
             if(serial)
@@ -107,7 +107,7 @@ int PacketQueueFunc::packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     
     q->AvPacketList.push_back(p_pkt);       //把当前的这个P_AVPacket丢进队列中
     q->nb_packets++;                        //添加节点数据
-    q->size = sizeof(p_pkt) * q->AvPacketList.size();
+    q->size += p_pkt->pkt.size + sizeof(*p_pkt);  // 计算包的size大小以及p_pkt结构大小
     q->duration += p_pkt->pkt.duration;
     
 //    SDL_CondSignal(q->cond);

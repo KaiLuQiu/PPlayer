@@ -29,7 +29,7 @@
 		369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */; };
 		369BDD02237FAE68001A9EBC /* DemuxThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */; };
 		369BDD03237FAE68001A9EBC /* AudioDecodeThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF4237FAE68001A9EBC /* AudioDecodeThread.cpp */; };
-		369BDD04237FAE68001A9EBC /* FrameQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF6237FAE68001A9EBC /* FrameQueue.cpp */; };
+		369BDD04237FAE68001A9EBC /* FrameQueueFunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF6237FAE68001A9EBC /* FrameQueueFunc.cpp */; };
 		369BDD05237FAE68001A9EBC /* VideoRefreshThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF7237FAE68001A9EBC /* VideoRefreshThread.cpp */; };
 		369BDD06237FAE68001A9EBC /* AvSyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCF8237FAE68001A9EBC /* AvSyncClock.cpp */; };
 		369BDD07237FAE68001A9EBC /* AudioRefreshThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCFB237FAE68001A9EBC /* AudioRefreshThread.cpp */; };
@@ -174,7 +174,7 @@
 		3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PacketQueueFunc.cpp; sourceTree = "<group>"; };
 		3625584B2380C3CE00BB843F /* PacketQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueueFunc.h; sourceTree = "<group>"; };
 		369BDCEA237FAE68001A9EBC /* AudioRefreshThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRefreshThread.h; sourceTree = "<group>"; };
-		369BDCEB237FAE68001A9EBC /* FrameQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameQueue.h; sourceTree = "<group>"; };
+		369BDCEB237FAE68001A9EBC /* FrameQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameQueueFunc.h; sourceTree = "<group>"; };
 		369BDCEC237FAE68001A9EBC /* MediaCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaCommon.h; sourceTree = "<group>"; };
 		369BDCED237FAE68001A9EBC /* DemuxThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemuxThread.h; sourceTree = "<group>"; };
 		369BDCEE237FAE68001A9EBC /* mediaCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mediaCore.cpp; sourceTree = "<group>"; };
@@ -185,7 +185,7 @@
 		369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DemuxThread.cpp; sourceTree = "<group>"; };
 		369BDCF4237FAE68001A9EBC /* AudioDecodeThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioDecodeThread.cpp; sourceTree = "<group>"; };
 		369BDCF5237FAE68001A9EBC /* mediaCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mediaCore.h; sourceTree = "<group>"; };
-		369BDCF6237FAE68001A9EBC /* FrameQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FrameQueue.cpp; sourceTree = "<group>"; };
+		369BDCF6237FAE68001A9EBC /* FrameQueueFunc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FrameQueueFunc.cpp; sourceTree = "<group>"; };
 		369BDCF7237FAE68001A9EBC /* VideoRefreshThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoRefreshThread.cpp; sourceTree = "<group>"; };
 		369BDCF8237FAE68001A9EBC /* AvSyncClock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AvSyncClock.cpp; sourceTree = "<group>"; };
 		369BDCF9237FAE68001A9EBC /* VideoRefreshThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoRefreshThread.h; sourceTree = "<group>"; };
@@ -562,8 +562,8 @@
 			children = (
 				369BDCEA237FAE68001A9EBC /* AudioRefreshThread.h */,
 				369BDCFB237FAE68001A9EBC /* AudioRefreshThread.cpp */,
-				369BDCEB237FAE68001A9EBC /* FrameQueue.h */,
-				369BDCF6237FAE68001A9EBC /* FrameQueue.cpp */,
+				369BDCEB237FAE68001A9EBC /* FrameQueueFunc.h */,
+				369BDCF6237FAE68001A9EBC /* FrameQueueFunc.cpp */,
 				369BDCEC237FAE68001A9EBC /* MediaCommon.h */,
 				369BDCF1237FAE68001A9EBC /* MediaDefineInfo.h */,
 				369BDCED237FAE68001A9EBC /* DemuxThread.h */,
@@ -1003,7 +1003,7 @@
 				369BDD05237FAE68001A9EBC /* VideoRefreshThread.cpp in Sources */,
 				369BDD08237FAE68001A9EBC /* PPlayer.cpp in Sources */,
 				3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */,
-				369BDD04237FAE68001A9EBC /* FrameQueue.cpp in Sources */,
+				369BDD04237FAE68001A9EBC /* FrameQueueFunc.cpp in Sources */,
 				642857D923766C45003DFEE5 /* PPlayerMidlle.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

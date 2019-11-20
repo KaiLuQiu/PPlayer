@@ -32,7 +32,8 @@ public:
     void run();
     void start();
     void stop();
-    int get_video_frame(const AVPacket *VideoPkt, AVFrame *frame);
+    AVPacket *GetOnePacket(PacketQueue *pPacketQueue);
+    int get_video_frame(AVFrame *frame);
     int decoder_decode_frame(const AVPacket *VideoPkt, AVFrame *frame);
     int queue_picture(AVFrame *src_frame, double pts, double duration, int64_t pos, int serial);
     

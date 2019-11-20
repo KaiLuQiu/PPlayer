@@ -178,12 +178,12 @@ typedef struct FrameQueue {
     FrameQueue()
     {
 //        Queue.clear();
-        rindex = -1;
-        windex = -1;
-        size = -1;
-        max_size = -1;
-        keep_last = -1;
-        rindex_shown = -1;
+        rindex = 0;
+        windex = 0;
+        size = 0;
+        max_size = 0;
+        keep_last = 0;
+        rindex_shown = 0;
         mutex = SDL_CreateMutex();
         cond = SDL_CreateCond();
         pktq = NULL;
@@ -199,12 +199,12 @@ typedef struct FrameQueue {
 //            Queue.erase(item_e);
 //        }
 //        Queue.clear();
-        rindex = -1;
-        windex = -1;
-        size = -1;
-        max_size = -1;
-        keep_last = -1;
-        rindex_shown = -1;
+        rindex = 0;
+        windex = 0;
+        size = 0;
+        max_size = 0;
+        keep_last = 0;
+        rindex_shown = 0;
         if(mutex != NULL)
         {
             SDL_DestroyMutex(mutex);

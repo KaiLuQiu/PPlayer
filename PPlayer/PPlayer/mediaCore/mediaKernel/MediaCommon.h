@@ -10,6 +10,7 @@
 #define MediaCommon_H
 
 #include <list>
+#include <vector>
 #include <string.h>
 #include <stdlib.h>
 
@@ -31,7 +32,11 @@ extern "C"{
 #define NS_MEDIA_BEGIN namespace media {
 #define NS_MEDIA_END  }
 
-#define FRAME_QUEUE_SIZE 24
+//#define FRAME_QUEUE_SIZE 24
+#define VIDEO_PICTURE_QUEUE_SIZE 3
+#define SUBPICTURE_QUEUE_SIZE 16
+#define SAMPLE_QUEUE_SIZE 9
+#define FRAME_QUEUE_SIZE FFMAX(SAMPLE_QUEUE_SIZE, FFMAX(VIDEO_PICTURE_QUEUE_SIZE, SUBPICTURE_QUEUE_SIZE))
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(x) { if (x) delete (x); (x) = NULL; }    //定义安全释放函数
@@ -172,7 +177,7 @@ typedef struct Frame {
 typedef struct FrameQueue {
     FrameQueue()
     {
-        Queue.clear();
+//        Queue.clear();
         rindex = -1;
         windex = -1;
         size = -1;
@@ -180,36 +185,48 @@ typedef struct FrameQueue {
         keep_last = -1;
         rindex_shown = -1;
         mutex = SDL_CreateMutex();
+        cond = SDL_CreateCond();
         pktq = NULL;
     }
     ~FrameQueue()
     {
-        std::list<Frame *>::iterator item = Queue.begin();
-        for(; item != Queue.end(); )
-        {
-            std::list<Frame *>::iterator item_e = item++;
-            SAFE_DELETE(*item_e);
-            Queue.erase(item_e);
-        }
-        Queue.clear();
+//        std::vector<Frame *>::iterator item = Queue.begin();
+//        for(; item != Queue.end(); )
+//        {
+//            std::vector<Frame *>::iterator item_e = item++;
+////            SAFE_DELETE(*item_e);
+//            av_frame_unref((*item_e)->frame);      // 可能内部使用引用计数方式，这边先释放帧引用
+//            Queue.erase(item_e);
+//        }
+//        Queue.clear();
         rindex = -1;
         windex = -1;
         size = -1;
         max_size = -1;
         keep_last = -1;
         rindex_shown = -1;
-        SDL_DestroyMutex(mutex);
+        if(mutex != NULL)
+        {
+            SDL_DestroyMutex(mutex);
+            mutex = NULL;
+        }
+        if(cond != NULL)
+        {
+            SDL_DestroyCond(cond);
+            cond = NULL;
+        }
         SAFE_DELETE(pktq);
     }
-    std::list<Frame *> Queue;
-//    Frame queue[FRAME_QUEUE_SIZE];
+//    std::vector<Frame *> Queue;
+    Frame queue[FRAME_QUEUE_SIZE];
     int rindex;
     int windex;
     int size;             // 总帧数
     int max_size;
-    int keep_last;
+    int keep_last;        // keep_last是一个bool值，表示是否在环形缓冲区的读写过程中保留最后一个读节点不被覆写
     int rindex_shown;
     SDL_mutex *mutex;
+    SDL_cond *cond;
     PacketQueue *pktq;
 } FrameQueue;
 

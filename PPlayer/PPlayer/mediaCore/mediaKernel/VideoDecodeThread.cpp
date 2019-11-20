@@ -9,6 +9,7 @@
 
 #include "VideoDecodeThread.h"
 #include "mediaCore.h"
+#include "FrameQueueFunc.h"
 
 NS_MEDIA_BEGIN
 SDL_mutex *VideoDecodeThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
@@ -143,7 +144,8 @@ void VideoDecodeThread::run()
             int pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts;
             int duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             int64_t pos = frame->pkt_pos;
-            queue_picture(frame, pts, duration, pos, pPlayerContext->videoDecoder->pkt_serial);
+            
+            queue_picture(FFrame->frame, pts, duration, pos, pPlayerContext->videoDecoder->pkt_serial);
             SDL_UnlockMutex(pPlayerContext->videoDecodeRingBuffer.mutex);
         }
         

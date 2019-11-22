@@ -19,6 +19,7 @@ extern "C"{
 #include<libswscale/swscale.h>
 #include<libswresample/swresample.h>
 #include<libavutil/rational.h>
+#include<libavutil/time.h>
 }
 
 #include <SDL_mutex.h>

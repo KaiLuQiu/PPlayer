@@ -26,6 +26,10 @@ typedef struct PlayerContext_T {
         keep_last = -1;                   //是否保存最后一帧
         width = -1;
         height = -1;
+        last_vis_time = 0;
+        frame_timer = 0;
+        max_frame_duration = 0.0;
+//        abort_request = 0;
         videoPacketQueueFunc = NULL;
         audioPacketQueueFunc = NULL;
         videoDecoder = NULL;
@@ -54,7 +58,10 @@ typedef struct PlayerContext_T {
         keep_last = -1;                   //是否保存最后一帧
         width = -1;
         height = -1;
-   
+        last_vis_time = 0;
+        frame_timer = 0;
+        max_frame_duration = 0.0;
+
         SAFE_DELETE(videoPacketQueueFunc);
         SAFE_DELETE(audioPacketQueueFunc);
         SAFE_DELETE(videoDecoder);
@@ -93,6 +100,10 @@ typedef struct PlayerContext_T {
     int videoStreamIndex;
     int audioStreamIndex;
     int eof;                    //是否parse到类eof标识位
+//    int abort_request;          //是否需要终端（当流close的时候可以终止）
+    int last_vis_time;          //上一次的播放时间
+    double frame_timer;         // 当前frame对应实际时间的累积值
+    double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
     
     DecoderContext *videoDecoder;       //
     DecoderContext *audioDecoder;       //

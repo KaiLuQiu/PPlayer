@@ -13,7 +13,11 @@ VideoRefreshThread* VideoRefreshThread::p_VideoOut = nullptr;
 
 VideoRefreshThread::VideoRefreshThread()
 {
-    
+    pPlayerContext = NULL;
+//    bVideoFreeRun = 0;
+//    pMasterClock = NULL;
+    needStop = 0;
+
 }
 
 VideoRefreshThread::~VideoRefreshThread()
@@ -28,7 +32,10 @@ void VideoRefreshThread::init()
 
 void VideoRefreshThread::start()
 {
-    
+    thread video_refresh_thread([this]()-> void {              //此处使用lamda表达式
+        run();
+    });
+    video_refresh_thread.detach();
 }
 
 void VideoRefreshThread::run()
@@ -36,5 +43,8 @@ void VideoRefreshThread::run()
     
 }
 
-
+void VideoRefreshThread::stop()
+{
+    needStop = 1;
+}
 NS_MEDIA_END

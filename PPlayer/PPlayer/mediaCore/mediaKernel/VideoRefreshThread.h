@@ -39,10 +39,13 @@ public:
         }
         return p_VideoOut;
     }
-    void init();
+    void init(PlayerContext *playerContext);
     void start();
     void run();
     void stop();
+    int NeedAVSync();
+    double vp_duration(Frame *vp, Frame *nextvp);
+
 
     VideoRefreshThread();
     virtual ~VideoRefreshThread();

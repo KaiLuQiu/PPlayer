@@ -13,7 +13,8 @@
 #import <CoreMotion/CoreMotion.h>
 
 #import "PPlayerMidlle.h"
-
+#import "OpenGLView.h"
+#include "render_frame.h"
 
 @interface PPlayerController () {
 
@@ -29,9 +30,17 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSString* path = [self getFileFromMainbundleAbsolutePath:@"video/13-sample.mp4"];
+    NSString* path = [self getFileFromMainbundleAbsolutePath:@"video/bboy.mp4"];
+    self.view.backgroundColor = [UIColor whiteColor];
+    OpenGLView *playerView = [[OpenGLView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    playerView.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:playerView];
+    
     PPlayerMidlle *player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
+    [player setView:(__bridge void *)(playerView)];
     [player prepareAsync];
+    [player start];
+
 }
 
 - (void)dealloc{

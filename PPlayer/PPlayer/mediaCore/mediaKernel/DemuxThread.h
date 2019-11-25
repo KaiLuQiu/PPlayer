@@ -13,7 +13,7 @@
 #include "PacketQueueFunc.h"
 
 NS_MEDIA_BEGIN
-#define MAX_SIZE (2 * 512 *1024)  //2M
+#define MAX_SIZE (15 * 512 *1024)  //2M
 
 class DemuxThread : public std::thread
 {

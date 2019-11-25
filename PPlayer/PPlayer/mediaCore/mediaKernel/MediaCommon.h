@@ -74,6 +74,7 @@ typedef struct PacketQueue_T {
         abort_request = 0;
         serial = 0;
         mutex = SDL_CreateMutex();
+        cond = SDL_CreateCond();
     }
     ~PacketQueue_T()
     {
@@ -92,6 +93,7 @@ typedef struct PacketQueue_T {
         abort_request = 0;
         serial = 0;
         SDL_DestroyMutex(mutex);
+        SDL_DestroyCond(cond);
     }
     std::list<P_AVPacket *> AvPacketList;
     int nb_packets;         // 队列中packet的数量
@@ -100,6 +102,7 @@ typedef struct PacketQueue_T {
     int abort_request;
     int serial;             // 播放序列，所谓播放序列就是一段连续的播放动作，一个seek操作会启动一段新的播放序列
     SDL_mutex *mutex;
+    SDL_cond  *cond;
 } PacketQueue;
 
 typedef struct AudioInfo_T {

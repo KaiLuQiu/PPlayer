@@ -29,13 +29,13 @@ void PacketQueueFunc::packet_queue_init(PacketQueue *q)
             return ;
         }
     }
-//    if(!q->cond) {
-//        q->cond = SDL_CreateCond();
-//        if (!q->cond) {
-//            printf("SDL_CreateCond() : %s\n",SDL_GetError());
-//            return ;
-//        }
-//    }
+    if(!q->cond) {
+        q->cond = SDL_CreateCond();
+        if (!q->cond) {
+            printf("SDL_CreateCond() : %s\n",SDL_GetError());
+            return ;
+        }
+    }
     q->abort_request = 1;
     return ;
 }
@@ -83,7 +83,7 @@ int PacketQueueFunc::packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, 
             ret = 0;
             break;
         } else {
-            ret = -1;
+            SDL_CondWait(q->cond, q->mutex);
         }
     }
 
@@ -110,7 +110,7 @@ int PacketQueueFunc::packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     q->size += p_pkt->pkt.size + sizeof(*p_pkt);  // 计算包的size大小以及p_pkt结构大小
     q->duration += p_pkt->pkt.duration;
     
-//    SDL_CondSignal(q->cond);
+    SDL_CondSignal(q->cond);
     return 0;
 }
 
@@ -166,6 +166,7 @@ void PacketQueueFunc::packet_queue_abort(PacketQueue *q)
     SDL_LockMutex(q->mutex);
     q->abort_request = 1;
     SDL_UnlockMutex(q->mutex);
+    SDL_CondSignal(q->cond);
 }
 
 

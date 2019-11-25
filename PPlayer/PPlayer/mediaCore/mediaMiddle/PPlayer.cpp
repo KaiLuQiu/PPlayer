@@ -25,6 +25,12 @@ void PPlayer::setDataSource(std::string url)        //这边暂时只保留url�
     pUrl = url;
 }
 
+int PPlayer::setView(void *view)
+{
+    VideoRefreshThread::getIntanse()->setView(view);
+    return 1;
+}
+
 void PPlayer::prepareAsync()
 {
     pPlayerContext = new PlayerContext();
@@ -34,10 +40,10 @@ void PPlayer::prepareAsync()
     {
         DemuxThread::getIntanse()->init(pPlayerContext);      //
         VideoDecodeThread::getIntanse()->init(pPlayerContext);  //初始化videodecoder，主要是startPacketQueue
+        VideoRefreshThread::getIntanse()->init(pPlayerContext);
         DemuxThread::getIntanse()->start();     //开启demuxer线程读取数据包
 
         VideoDecodeThread::getIntanse()->start();
-        
         
     }
 }
@@ -49,6 +55,7 @@ void PPlayer::prepare()
 
 bool PPlayer::start()
 {
+    VideoRefreshThread::getIntanse()->start();
     return true;
 }
 

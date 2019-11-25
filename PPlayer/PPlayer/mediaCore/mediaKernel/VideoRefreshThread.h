@@ -10,7 +10,9 @@
 #define VideoRefreshThread_H
 #include "MediaDefineInfo.h"
 #include <thread>
-
+extern "C" {
+#include "render_frame.h"
+}
 NS_MEDIA_BEGIN
 
 //videoRefresh的状态
@@ -45,11 +47,19 @@ public:
     void stop();
     int NeedAVSync();
     double vp_duration(Frame *vp, Frame *nextvp);
-
+    int DecideKeepFrame(int need_av_sync, int64_t pts);
+    int64_t CalcSyncLate(int64_t pts);
+    double compute_target_delay(double delay);
+    
+    void video_image_display(Frame *vp);
+    void copyYUVFrameData(uint8_t *src, uint8_t *dst, int linesize, int width, int height);
+    void setView(void *view);
 
     VideoRefreshThread();
     virtual ~VideoRefreshThread();
 private:
+    void *glView;
+    bool bVideoFreeRun;  // 不进行avsync，让video自由播放
     PlayerContext *pPlayerContext;
     bool needStop;
     static VideoRefreshThread* p_VideoOut;

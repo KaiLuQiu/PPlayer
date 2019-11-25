@@ -15,8 +15,7 @@ VideoRefreshThread* VideoRefreshThread::p_VideoOut = nullptr;
 VideoRefreshThread::VideoRefreshThread()
 {
     pPlayerContext = NULL;
-//    bVideoFreeRun = 0;
-//    pMasterClock = NULL;
+    bVideoFreeRun = 0;
     needStop = 0;
 
 }
@@ -29,7 +28,11 @@ VideoRefreshThread::~VideoRefreshThread()
 void VideoRefreshThread::init(PlayerContext *playerContext)
 {
     pPlayerContext = playerContext;
-    
+}
+
+void VideoRefreshThread::setView(void *view)
+{
+    glView = view;
 }
 
 void VideoRefreshThread::start()
@@ -58,25 +61,6 @@ double VideoRefreshThread::vp_duration(Frame *vp, Frame *nextvp) {  // 计算当
     }
 }
 
-//int VideoRefreshThread::DecideKeepFrame(int need_av_sync, int64_t pts)
-//{
-//    int64_t late = 0;
-//
-//    if (!need_av_sync)
-//        return 1;
-//
-//    late = CalcSyncLate(pts);
-//    if (late < 0)
-//    {
-//        printf("video pts is late need drop this frame.\n");
-//        //        qDebug()<<"video pts is late need drop this frame.";
-//        return 0;
-//    }
-//
-//    return 1;
-//}
-
-
 void VideoRefreshThread::run()
 {
     int sync_status = FRAME_NEED_NEXT;
@@ -94,7 +78,7 @@ void VideoRefreshThread::run()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
         }
-        if (remaining_time > 0.0) {
+        if (remaining_time > 0.0) {         // 目的是做音视频同步操作
             av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         }
         
@@ -129,6 +113,9 @@ void VideoRefreshThread::run()
                     
                     need_av_sync = NeedAVSync();
                     
+                    //暂时不做av sync操作，带音频模块的接入
+                    FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
+                    video_image_display(vp);
                     
                 }
 
@@ -138,6 +125,50 @@ void VideoRefreshThread::run()
     }
         
 }
+
+void VideoRefreshThread::video_image_display(Frame *vp)
+{
+    
+    if (vp->frame) {
+        
+        enum AVPixelFormat sw_pix_fmt;
+        
+        sw_pix_fmt = pPlayerContext->videoDecoder->codecContext->sw_pix_fmt;
+        if (sw_pix_fmt == AV_PIX_FMT_YUV420P || sw_pix_fmt == AV_PIX_FMT_YUVJ420P){
+            VideoFrame *videoFrame = (VideoFrame *)malloc(sizeof(VideoFrame));
+            videoFrame->width = vp->frame->width;
+            videoFrame->height = vp->frame->height;
+            videoFrame->format = AV_PIX_FMT_YUV420P;
+            videoFrame->planar = 3;
+            
+            videoFrame->pixels[0] = (unsigned char *)malloc(vp->frame->width * vp->frame->height);
+            videoFrame->pixels[1] = (unsigned char *)malloc(vp->frame->width * vp->frame->height);
+            videoFrame->pixels[2] = (unsigned char *)malloc(vp->frame->width * vp->frame->height);
+            copyYUVFrameData(vp->frame->data[0], videoFrame->pixels[0], vp->frame->linesize[0], vp->frame->width, vp->frame->height);
+            copyYUVFrameData(vp->frame->data[1], videoFrame->pixels[1], vp->frame->linesize[1], vp->frame->width / 2, vp->frame->height / 2);
+            copyYUVFrameData(vp->frame->data[2], videoFrame->pixels[2], vp->frame->linesize[2], vp->frame->width / 2, vp->frame->height / 2);
+            Render(glView, videoFrame);
+            
+            
+            free(videoFrame->pixels[0]);
+            free(videoFrame->pixels[1]);
+            free(videoFrame->pixels[2]);
+            free(videoFrame);
+        }
+        
+    }
+}
+
+void VideoRefreshThread::copyYUVFrameData(uint8_t *src, uint8_t *dst, int linesize, int width, int height){
+    width = FFMIN(linesize, width);
+    memset(dst, 0, width * height);
+    for (int i = 0; i < height; ++i) {
+        memcpy(dst, src, width);
+        dst += width;
+        src += linesize;
+    }
+}
+
 
 void VideoRefreshThread::stop()
 {

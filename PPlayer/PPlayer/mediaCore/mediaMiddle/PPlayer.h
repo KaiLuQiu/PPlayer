@@ -14,6 +14,7 @@
 #include "mediaCore.h"
 #include "Demuxthread.h"
 #include "VideoDecodeThread.h"
+#include "VideoRefreshThread.h"
 
 NS_MEDIA_BEGIN
 
@@ -47,6 +48,8 @@ public:
     int getCurPos();
     bool setSpeed();
     float getSpeed();
+    int setView(void *view);
+
     
     PlayerContext* getPlayerContext()      //写在class内相当于内联函数
     {

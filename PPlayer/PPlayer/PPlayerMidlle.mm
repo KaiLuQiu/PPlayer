@@ -9,6 +9,7 @@
 #import "PPlayerMidlle.h"
 #include "PPlayer.h"
 
+
 @interface PPlayerMidlle ()
 
 @end
@@ -27,10 +28,18 @@
 -(void) prepareAsync {
     
     media::PPlayer::getInstance()->prepareAsync();
+    
+}
+
+-(void) setView:(void *)view
+{
+    media::PPlayer::getInstance()->setView(view);
+
 }
 
 -(void) start {
-    
+    media::PPlayer::getInstance()->start();
+
 }
 
 -(void) pause {

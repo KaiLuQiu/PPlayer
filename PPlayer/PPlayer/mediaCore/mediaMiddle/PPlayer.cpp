@@ -41,10 +41,13 @@ void PPlayer::prepareAsync()
         DemuxThread::getIntanse()->init(pPlayerContext);      //
         VideoDecodeThread::getIntanse()->init(pPlayerContext);  //初始化videodecoder，主要是startPacketQueue
         VideoRefreshThread::getIntanse()->init(pPlayerContext);
+        
+        AudioDecodeThread::getIntanse()->init(pPlayerContext);  //初始化videodecoder，主要是startPacketQueue
+        
         DemuxThread::getIntanse()->start();     //开启demuxer线程读取数据包
 
         VideoDecodeThread::getIntanse()->start();
-        
+        AudioDecodeThread::getIntanse()->start();
     }
 }
 

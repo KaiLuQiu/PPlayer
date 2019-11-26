@@ -34,7 +34,7 @@ public:
             if(NULL == p_VideoOut) {
                 p_VideoOut = new (std::nothrow)VideoRefreshThread();
                 if(p_VideoOut == NULL) {
-                    printf("DemuxThread getInstance is NULL!");
+                    printf("VideoDecodeThread getInstance is NULL!");
                 }
             }
             SDL_UnlockMutex(mutex);

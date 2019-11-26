@@ -14,6 +14,7 @@
 #include "mediaCore.h"
 #include "Demuxthread.h"
 #include "VideoDecodeThread.h"
+#include "AudioDecodeThread.h"
 #include "VideoRefreshThread.h"
 
 NS_MEDIA_BEGIN

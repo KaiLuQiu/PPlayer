@@ -178,7 +178,9 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
 
 int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 {
+    DecoderContext *codecContext;
     SDL_LockMutex(mutex);
+    
     if (!p_PlayerContext->ic || pkt == NULL || frame == NULL )
     {
         SDL_UnlockMutex(mutex);
@@ -191,8 +193,12 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         return -1;
     }
     
+    if (pkt->stream_index == p_PlayerContext->audioStreamIndex)
+        codecContext = p_PlayerContext->audioDecoder;
+    else
+        codecContext = p_PlayerContext->videoDecoder;
     
-    int ret = avcodec_send_packet(p_PlayerContext->videoDecoder->codecContext, pkt);
+    int ret = avcodec_send_packet(codecContext->codecContext, pkt);
 
     if (ret < 0)
     {
@@ -216,7 +222,7 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         return ret;
     }
     
-    ret = avcodec_receive_frame(p_PlayerContext->videoDecoder->codecContext, frame);
+    ret = avcodec_receive_frame(codecContext->codecContext, frame);
     if (ret < 0) {
         
         SDL_UnlockMutex(mutex);

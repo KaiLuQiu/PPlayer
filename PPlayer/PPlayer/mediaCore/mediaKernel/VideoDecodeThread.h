@@ -21,7 +21,7 @@ public:
             if(NULL == p_Decoder) {
                 p_Decoder = new (std::nothrow)VideoDecodeThread();
                 if(p_Decoder == NULL) {
-                    printf("DemuxThread getInstance is NULL!");
+                    printf("VideoDecodeThread getInstance is NULL!");
                 }
             }
             SDL_UnlockMutex(mutex);
@@ -32,7 +32,6 @@ public:
     void run();
     void start();
     void stop();
-    AVPacket *GetOnePacket(PacketQueue *pPacketQueue);
     int get_video_frame(AVFrame *frame);
     int decoder_decode_frame(const AVPacket *VideoPkt, AVFrame *frame);
     int queue_picture(AVFrame *src_frame, double pts, double duration, int64_t pos, int serial);
@@ -44,7 +43,7 @@ private:
     static VideoDecodeThread* p_Decoder;
     static SDL_mutex *mutex;
 
-    int bStop;
+    int needStop;
 };
 
 

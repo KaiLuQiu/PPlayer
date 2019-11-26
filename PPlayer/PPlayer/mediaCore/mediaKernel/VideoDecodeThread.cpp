@@ -116,12 +116,12 @@ void VideoDecodeThread::start()
 
 void VideoDecodeThread::run()
 {
-    bStop = 0;
+    needStop = 0;
     AVFrame *frame = av_frame_alloc();
     int serial = 0;
     AVRational frame_rate = av_guess_frame_rate(pPlayerContext->ic, pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex], NULL);
     
-    while(!bStop)
+    while(!needStop)
     {
         if(!pPlayerContext)         // 判断上下文是否存在
         {
@@ -148,7 +148,7 @@ void VideoDecodeThread::run()
             {
                 pPlayerContext->videoDecoder->finished = pPlayerContext->videoDecoder->pkt_serial;
                 avcodec_flush_buffers(pPlayerContext->videoDecoder->codecContext);  // 冲刷avcodec信息
-                bStop = true;  //说明读取到了结束包信息
+                needStop = true;  //说明读取到了结束包信息
             }
             continue;
         }
@@ -198,7 +198,7 @@ int VideoDecodeThread::queue_picture(AVFrame *src_frame, double pts, double dura
 
 void VideoDecodeThread::stop()
 {
-    
+    needStop = 1;
 }
 
 

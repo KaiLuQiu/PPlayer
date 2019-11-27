@@ -157,7 +157,7 @@ int AudioDecodeThread::queue_audio(AVFrame *src_frame, double pts, double durati
 {
     Frame *ap;
     
-    // 从videoDecodeRingBuffer中获取一块Frame大小的可写内存，如果当前的size = max_size的话，说明写满了则返回为空
+    // 从audioDecodeRingBuffer中获取一块Frame大小的可写内存，如果当前的size = max_size的话，说明写满了则返回为空
     if (!(ap = FrameQueueFunc::frame_queue_peek_writable(&pPlayerContext->audioDecodeRingBuffer)))
         return -1;
     

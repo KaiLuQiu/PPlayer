@@ -54,7 +54,7 @@ public:
         return p_AudioOut;
     }
     AudioRefreshThread();
-    void init(PlayerContext *pPlayer);
+    int init(PlayerContext *pPlayer);
     void start();
     void deinit();
     void run();
@@ -63,6 +63,7 @@ public:
     virtual ~AudioRefreshThread();
     int bFirstFrame;
 private:
+    static void audio_callback(void *udata, unsigned char *stream, int len);
     static AudioRefreshThread *p_AudioOut;
     static SDL_mutex *mutex;
     PlayerContext *pPlayerContext;

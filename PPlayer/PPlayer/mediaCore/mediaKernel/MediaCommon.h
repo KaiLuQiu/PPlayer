@@ -114,6 +114,7 @@ typedef struct AudioInfo_T {
         fmt = AV_SAMPLE_FMT_NONE;
         frame_size = -1;
         bytes_per_sec = -1;
+        sample_rate = -1;
     }
     ~AudioInfo_T()
     {
@@ -123,6 +124,7 @@ typedef struct AudioInfo_T {
         fmt = AV_SAMPLE_FMT_NONE;
         frame_size = -1;
         bytes_per_sec = -1;
+        sample_rate = -1;
     }
     int freq;
     int channels;
@@ -130,6 +132,7 @@ typedef struct AudioInfo_T {
     enum AVSampleFormat fmt;
     int frame_size;
     int bytes_per_sec;          //每秒的
+    int sample_rate;
 } AudioInfo;
 
 //解码帧信息

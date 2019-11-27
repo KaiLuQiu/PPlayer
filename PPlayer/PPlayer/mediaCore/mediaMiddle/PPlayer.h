@@ -16,6 +16,8 @@
 #include "VideoDecodeThread.h"
 #include "AudioDecodeThread.h"
 #include "VideoRefreshThread.h"
+#include "AudioRefreshThread.h"
+
 
 NS_MEDIA_BEGIN
 

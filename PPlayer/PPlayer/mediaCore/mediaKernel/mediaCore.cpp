@@ -171,7 +171,9 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
         p_PlayerContext->audioInfo.freq = p_PlayerContext->audioDecoder->codecContext->sample_rate;
         p_PlayerContext->audioInfo.channels = p_PlayerContext->audioDecoder->codecContext->channels;
         p_PlayerContext->audioInfo.frame_size = p_PlayerContext->audioDecoder->codecContext->frame_size;
-        
+        p_PlayerContext->audioInfo.channel_layout = p_PlayerContext->audioDecoder->codecContext->channel_layout;
+        p_PlayerContext->audioInfo.sample_rate = p_PlayerContext->audioDecoder->codecContext->sample_rate;
+
     }
     return true;
 }

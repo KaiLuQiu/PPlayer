@@ -5,6 +5,7 @@
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
+
 #ifndef AudioDecodeThread_H
 #define AudioDecodeThread_H
 #include "MediaDefineInfo.h"
@@ -34,7 +35,6 @@ public:
     int get_audio_frame(AVFrame *frame);
     int decoder_decode_frame(const AVPacket *AudioPkt, AVFrame *frame);
     int queue_audio(AVFrame *src_frame, double pts, double duration, int64_t pos, int serial);
-
     virtual ~AudioDecodeThread();
     AudioDecodeThread();
 private:

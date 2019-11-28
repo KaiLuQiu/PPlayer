@@ -245,4 +245,27 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 }
 
 
+
+int mediaCore::audioSwr(char *out, AVFrame* frame)
+{
+    if (!p_PlayerContext->ic || !frame || !out)
+    {
+        return 0;
+    }
+    AVCodecContext *ctx = p_PlayerContext->ic->streams[p_PlayerContext->audioStreamIndex]->codec;
+
+    if (swr_ctx == NULL)
+    {
+        // 创建音频转码上下文
+        swr_ctx = swr_alloc();
+        // 对音频转上下文设置参数信息
+        swr_alloc_set_opts(swr_ctx, p_PlayerContext->audioInfoTarget.channel_layout, AV_SAMPLE_FMT_S16,
+                           p_PlayerContext->audioInfoTarget.sample_rate, p_PlayerContext->audioInfoTarget.channels, p_PlayerContext->audioInfoTarget.fmt, p_PlayerContext->audioInfoTarget.sample_rate,
+                           0, 0);
+        // 音视频转码上下文
+        swr_init(swr_ctx);
+    }
+
+    return 1;
+}
 NS_MEDIA_END

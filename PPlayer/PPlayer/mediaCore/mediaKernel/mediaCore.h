@@ -37,6 +37,7 @@ public:
     void Init(PlayerContext *p_PlayerContext);
     bool StreamOpen(std::string pUrl);
     int Decode(const AVPacket *pkt, AVFrame *frame);
+    int audioSwr(char *out, AVFrame* frame);
 
 
     mediaCore();
@@ -49,7 +50,7 @@ private:
     AVFormatContext *avFormatContext;
     PlayerContext *p_PlayerContext;
     AVDictionary  *codec_opts;
-    
+    SwrContext *swr_ctx;  //音视频转码上下文
 };
 
 NS_MEDIA_END

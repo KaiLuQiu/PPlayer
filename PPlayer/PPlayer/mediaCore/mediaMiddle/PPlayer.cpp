@@ -5,11 +5,13 @@
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
+
 #include "PPlayer.h"
 NS_MEDIA_BEGIN
 
 PPlayer* PPlayer::p_Player = nullptr;
-SDL_mutex* PPlayer::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
+// 类的静态指针需要在此初始化
+SDL_mutex* PPlayer::mutex = SDL_CreateMutex();
 
 PPlayer::PPlayer()
 {
@@ -20,7 +22,8 @@ PPlayer::~PPlayer()
     
 }
 
-void PPlayer::setDataSource(std::string url)        //这边暂时只保留url信息
+// 这边暂时只保留url信息
+void PPlayer::setDataSource(std::string url)
 {
     pUrl = url;
 }
@@ -35,18 +38,20 @@ void PPlayer::prepareAsync()
 {
     pPlayerContext = new PlayerContext();
     mediaCore::getIntanse()->Init(pPlayerContext);
+    // avformat和avcodec都打开了
     bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
-    if(ret == true)                     //avformat和avcodec都打开了，
+    if(ret == true)
     {
-        DemuxThread::getIntanse()->init(pPlayerContext);      //
-        VideoDecodeThread::getIntanse()->init(pPlayerContext);  //初始化videodecoder，主要是startPacketQueue
+        DemuxThread::getIntanse()->init(pPlayerContext);
+        // 初始化videodecoder，主要是startPacketQueue
+        VideoDecodeThread::getIntanse()->init(pPlayerContext);
         VideoRefreshThread::getIntanse()->init(pPlayerContext);
         AudioRefreshThread::getIntanse()->init(pPlayerContext);
-
-        AudioDecodeThread::getIntanse()->init(pPlayerContext);  //初始化videodecoder，主要是startPacketQueue
-        
-        DemuxThread::getIntanse()->start();     //开启demuxer线程读取数据包
-
+        // 初始化videodecoder，主要是startPacketQueue
+        AudioDecodeThread::getIntanse()->init(pPlayerContext);
+        // 开启demuxer线程读取数据包
+        DemuxThread::getIntanse()->start();
+        // videoDecode和audioDecode可以在prepareAsync的时候就开启，当显示线程则不可。为了加快第一帧的show
         VideoDecodeThread::getIntanse()->start();
         AudioDecodeThread::getIntanse()->start();
     }

@@ -11,8 +11,12 @@
 #include "MediaDefineInfo.h"
 #include <thread>
 #include "stdint.h"
-
 NS_MEDIA_BEGIN
+
+#define SDL_AUDIO_MIN_BUFFER_SIZE 512
+#define SDL_AUDIO_MAX_CALLBACKS_PER_SEC 30
+#define MAX_AUDIO_FRAME_SIZE 192000
+
 
 typedef enum
 {

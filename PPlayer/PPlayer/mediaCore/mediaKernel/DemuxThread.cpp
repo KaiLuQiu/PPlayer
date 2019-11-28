@@ -7,9 +7,10 @@
 //
 
 #include "Demuxthread.h"
-
 NS_MEDIA_BEGIN
-SDL_mutex *DemuxThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
+
+// 类的静态指针需要在此初始化
+SDL_mutex *DemuxThread::mutex = SDL_CreateMutex();
 DemuxThread* DemuxThread::pDemuxer = nullptr;
 
 // 对于packetQueue中我们需要在一个向队列中先放置一个flush_pkt，主要用来作为非连续的两端数据的“分界”标记

@@ -191,7 +191,7 @@ int VideoDecodeThread::queue_picture(AVFrame *src_frame, double pts, double dura
     av_frame_move_ref(vp->frame, src_frame);
     // 主要时将写索引往前移动
     FrameQueueFunc::frame_queue_push(&pPlayerContext->videoDecodeRingBuffer);
-//    pPlayerContext->videoDecodeRingBuffer.Queue.push_back(vp);
+    // pPlayerContext->videoDecodeRingBuffer.Queue.push_back(vp);
     return 0;
 }
 

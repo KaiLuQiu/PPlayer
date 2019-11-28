@@ -93,6 +93,7 @@ typedef struct PlayerContext_T {
     FrameQueue subDecodeRingBuffer;   // 存储decode出来的未解码的序列帧
     
     AudioInfo audioInfo;   // SDL支持的音频参数，重采样转换;
+    AudioInfo audioInfoTarget;   // SDL支持的音频参数，重采样转换;
     int audio_hw_buf_size;          // SDL音频缓冲区大小(单位字节)
     bool keep_last;                   //是否保存最后一帧
     int width;                      

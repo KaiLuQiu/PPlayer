@@ -41,7 +41,6 @@ private:
     PlayerContext *pPlayerContext;
     static VideoDecodeThread* p_Decoder;
     static SDL_mutex *mutex;
-
     int needStop;
 };
 

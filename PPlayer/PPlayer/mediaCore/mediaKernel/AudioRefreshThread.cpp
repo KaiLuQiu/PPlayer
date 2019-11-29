@@ -15,21 +15,19 @@ NS_MEDIA_BEGIN
 SDL_mutex *AudioRefreshThread::mutex = SDL_CreateMutex();
 AudioRefreshThread* AudioRefreshThread::p_AudioOut = nullptr;
 
-std::list<PCMBuffer_t *>audioPCMDisp;
-
 void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int len) {
     AudioRefreshThread *pADT = (AudioRefreshThread *)udata;
-    PCMBuffer_t * pPCMBuffer = NULL;
+    PCMBuffer * pPCMBuffer = NULL;
     SDL_memset(stream, 0, len);
     SDL_LockMutex(pADT->ADispPCMQueue.mutex);
 
-    if (pADT->ADispPCMQueue.Queue->empty()) {
+    if (pADT->ADispPCMQueue.Queue.empty()) {
         SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
         return;
     }
     
-    pPCMBuffer = pADT->ADispPCMQueue.Queue->front();
-    pADT->ADispPCMQueue.Queue->pop_front();
+    pPCMBuffer = pADT->ADispPCMQueue.Queue.front();
+    pADT->ADispPCMQueue.Queue.pop_front();
     SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
 
 
@@ -57,7 +55,6 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
         return -1;
     pPlayerContext = pPlayer;
     
-    ADispPCMQueue.Queue = &audioPCMDisp;
     ADispPCMQueue.size = FRAME_QUEUE_SIZE + 1;
     // 初始化为PCMBuffers分配空间
     for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
@@ -173,8 +170,6 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
     return spec.size;
 }
 
-
-
 void AudioRefreshThread::start() {
     thread audio_refresh_thread([this]()-> void {
         run();
@@ -183,8 +178,8 @@ void AudioRefreshThread::start() {
 }
 
 // 获取一个能够使用的PCMBuffers
-PCMBuffer_t *AudioRefreshThread::GetOneValidPCMBuffer() {
-    PCMBuffer_t *pPCMBuffer = NULL;
+PCMBuffer *AudioRefreshThread::GetOneValidPCMBuffer() {
+    PCMBuffer *pPCMBuffer = NULL;
     int i;
     
     for (i = 0; i < FRAME_QUEUE_SIZE; i++) {
@@ -228,17 +223,29 @@ void AudioRefreshThread::stop() {
 }
 
 void AudioRefreshThread::flush() {
-    ADispPCMQueue.Queue->clear();
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
-        PCMBuffers[i].state = DISP_NONE;
-        PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+    std::list<PCMBuffer *>::iterator item = ADispPCMQueue.Queue.begin();
+    for(; item != ADispPCMQueue.Queue.end(); )
+    {
+        std::list<PCMBuffer *>::iterator item_e = item++;
+        if(*item_e)
+        {
+            if(NULL != (*item_e)->bufferAddr)
+            {
+                av_free((void *)(*item_e)->bufferAddr);
+                (*item_e)->bufferAddr = NULL;
+            }
+            (*item_e)->state = DISP_NONE;
+            (*item_e)->bufferSize = 0;
+            (*item_e)->pts = -1;
+        }
+        ADispPCMQueue.Queue.erase(item_e);
     }
+    ADispPCMQueue.Queue.clear();
 }
 
 void AudioRefreshThread::run() {
     Frame *pFrame = NULL;
-    PCMBuffer_t *pPCMBuffer = NULL;
+    PCMBuffer *pPCMBuffer = NULL;
     int data_size = 0;
     int64_t dec_channel_layout;
     int wanted_nb_samples;
@@ -303,7 +310,7 @@ void AudioRefreshThread::run() {
         pPCMBuffer->pts = pFrame->frame->pts;
         SDL_LockMutex(ADispPCMQueue.mutex);
         pPCMBuffer->state = DISP_WAIT;
-        ADispPCMQueue.Queue->push_back(pPCMBuffer);
+        ADispPCMQueue.Queue.push_back(pPCMBuffer);
         SDL_UnlockMutex(ADispPCMQueue.mutex);
     }
 }
@@ -317,28 +324,45 @@ AudioRefreshThread::AudioRefreshThread() {
 AudioRefreshThread::~AudioRefreshThread() {
     SDL_CloseAudio();//Close SDL
     
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
-        if (!PCMBuffers[i].bufferAddr) {
-            av_free((void *)PCMBuffers[i].bufferAddr);
-            PCMBuffers[i].bufferAddr = NULL;
+    std::list<PCMBuffer *>::iterator item = ADispPCMQueue.Queue.begin();
+    for(; item != ADispPCMQueue.Queue.end(); )
+    {
+        std::list<PCMBuffer *>::iterator item_e = item++;
+        if(*item_e)
+        {
+            if(NULL != (*item_e)->bufferAddr)
+            {
+                av_free((void *)(*item_e)->bufferAddr);
+                (*item_e)->bufferAddr = NULL;
+            }
+            (*item_e)->state = DISP_NONE;
+            (*item_e)->bufferSize = 0;
+            (*item_e)->pts = -1;
         }
-        PCMBuffers[i].state = DISP_NONE;
-        PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+        ADispPCMQueue.Queue.erase(item_e);
     }
+    ADispPCMQueue.Queue.clear();
 }
 
 void AudioRefreshThread::deinit() {
-    ADispPCMQueue.Queue->clear();
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
-        if (!PCMBuffers[i].bufferAddr) {
-            av_free((void *)PCMBuffers[i].bufferAddr);
-            PCMBuffers[i].bufferAddr = NULL;
+    std::list<PCMBuffer *>::iterator item = ADispPCMQueue.Queue.begin();
+    for(; item != ADispPCMQueue.Queue.end(); )
+    {
+        std::list<PCMBuffer *>::iterator item_e = item++;
+        if(*item_e)
+        {
+            if(NULL != (*item_e)->bufferAddr)
+            {
+                av_free((void *)(*item_e)->bufferAddr);
+                (*item_e)->bufferAddr = NULL;
+            }
+            (*item_e)->state = DISP_NONE;
+            (*item_e)->bufferSize = 0;
+            (*item_e)->pts = -1;
         }
-        PCMBuffers[i].state = DISP_NONE;
-        PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+        ADispPCMQueue.Queue.erase(item_e);
     }
+    ADispPCMQueue.Queue.clear();
 }
 
 

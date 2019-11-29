@@ -32,6 +32,8 @@ public:
     void run();
     void start();
     void stop();
+    void close();
+    void flush();
     int get_audio_frame(AVFrame *frame);
     int decoder_decode_frame(const AVPacket *AudioPkt, AVFrame *frame);
     int queue_audio(AVFrame *src_frame, double pts, double duration, int64_t pos, int serial);
@@ -40,7 +42,6 @@ public:
 private:
     static AudioDecodeThread *p_Decoder;
     static SDL_mutex *mutex;
-
     PlayerContext *pPlayerContext;
     int needStop;
 };

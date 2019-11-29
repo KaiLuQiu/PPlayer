@@ -35,11 +35,10 @@ typedef struct stPCMBuffer_T {
     int64_t bufferSize;
     int64_t pts;
     PCMBufferState_e state;
-} PCMBuffer_t;
+} PCMBuffer;
 
 typedef struct DispPCMQueue_T {
     DispPCMQueue_T() {
-        Queue = NULL;
         rindex = 0;
         windex = 0;
         notUseNum = 0;
@@ -47,15 +46,31 @@ typedef struct DispPCMQueue_T {
         mutex = SDL_CreateMutex();
     }
     ~DispPCMQueue_T() {
-        Queue = NULL;
-        SAFE_DELETE_ARRAY(Queue);
+        std::list<PCMBuffer *>::iterator item = Queue.begin();
+        for(; item != Queue.end(); )
+        {
+            std::list<PCMBuffer *>::iterator item_e = item++;
+            if(*item_e)
+            {
+                if(NULL != (*item_e)->bufferAddr)
+                {
+                    av_free((void *)(*item_e)->bufferAddr);
+                    (*item_e)->bufferAddr = NULL;
+                }
+                (*item_e)->state = DISP_NONE;
+                (*item_e)->bufferSize = 0;
+                (*item_e)->pts = -1;
+            }
+            Queue.erase(item_e);
+        }
+        Queue.clear();
         rindex = 0;
         windex = 0;
         notUseNum = 0;
         size = 0;
         SDL_DestroyMutex(mutex);
     }
-    std::list<PCMBuffer_t *> *Queue;
+    std::list<PCMBuffer *> Queue;
     int rindex;
     int windex;
     int notUseNum;
@@ -91,16 +106,15 @@ public:
 private:
     static void audio_callback(void *udata, unsigned char *stream, int len);
     Frame *GetOneValidFrame();
-    PCMBuffer_t *GetOneValidPCMBuffer();
+    PCMBuffer *GetOneValidPCMBuffer();
 private:
     static AudioRefreshThread *p_AudioOut;
     static SDL_mutex *mutex;
     PlayerContext *pPlayerContext;
-    PCMBuffer_t PCMBuffers[FRAME_QUEUE_SIZE];
+    PCMBuffer PCMBuffers[FRAME_QUEUE_SIZE];
     DispPCMQueue ADispPCMQueue;
     int needStop;
 };
-
 
 NS_MEDIA_END
 

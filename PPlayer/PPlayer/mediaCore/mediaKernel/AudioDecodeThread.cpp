@@ -193,5 +193,9 @@ void AudioDecodeThread::stop()
     needStop = 1;
 }
 
+void AudioDecodeThread::close()
+{
+    
+}
 
 NS_MEDIA_END

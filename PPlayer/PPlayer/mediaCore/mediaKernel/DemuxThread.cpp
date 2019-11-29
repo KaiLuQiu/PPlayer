@@ -26,6 +26,7 @@ DemuxThread::DemuxThread()
 
 DemuxThread::~DemuxThread()
 {
+    
 }
 
 void DemuxThread::init(PlayerContext *playerContext)

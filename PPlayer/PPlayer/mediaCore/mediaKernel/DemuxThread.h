@@ -16,8 +16,7 @@ NS_MEDIA_BEGIN
 // 15M
 #define MAX_SIZE (15 * 512 *1024)
 
-class DemuxThread : public std::thread
-{
+class DemuxThread : public std::thread {
 public:
     static DemuxThread* getIntanse() {
         if(NULL == pDemuxer) {
@@ -32,7 +31,8 @@ public:
         }
         return pDemuxer;
     }
-    static double av_q2d(AVRational a){
+    
+    static double av_q2d(AVRational a) {
         return a.num / (double) a.den;
     }
     
@@ -64,7 +64,6 @@ private:
 
     int duration = AV_NOPTS_VALUE;
     int start_time = AV_NOPTS_VALUE;
-
     // 流seek的方式有by byte也有by time
     int seek_by_bytes;
 };

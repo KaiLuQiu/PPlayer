@@ -15,11 +15,13 @@
 #include <stdlib.h>
 
 extern "C"{
-#include<libavformat/avformat.h>
-#include<libswscale/swscale.h>
-#include<libswresample/swresample.h>
-#include<libavutil/rational.h>
-#include<libavutil/time.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
+#include <libavutil/rational.h>
+#include <libavutil/time.h>
+#include <libavutil/samplefmt.h>
+
 }
 
 #include <SDL_mutex.h>

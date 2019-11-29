@@ -64,7 +64,9 @@ void PPlayer::prepare()
 
 bool PPlayer::start()
 {
-    VideoRefreshThread::getIntanse()->start();
+//    VideoRefreshThread::getIntanse()->start();
+    AudioRefreshThread::getIntanse()->start();
+
     return true;
 }
 

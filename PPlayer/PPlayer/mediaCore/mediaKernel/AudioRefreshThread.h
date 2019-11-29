@@ -18,21 +18,17 @@ NS_MEDIA_BEGIN
 #define MAX_AUDIO_FRAME_SIZE 192000
 
 
-typedef enum
-{
+typedef enum {
     DISP_NONE,
     DISP_WAIT,
     DISP_DONE
 } PCMBufferState_e;
 
-typedef struct stPCMBuffer_T
-{
-    stPCMBuffer_T()
-    {
+typedef struct stPCMBuffer_T {
+    stPCMBuffer_T() {
         bufferAddr = NULL;
     }
-    ~stPCMBuffer_T()
-    {
+    ~stPCMBuffer_T() {
         SAFE_DELETE(bufferAddr);
     }
     char *bufferAddr;
@@ -41,8 +37,34 @@ typedef struct stPCMBuffer_T
     PCMBufferState_e state;
 } PCMBuffer_t;
 
-class AudioRefreshThread : public std::thread
-{
+typedef struct DispPCMQueue_T {
+    DispPCMQueue_T() {
+        Queue = NULL;
+        rindex = 0;
+        windex = 0;
+        notUseNum = 0;
+        size = 0;
+        mutex = SDL_CreateMutex();
+    }
+    ~DispPCMQueue_T() {
+        Queue = NULL;
+        SAFE_DELETE_ARRAY(Queue);
+        rindex = 0;
+        windex = 0;
+        notUseNum = 0;
+        size = 0;
+        SDL_DestroyMutex(mutex);
+    }
+    std::list<PCMBuffer_t *> *Queue;
+    int rindex;
+    int windex;
+    int notUseNum;
+    int size;
+    SDL_mutex *mutex;
+} DispPCMQueue;
+
+
+class AudioRefreshThread : public std::thread {
 public:
     static AudioRefreshThread* getIntanse() {
         if(NULL == p_AudioOut) {
@@ -68,12 +90,15 @@ public:
     int bFirstFrame;
 private:
     static void audio_callback(void *udata, unsigned char *stream, int len);
+    Frame *GetOneValidFrame();
+    PCMBuffer_t *GetOneValidPCMBuffer();
+private:
     static AudioRefreshThread *p_AudioOut;
     static SDL_mutex *mutex;
     PlayerContext *pPlayerContext;
     PCMBuffer_t PCMBuffers[FRAME_QUEUE_SIZE];
+    DispPCMQueue ADispPCMQueue;
     int needStop;
-    PCMBuffer_t *GetOneValidPCMBuffer();
 };
 
 

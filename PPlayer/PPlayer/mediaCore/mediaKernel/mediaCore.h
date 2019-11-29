@@ -37,7 +37,10 @@ public:
     void Init(PlayerContext *p_PlayerContext);
     bool StreamOpen(std::string pUrl);
     int Decode(const AVPacket *pkt, AVFrame *frame);
-    int audioSwr(char *out, AVFrame* frame);
+    int audio_open();
+    int ResSampleInit(Frame* pFrame, int64_t dec_channel_layout);
+    SwrContext* getSwrContext();
+    int audioResample(char *out, int out_samples, AVFrame* frame);
 
 
     mediaCore();

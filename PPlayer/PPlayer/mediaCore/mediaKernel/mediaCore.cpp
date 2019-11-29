@@ -18,8 +18,8 @@ SDL_mutex *mediaCore::mutex = SDL_CreateMutex();      //类的静态指针需要
 mediaCore::mediaCore()
 {
     avFormatContext = NULL;
-    
-    av_register_all();      //挂载demuxer filter muxer decoder等
+    swr_ctx = NULL;
+    av_register_all();      // 挂载demuxer filter muxer decoder等
     avformat_network_init();
 }
 
@@ -174,6 +174,7 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
         p_PlayerContext->audioInfo.channel_layout = p_PlayerContext->audioDecoder->codecContext->channel_layout;
         p_PlayerContext->audioInfo.sample_rate = p_PlayerContext->audioDecoder->codecContext->sample_rate;
 
+        
     }
     return true;
 }
@@ -246,26 +247,73 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 
 
 
-int mediaCore::audioSwr(char *out, AVFrame* frame)
+int mediaCore::ResSampleInit(Frame* pFrame, int64_t dec_channel_layout)
 {
+    if(swr_ctx == NULL)
+    {
+        swr_ctx = swr_alloc();
+    }
+    // 释放之前的重采样对象
+    swr_free(&swr_ctx);
+    
+    int a = p_PlayerContext->audioInfoTarget.channel_layout;
+    int b = p_PlayerContext->audioInfoTarget.freq;
+    int c = p_PlayerContext->audioInfoTarget.channels;
+    int d = pFrame->frame->format;
+    int e = pFrame->frame->sample_rate;
+    
+    // 对音频转上下文设置参数信息
+    // 使用pFrame(源)和p_PlayerContext->audioInfoTarget(目标)中的音频参数来设置swr_ctx
+    swr_ctx = swr_alloc_set_opts(NULL, p_PlayerContext->audioInfoTarget.channel_layout, p_PlayerContext->audioInfoTarget.fmt,
+                       p_PlayerContext->audioInfoTarget.freq, dec_channel_layout, (AVSampleFormat)pFrame->frame->format, pFrame->frame->sample_rate,
+                       0, NULL);
+
+    if (!swr_ctx || swr_init(swr_ctx) < 0) {
+        av_log(NULL, AV_LOG_ERROR,
+               "Cannot create sample rate converter for conversion of %d Hz %s %d channels to %d Hz %s %d channels!\n",
+               pFrame->frame->sample_rate, av_get_sample_fmt_name((AVSampleFormat)pFrame->frame->format), pFrame->frame->channels,
+               p_PlayerContext->audioInfoTarget.freq, av_get_sample_fmt_name(p_PlayerContext->audioInfoTarget.fmt), p_PlayerContext->audioInfoTarget.channels);
+        swr_free(&swr_ctx);
+        return -1;
+    }
+    
+    // 跟新audioInfo的信息
+    // 使用pFrame中的参数更新p_PlayerContext->audioInfo，第一次更新后后面基本不用执行此if分支了，因为一个音频流中各frame通用参数一样
+    p_PlayerContext->audioInfo.channel_layout = dec_channel_layout;
+    p_PlayerContext->audioInfo.channels       = pFrame->frame->channels;
+    p_PlayerContext->audioInfo.freq = pFrame->frame->sample_rate;
+    p_PlayerContext->audioInfo.fmt = (AVSampleFormat)pFrame->frame->format;
+    return 1;
+}
+
+SwrContext* mediaCore::getSwrContext()
+{
+    return swr_ctx;
+}
+
+int mediaCore::audioResample(char *out, int out_samples, AVFrame* frame)
+{
+    int resampled_data_size;
+    
     if (!p_PlayerContext->ic || !frame || !out)
     {
         return 0;
     }
-    AVCodecContext *ctx = p_PlayerContext->ic->streams[p_PlayerContext->audioStreamIndex]->codec;
-
-    if (swr_ctx == NULL)
+    
+    const uint8_t **in = (const uint8_t **)frame->extended_data;
+    
+    uint8_t *data[1];
+    data[0] = (uint8_t *)out;
+    // 音频重采样：返回值是重采样后得到的音频数据中单个声道的样本数
+    int len = swr_convert(swr_ctx, data, out_samples, in, frame->nb_samples);
+    if (len < 0)
     {
-        // 创建音频转码上下文
-        swr_ctx = swr_alloc();
-        // 对音频转上下文设置参数信息
-        swr_alloc_set_opts(swr_ctx, p_PlayerContext->audioInfoTarget.channel_layout, AV_SAMPLE_FMT_S16,
-                           p_PlayerContext->audioInfoTarget.sample_rate, p_PlayerContext->audioInfoTarget.channels, p_PlayerContext->audioInfoTarget.fmt, p_PlayerContext->audioInfoTarget.sample_rate,
-                           0, 0);
-        // 音视频转码上下文
-        swr_init(swr_ctx);
+        return 0;
     }
-
-    return 1;
+    
+    // 重采样返回的一帧音频数据大小(以字节为单位)
+    resampled_data_size = len * p_PlayerContext->audioInfoTarget.channels * av_get_bytes_per_sample(p_PlayerContext->audioInfoTarget.fmt);
+    return resampled_data_size;
+    
 }
 NS_MEDIA_END

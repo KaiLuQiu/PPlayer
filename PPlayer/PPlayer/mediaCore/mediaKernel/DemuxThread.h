@@ -18,6 +18,9 @@ NS_MEDIA_BEGIN
 
 class DemuxThread : public std::thread {
 public:
+    /*
+     * demux线程的单例模式：饿汉模式
+     */
     static DemuxThread* getIntanse() {
         if(NULL == pDemuxer) {
             SDL_LockMutex(mutex);
@@ -32,17 +35,41 @@ public:
         return pDemuxer;
     }
     
+    /*
+     * demux线程的单例模式：饿汉模式
+     */
     static double av_q2d(AVRational a) {
         return a.num / (double) a.den;
     }
     
+    /*
+     * demux线程的初始化过程
+     */
     void init(PlayerContext *playerContext);
+    
+    /*
+     * demux线程主要运行的代码
+     */
     void run();
-    void seek();
+    
+    /*
+     * 开启demuxer过程
+     */
     void start();
+    
+    /*
+     * 结束demuxer过程
+     */
     void stop();
+    
+    /*
+     * 冲刷demuxer，将parse出来的包进行重刷掉
+     */
     void flush();
 
+    /*
+     * 设置seek的方式
+     */
     void setSeekType(int type);
 
     virtual ~DemuxThread();

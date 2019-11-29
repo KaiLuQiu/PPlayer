@@ -27,6 +27,9 @@ enum FrameState{
 class VideoRefreshThread : public std::thread
 {
 public:
+    /*
+     * Video输出线程的单例模式：饿汉模式
+     */
     static VideoRefreshThread *getIntanse()  // 饿汉模式
     {
         if(NULL == p_VideoOut) {
@@ -41,18 +44,65 @@ public:
         }
         return p_VideoOut;
     }
+    
+    /*
+     * Video输出线程的初始化过程
+     */
     void init(PlayerContext *playerContext);
+    
+    /*
+     * Video输出线程的初始化过程
+     */
     void start();
+    
+    /*
+     * Video输出线程的主要运行代码
+     */
     void run();
+    
+    /*
+     * 停止输出
+     */
     void stop();
+    
+    /*
+     * 是否需要AVSync
+     */
     int NeedAVSync();
+    
+    /*
+     * 计算当前现实这笔的pts和下一笔的pts的差值
+     */
     double vp_duration(Frame *vp, Frame *nextvp);
+    
+    /*
+     * 是否要保留这一帧
+     */
     int DecideKeepFrame(int need_av_sync, int64_t pts);
+    
+    /*
+     * 计算late值
+     */
     int64_t CalcSyncLate(int64_t pts);
+    
+    /*
+     * 计算late值
+     */
     double compute_target_delay(double delay);
     
+    /*
+     * 渲染过程
+     */
     void video_image_display(Frame *vp);
+    
+    /*
+     * cp frame中yuv数据
+     */
     void copyYUVFrameData(uint8_t *src, uint8_t *dst, int linesize, int width, int height);
+    
+    /*
+     * 设置viewb以便渲染
+     */
     void setView(void *view);
 
     VideoRefreshThread();

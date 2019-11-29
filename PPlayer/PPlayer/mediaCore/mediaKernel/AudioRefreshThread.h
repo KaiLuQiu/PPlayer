@@ -81,6 +81,9 @@ typedef struct DispPCMQueue_T {
 
 class AudioRefreshThread : public std::thread {
 public:
+    /*
+     * Audio输出现场的单例模式：饿汉模式
+     */
     static AudioRefreshThread* getIntanse() {
         if(NULL == p_AudioOut) {
             SDL_LockMutex(mutex);
@@ -95,17 +98,52 @@ public:
         return p_AudioOut;
     }
     AudioRefreshThread();
+    
+    /*
+     * Audio输出现场初始化过程
+     */
     int init(PlayerContext *pPlayer);
+    
+    /*
+     * 启动Audio输出
+     */
     void start();
+    
+    /*
+     * 重置Audio输出
+     */
     void deinit();
+    
+    /*
+     * audio输出的主要代码
+     */
     void run();
+    
+    /*
+     * 结束audio输出
+     */
     void stop();
+    
+    /*
+     * 重刷audio输出
+     */
     void flush();
     virtual ~AudioRefreshThread();
     int bFirstFrame;
 private:
+    /*
+     * SDL audio的callback
+     */
     static void audio_callback(void *udata, unsigned char *stream, int len);
+    
+    /*
+     * 获取一个有效的帧
+     */
     Frame *GetOneValidFrame();
+    
+    /*
+     * 获取一个可用的空PCM buffer
+     */
     PCMBuffer *GetOneValidPCMBuffer();
 private:
     static AudioRefreshThread *p_AudioOut;

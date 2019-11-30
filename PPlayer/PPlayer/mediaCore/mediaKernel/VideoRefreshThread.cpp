@@ -8,6 +8,8 @@
 #include "VideoRefreshThread.h"
 #include "FrameQueueFunc.h"
 #include <math.h>
+#include "AvSyncClock.h"
+
 NS_MEDIA_BEGIN
 SDL_mutex *VideoRefreshThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
 VideoRefreshThread* VideoRefreshThread::p_VideoOut = nullptr;
@@ -17,6 +19,7 @@ VideoRefreshThread::VideoRefreshThread()
     pPlayerContext = NULL;
     bVideoFreeRun = 0;
     needStop = 0;
+    framedrop = -1;
 
 }
 
@@ -48,8 +51,42 @@ int VideoRefreshThread::NeedAVSync()  // 在不考虑其他case的情况下都�
     return 1;
 }
 
-/* compute nominal last_duration */
-double VideoRefreshThread::vp_duration(Frame *vp, Frame *nextvp) {  // 计算当前现实这笔的pts和下一笔的pts的差值，如果duration 满足如下几种情况，则使用包的duration， 否则使用差值duration
+
+void VideoRefreshThread::update_video_pts(double pts, int64_t pos, int serial)
+{
+    AvSyncClock::set_clock(&pPlayerContext->VideoClock, pts, serial);
+}
+
+double VideoRefreshThread::compute_target_delay(double delay)
+{
+    double sync_threshold, diff = 0;
+
+    // 计算video的时钟和audio时钟的差值
+    diff = AvSyncClock::get_clock(&pPlayerContext->VideoClock) - AvSyncClock::get_master_clock(pPlayerContext);
+
+    /* skip or repeat frame. We take into account the
+       delay to compute the threshold. I still don't know
+       if it is the best guess */
+    sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
+    if (!isnan(diff) && fabs(diff) < pPlayerContext->max_frame_duration) {
+        // 如果当前落后audio 则应该丢帧
+        if (diff <= -sync_threshold)
+            delay = FFMAX(0, delay + diff);
+        // 如果超前应该等待更久的时间
+        else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD)
+            delay = delay + diff;
+        else if (diff >= sync_threshold)
+            delay = 2 * delay;
+    }
+
+    printf("avsync: delay=%0.3f A-V=%f\n",
+            delay, -diff);
+
+    return delay;
+}
+
+// 计算当前现实这笔的pts和下一笔的pts的差值，如果duration 满足如下几种情况，则使用包的duration， 否则使用差值duration
+double VideoRefreshThread::vp_duration(Frame *vp, Frame *nextvp) {
     if (vp->serial == nextvp->serial) {
         double duration = nextvp->pts - vp->pts;
         if (isnan(duration) || duration <= 0 || duration > pPlayerContext->max_frame_duration)
@@ -85,37 +122,109 @@ void VideoRefreshThread::run()
         if (sync_status == FRAME_NEED_NEXT)
         {
             if (pPlayerContext->ic->streams[pPlayerContext->audioStreamIndex]) {
-                time = av_gettime_relative() / 1000000.0;       // 获取当前的时间
-                if (pPlayerContext->last_vis_time + rdftspeed < time) { // 如果
-//                    video_display(is);
+                // 获取当前的时间
+                time = av_gettime_relative() / 1000000.0;
+                // 如果
+                if (pPlayerContext->last_vis_time + rdftspeed < time) {
+                    printf("avsync: pPlayerContext->last_vis_time = %f time = %f\n", pPlayerContext->last_vis_time, time);
+//                    video_image_display();
                     pPlayerContext->last_vis_time = time;
                 }
                 remaining_time = FFMIN(remaining_time, pPlayerContext->last_vis_time + rdftspeed - time);
             }
-            if (pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex]) // 说明当前存在视频流
+            // 说明当前存在视频流
+            if (pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex])
             {
-                if (FrameQueueFunc::frame_queue_nb_remaining(&pPlayerContext->videoDecodeRingBuffer) == 0) // 判断decoder queue中是否存在数据
+                // 判断decoder queue中是否存在数据
+                if (FrameQueueFunc::frame_queue_nb_remaining(&pPlayerContext->videoDecodeRingBuffer) == 0)
                 {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));       // 如果没有则，delay
+                    // 如果没有则，delay
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     continue;
                 }
                 else
                 {
+                    double last_duration, duration, delay;
                     Frame *vp, *lastvp;
-                    lastvp = FrameQueueFunc::frame_queue_peek_last(&pPlayerContext->videoDecodeRingBuffer); // 从frameQueue中获取当前播放器显示的帧
-                    vp = FrameQueueFunc::frame_queue_peek(&pPlayerContext->videoDecodeRingBuffer); // 获取下一笔要现实的帧
-                    if (vp->serial != pPlayerContext->videoRingBuffer.serial) {  // 当前的这笔数据流不连续，则跳过获取下一笔
+                    // 从frameQueue中获取当前播放器显示的帧
+                    lastvp = FrameQueueFunc::frame_queue_peek_last(&pPlayerContext->videoDecodeRingBuffer);
+
+                    // 获取下一笔要现实的帧
+                    vp = FrameQueueFunc::frame_queue_peek(&pPlayerContext->videoDecodeRingBuffer);
+                    
+                    // 当前的这笔数据流不连续，则跳过获取下一笔
+                    if (vp->serial != pPlayerContext->videoRingBuffer.serial) {
                         FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
                         continue;
                     }
-                    if (lastvp->serial != vp->serial)   // 如果上一笔和当前的这笔serial不对，表示不连续。这边应该从新获取frame_timer的时间
+                    // 如果上一笔和当前的这笔serial不对，表示不连续。这边应该从新获取frame_timer的时间
+                    if (lastvp->serial != vp->serial)
                         pPlayerContext->frame_timer = av_gettime_relative() / 1000000.0; //
                     
                     need_av_sync = NeedAVSync();
+                    if (need_av_sync)
+                    {
+                        // 计算上笔应该持续的时间
+                        last_duration = vp_duration(lastvp, vp);
+                        printf("avsync: last_duration = %f\n", last_duration);
+
+                        // 根据当前的视频和主时钟（audio时钟）计算差值diff,根据不同情况调整delay值
+                        delay = compute_target_delay(last_duration);
+                        printf("avsync: delay = %f\n", delay);
+
+                        // 获取当前的系统时间值
+                        time = av_gettime_relative() / 1000000.0;
+                        // 如果上一帧显示时长未满，重复显示上一帧
+                        // 判断当前frame_timer + delay值是否大于当前的系统时间，如果大于计算剩余时间，继续显示当前帧
+                        if (time < pPlayerContext->frame_timer + delay) {
+                            remaining_time = FFMIN(pPlayerContext->frame_timer + delay - time, remaining_time);
+                            video_image_display();
+                            printf("avsync: show last frame remaining_time %f\n", remaining_time);
+//                            goto display;
+                        }
+                        
+                        // 更新frame_timer时间，frame_timer更新为上一帧结束时刻，也是当前帧开始时刻
+                        pPlayerContext->frame_timer += delay;
+                        // 如果delay大雨0
+                        if (delay > 0 && time - pPlayerContext->frame_timer > AV_SYNC_THRESHOLD_MAX)
+                            pPlayerContext->frame_timer = time;
+                        
+                        // 更新video clock
+                        SDL_LockMutex(pPlayerContext->videoDecodeRingBuffer.mutex);
+                        if (!isnan(vp->pts))
+                        {
+                            printf("avsync: update cur time = %f\n", vp->pts);
+                            update_video_pts(vp->pts, vp->pos, vp->serial);
+                        }
+                        SDL_UnlockMutex(pPlayerContext->videoDecodeRingBuffer.mutex);
+                        
+                        // 丢帧模式
+                        if (FrameQueueFunc::frame_queue_nb_remaining(&pPlayerContext->videoDecodeRingBuffer) > 1)
+                        {
+                            Frame *nextvp = FrameQueueFunc::frame_queue_peek_next(&pPlayerContext->videoDecodeRingBuffer);
+                            duration = vp_duration(vp, nextvp);
+                            // 如果当前时间要比这笔显示结束的时间（也就是下一笔开始时间）还大，则丢这一帧
+                            if(time > pPlayerContext->frame_timer + duration)
+                            {
+                                printf("avsync: drop video \n");
+
+//                                videoDecodeRingBuffer->frame_drops_late++;
+                                FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
+                                continue;
+                            }
+                        }
+                        
+                        // 则正常显示
+                        FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
+                        video_image_display();
+                    }
+                    else
+                    {
                     
-                    //暂时不做av sync操作，带音频模块的接入
-                    FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
-                    video_image_display(vp);
+                        //暂时不做av sync操作，带音频模块的接入
+                        FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
+                        video_image_display();
+                    }
                     
                 }
 
@@ -126,9 +235,9 @@ void VideoRefreshThread::run()
         
 }
 
-void VideoRefreshThread::video_image_display(Frame *vp)
+void VideoRefreshThread::video_image_display()
 {
-    
+    Frame *vp = FrameQueueFunc::frame_queue_peek_last(&pPlayerContext->videoDecodeRingBuffer);
     if (vp->frame) {
         
         enum AVPixelFormat sw_pix_fmt;

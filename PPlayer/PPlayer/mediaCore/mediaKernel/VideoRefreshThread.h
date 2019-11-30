@@ -71,10 +71,18 @@ public:
     int NeedAVSync();
     
     /*
+     * 更新video pts时间
+     */
+    void update_video_pts(double pts, int64_t pos, int serial);
+    /*
      * 计算当前现实这笔的pts和下一笔的pts的差值
      */
     double vp_duration(Frame *vp, Frame *nextvp);
     
+    /*
+     * 参考audio clock计算上一帧真正的持续时长
+     */
+    double compute_target_delay(double delay);
     /*
      * 是否要保留这一帧
      */
@@ -86,14 +94,9 @@ public:
     int64_t CalcSyncLate(int64_t pts);
     
     /*
-     * 计算late值
-     */
-    double compute_target_delay(double delay);
-    
-    /*
      * 渲染过程
      */
-    void video_image_display(Frame *vp);
+    void video_image_display();
     
     /*
      * cp frame中yuv数据
@@ -112,6 +115,7 @@ private:
     bool bVideoFreeRun;  // 不进行avsync，让video自由播放
     PlayerContext *pPlayerContext;
     bool needStop;
+    int framedrop;
     static VideoRefreshThread* p_VideoOut;
     static SDL_mutex *mutex;
 };

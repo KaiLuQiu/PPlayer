@@ -106,6 +106,9 @@ typedef struct PlayerContext_T {
     double frame_timer;         // 当前frame对应实际时间的累积值
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
     
+    Clock AudioClock;
+    Clock VideoClock;
+    
     DecoderContext *videoDecoder;       //
     DecoderContext *audioDecoder;       //
     

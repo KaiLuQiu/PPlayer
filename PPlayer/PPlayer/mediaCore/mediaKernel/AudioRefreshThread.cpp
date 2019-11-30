@@ -9,6 +9,8 @@
 #include "AudioRefreshThread.h"
 #include "FrameQueueFunc.h"
 #include "mediaCore.h"
+#include "math.h"
+#include "AvSyncClock.h"
 
 NS_MEDIA_BEGIN
 // 类的静态指针需要在此初始化
@@ -18,6 +20,9 @@ AudioRefreshThread* AudioRefreshThread::p_AudioOut = nullptr;
 void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int len) {
     AudioRefreshThread *pADT = (AudioRefreshThread *)udata;
     PCMBuffer * pPCMBuffer = NULL;
+    
+    int64_t audio_callback_time = av_gettime_relative();
+
     SDL_memset(stream, 0, len);
     SDL_LockMutex(pADT->ADispPCMQueue.mutex);
 
@@ -30,7 +35,15 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     pADT->ADispPCMQueue.Queue.pop_front();
     SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
 
+    // 更新audio clock的时间
+    if (!isnan(pADT->audio_clock))
+    {
+        AvSyncClock::set_clock_at(&pADT->pPlayerContext->AudioClock, pADT->audio_clock, pADT->audio_clock_serial, audio_callback_time / 1000000.0);
+        
+        printf("avsync: pADT->audio_clock = %f\n", pADT->audio_clock);
 
+    }
+    
     int buffer_size_read = 0;
     int buffer_size_index = 0;
     while (len > 0) {
@@ -46,6 +59,7 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
         len -= buffer_size_read;
         buffer_size_index += buffer_size_read;
     }
+    
     pPCMBuffer->state = DISP_DONE;
 }
 
@@ -305,7 +319,18 @@ void AudioRefreshThread::run() {
                 pPCMBuffer->state = DISP_DONE;
                 continue;
             }
+            // 更新pcmBuffer的pts时间
+            pPCMBuffer->pts = pFrame->frame->pts;
         }
+        
+        // 更新audio clock时钟
+        if (!isnan(pFrame->pts))
+            audio_clock = pFrame->pts + (double) pFrame->frame->nb_samples / pFrame->frame->sample_rate;
+        else
+            audio_clock = NAN;
+        
+        // 更新audio clock的序列号
+        audio_clock_serial = pFrame->serial;
         
         pPCMBuffer->pts = pFrame->frame->pts;
         SDL_LockMutex(ADispPCMQueue.mutex);

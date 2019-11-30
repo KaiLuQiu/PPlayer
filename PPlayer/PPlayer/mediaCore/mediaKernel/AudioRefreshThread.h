@@ -152,6 +152,9 @@ private:
     PCMBuffer PCMBuffers[FRAME_QUEUE_SIZE];
     DispPCMQueue ADispPCMQueue;
     int needStop;
+    double audio_clock;
+    int audio_clock_serial;
+    
 };
 
 NS_MEDIA_END

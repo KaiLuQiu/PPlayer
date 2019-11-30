@@ -10,6 +10,7 @@
 #include "VideoDecodeThread.h"
 #include "mediaCore.h"
 #include "FrameQueueFunc.h"
+#include "AvSyncClock.h"
 
 NS_MEDIA_BEGIN
 SDL_mutex *VideoDecodeThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
@@ -103,6 +104,9 @@ bool VideoDecodeThread::init(PlayerContext *playerContext)
         return false;
     }
         
+    // 初始化audio的同步时钟
+    AvSyncClock::init_clock(&pPlayerContext->VideoClock, &pPlayerContext->videoRingBuffer.serial);
+    
     return true;
 }
 

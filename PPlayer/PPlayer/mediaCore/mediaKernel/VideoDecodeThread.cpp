@@ -123,8 +123,11 @@ void VideoDecodeThread::run()
     needStop = 0;
     AVFrame *frame = av_frame_alloc();
     int serial = 0;
+    // 设置好time_base和frame_rate
+    AVRational tb = pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex]->time_base;
+    // 猜测视频帧率
     AVRational frame_rate = av_guess_frame_rate(pPlayerContext->ic, pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex], NULL);
-    
+
     while(!needStop)
     {
         if(!pPlayerContext)         // 判断上下文是否存在
@@ -157,8 +160,9 @@ void VideoDecodeThread::run()
             continue;
         }
         
-        int pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts;
-        int duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
+        // 将pts时间转成秒
+        double pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+        double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         int64_t pos = frame->pkt_pos;
         
         queue_picture(frame, pts, duration, pos, pPlayerContext->videoDecoder->pkt_serial);

@@ -91,7 +91,6 @@ int AudioDecodeThread::get_audio_frame(AVFrame *frame)
     }
     
     ret = decoder_decode_frame(&AudioPkt, frame);
-    
     if (ret < 0)
     {
         av_free_packet(&AudioPkt);
@@ -115,6 +114,7 @@ void AudioDecodeThread::run()
     needStop = 0;
     AVFrame *frame = av_frame_alloc();
     int serial = 0;
+    AVRational tb;
     
     while(!needStop)
     {
@@ -146,14 +146,13 @@ void AudioDecodeThread::run()
             }
             continue;
         }
-        
-        int pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts;
+        tb = (AVRational){1, frame->sample_rate};
+        double pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
         int64_t pos = frame->pkt_pos;
         int serial =  pPlayerContext->audioDecoder->pkt_serial;
-        int duration = av_q2d((AVRational){frame->nb_samples, frame->sample_rate});
+        double duration = av_q2d((AVRational){frame->nb_samples, frame->sample_rate});
        
         queue_audio(frame, pts, duration, pos, serial);
-
         av_frame_unref(frame);
     }
 }

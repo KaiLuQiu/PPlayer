@@ -10,6 +10,12 @@
 #include "PPlayer.h"
 NS_MEDIA_BEGIN
 
+// AVStream的time_base的单位是秒。每种格式的time_base的值不一样，根据采样来计算，比如mpeg的pts、dts都是以90kHz来采样的，所以采样间隔就是1/900000秒。
+// AVCodecContext的time_base单位同样为秒，不过精度没有AVStream->time_base高，大小为1/framerate。
+// AVPacket下的pts和dts以AVStream->time_base为单位(数值比较大)，时间间隔就是AVStream->time_base。
+// AVFrame里面的pkt_pts和pkt_dts是拷贝自AVPacket，同样以AVStream->time_base为单位；而pts是为输出(显示)准备的，以AVCodecContex->time_base为单位。
+// 输入流InputStream下的pts和dts以AV_TIME_BASE为单位(微秒)，至于为什么要转化为微秒，可能是为了避免使用浮点数.
+// 输出流OutputStream涉及音视频同步，结构和InputStream不同，暂时只作记录，不分析。
 
 
 mediaCore* mediaCore::p_Core = nullptr;
@@ -153,6 +159,9 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
     if(ret < 0)
         return false;
     
+    // 设置time_base信息
+    av_codec_set_pkt_timebase(p_PlayerContext->audioDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->time_base);
+    
     AVCodec *codec = avcodec_find_decoder(p_PlayerContext->audioDecoder->codecContext->codec_id);
     if (!codec)
     {
@@ -232,14 +241,30 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         return ret;
     }
     
-    AVRational playTimeBase;
-    playTimeBase.num = 1;
-    playTimeBase.den = 1000;
-    frame->pts = av_rescale_q_rnd(frame->pts,p_PlayerContext->ic->streams[pkt->stream_index]->time_base,
-                                  p_PlayerContext->ic->streams[pkt->stream_index]->codec->time_base, AV_ROUND_NEAR_INF);
-    frame->pts = av_rescale_q_rnd(frame->pts,p_PlayerContext->ic->streams[pkt->stream_index]->codec->time_base,
-                                  playTimeBase, AV_ROUND_NEAR_INF);
-    
+    if (pkt->stream_index == p_PlayerContext->audioStreamIndex)
+    {
+        // 获取audio的time_base
+        AVRational tb = (AVRational){1, frame->sample_rate};
+        if (frame->pts != AV_NOPTS_VALUE)
+        {
+            // 用于time_base之间转换,相当于执行a*b/c
+            frame->pts = av_rescale_q(frame->pts, av_codec_get_pkt_timebase(codecContext->codecContext), tb);
+        }
+        else if (codecContext->next_pts != AV_NOPTS_VALUE)
+        {
+            frame->pts = av_rescale_q(codecContext->next_pts, codecContext->next_pts_tb, tb);
+        }
+        if (frame->pts != AV_NOPTS_VALUE)
+        {
+            codecContext->next_pts = frame->pts + frame->nb_samples;
+            codecContext->next_pts_tb = tb;
+        }
+    }
+    else if(pkt->stream_index == p_PlayerContext->videoStreamIndex)
+    {
+        frame->pts = frame->best_effort_timestamp;
+    }
+
     SDL_UnlockMutex(mutex);
     
     return 1;

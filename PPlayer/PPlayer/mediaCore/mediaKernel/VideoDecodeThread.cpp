@@ -29,7 +29,7 @@ VideoDecodeThread::~VideoDecodeThread()
 int VideoDecodeThread::get_video_frame(AVFrame *frame)
 {
     int ret = 0;
-    
+    double dpts = NAN;
     AVPacket VideoPkt;
     
     ret = pPlayerContext->videoPacketQueueFunc->packet_queue_get(&pPlayerContext->videoRingBuffer, &VideoPkt, 1, &pPlayerContext->videoDecoder->pkt_serial);
@@ -68,15 +68,34 @@ int VideoDecodeThread::get_video_frame(AVFrame *frame)
     }
     
     ret = decoder_decode_frame(&VideoPkt, frame);
-    
     if (ret < 0)
     {
         av_free_packet(&VideoPkt);
         return ret;
     }
     
+    if (frame->pts != AV_NOPTS_VALUE)
+    {
+        dpts = av_q2d(pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex]->time_base) * frame->pts;
+    }
+    
     frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(pPlayerContext->ic, pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex], frame);
     
+    // 如果当前video 落后则丢帧处理
+    if (frame->pts != AV_NOPTS_VALUE)
+    {
+        double diff = dpts - AvSyncClock::get_master_clock(pPlayerContext);
+        
+        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD && diff < 0 &&
+            pPlayerContext->videoDecoder->pkt_serial == pPlayerContext->VideoClock.serial &&
+            pPlayerContext->videoRingBuffer.nb_packets)
+        {
+            av_frame_unref(frame);
+            av_free_packet(&VideoPkt);
+            return -1;
+        }
+    }
+
     av_free_packet(&VideoPkt);
     return ret;
 }
@@ -123,7 +142,7 @@ void VideoDecodeThread::run()
     needStop = 0;
     AVFrame *frame = av_frame_alloc();
     int serial = 0;
-    // 设置好time_base和frame_rate
+    // 设置好time_base
     AVRational tb = pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex]->time_base;
     // 猜测视频帧率
     AVRational frame_rate = av_guess_frame_rate(pPlayerContext->ic, pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex], NULL);
@@ -161,6 +180,8 @@ void VideoDecodeThread::run()
         }
         
         // 将pts时间转成秒
+        // timestamp(ffmpeg内部时间戳) = AV_TIME_BASE * time(秒)
+        // time(秒) = AV_TIME_BASE_Q * timestamp(ffmpeg内部时间戳)
         double pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
         double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         int64_t pos = frame->pkt_pos;

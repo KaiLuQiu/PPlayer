@@ -128,6 +128,7 @@ void VideoRefreshThread::run()
                 // 判断decoder queue中是否存在数据
                 if (FrameQueueFunc::frame_queue_nb_remaining(&pPlayerContext->videoDecodeRingBuffer) == 0)
                 {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
                     // 如果没有则，delay
                     continue;
                 }
@@ -160,7 +161,6 @@ void VideoRefreshThread::run()
 
                         // 根据当前的视频和主时钟（audio时钟）计算差值diff,根据不同情况调整delay值
                         delay = compute_target_delay(last_duration);
-                        printf("avsync: video refresh thread last duration = %f, delay = %f\n", last_duration, delay);
 
                         // 获取当前的系统时间值
                         time = av_gettime_relative() / 1000000.0;
@@ -197,8 +197,6 @@ void VideoRefreshThread::run()
                         {
                             Frame *nextvp = FrameQueueFunc::frame_queue_peek_next(&pPlayerContext->videoDecodeRingBuffer);
                             duration = vp_duration(vp, nextvp);
-                            printf("avsync: video refresh thread time %f, frame_timer %f, duration %f\n", time, pPlayerContext->frame_timer, duration);
-
                             // 如果当前时间要比这笔显示结束的时间（也就是下一笔开始时间）还大，则丢这一帧
                             if(time > pPlayerContext->frame_timer + duration)
                             {
@@ -212,6 +210,7 @@ void VideoRefreshThread::run()
                         // 则正常显示
                         FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
                         video_image_display();
+
                     }
                     else
                     {
@@ -246,7 +245,6 @@ void VideoRefreshThread::video_image_display()
             copyYUVFrameData(vp->frame->data[1], videoFrame->pixels[1], vp->frame->linesize[1], vp->frame->width / 2, vp->frame->height / 2);
             copyYUVFrameData(vp->frame->data[2], videoFrame->pixels[2], vp->frame->linesize[2], vp->frame->width / 2, vp->frame->height / 2);
             Render(glView, videoFrame);
-            
             free(videoFrame->pixels[0]);
             free(videoFrame->pixels[1]);
             free(videoFrame->pixels[2]);

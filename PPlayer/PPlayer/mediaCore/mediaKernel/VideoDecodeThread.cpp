@@ -166,9 +166,7 @@ void VideoDecodeThread::run()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
         }
-        
         int ret = get_video_frame(frame);
-        
         if(ret < 0)
         {
             if (AVERROR_EOF == ret)
@@ -186,9 +184,7 @@ void VideoDecodeThread::run()
         double pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
         double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         int64_t pos = frame->pkt_pos;
-        
         queue_picture(frame, pts, duration, pos, pPlayerContext->videoDecoder->pkt_serial);
-
         av_frame_unref(frame);
     }
 }

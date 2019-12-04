@@ -30,6 +30,9 @@ typedef struct PlayerContext_T {
         frame_timer = 0;
         max_frame_duration = 0.0;
 //        abort_request = 0;
+        frame_drops_late = 0;
+        frame_drops_early = 0;
+        
         videoPacketQueueFunc = NULL;
         audioPacketQueueFunc = NULL;
         videoDecoder = NULL;
@@ -61,6 +64,8 @@ typedef struct PlayerContext_T {
         last_vis_time = 0;
         frame_timer = 0;
         max_frame_duration = 0.0;
+        frame_drops_late = 0.0;
+        frame_drops_early = 0;
 
         SAFE_DELETE(videoPacketQueueFunc);
         SAFE_DELETE(audioPacketQueueFunc);
@@ -78,33 +83,35 @@ typedef struct PlayerContext_T {
         }
         eof = 0;
     }
-    AVInputFormat *avformat;        //
-    int seek_request;               // 标识一次SEEK请求
-    int seek_flags;                 // SEEK标志，诸如AVSEEK_FLAG_BYTE等
-    int64_t seek_pos;               // SEEK的目标位置(当前位置+增量)
-    int64_t seek_rel;               // 本次SEEK的位置增量
+    AVInputFormat *avformat;            //
+    int seek_request;                   // 标识一次SEEK请求
+    int seek_flags;                     // SEEK标志，诸如AVSEEK_FLAG_BYTE等
+    int64_t seek_pos;                   // SEEK的目标位置(当前位置+增量)
+    int64_t seek_rel;                   // 本次SEEK的位置增量
     AVFormatContext *ic;
-    PacketQueue videoRingBuffer;    // 存储demuxer出来的未解码的序列帧
-    PacketQueue audioRingBuffer;    // 存储demuxer出来的未解码的序列帧
-    PacketQueue subtilteRingBuffer; // 存储demuxer出来的未解码的序列帧
+    PacketQueue videoRingBuffer;        // 存储demuxer出来的未解码的序列帧
+    PacketQueue audioRingBuffer;        // 存储demuxer出来的未解码的序列帧
+    PacketQueue subtilteRingBuffer;     // 存储demuxer出来的未解码的序列帧
     
-    FrameQueue videoDecodeRingBuffer; // 存储decode出来的未解码的序列帧
-    FrameQueue audioDecodeRingBuffer; // 存储decode出来的未解码的序列帧
-    FrameQueue subDecodeRingBuffer;   // 存储decode出来的未解码的序列帧
+    FrameQueue videoDecodeRingBuffer;   // 存储decode出来的未解码的序列帧
+    FrameQueue audioDecodeRingBuffer;   // 存储decode出来的未解码的序列帧
+    FrameQueue subDecodeRingBuffer;     // 存储decode出来的未解码的序列帧
     
-    AudioInfo audioInfo;   // SDL支持的音频参数，重采样转换;
-    AudioInfo audioInfoTarget;   // SDL支持的音频参数，重采样转换;
-    int audio_hw_buf_size;          // SDL音频缓冲区大小(单位字节)
-    bool keep_last;                   //是否保存最后一帧
+    AudioInfo audioInfo;                // SDL支持的音频参数，重采样转换;
+    AudioInfo audioInfoTarget;          // SDL支持的音频参数，重采样转换;
+    int audio_hw_buf_size;              // SDL音频缓冲区大小(单位字节)
+    bool keep_last;                     //是否保存最后一帧
     int width;                      
     int height;
     int videoStreamIndex;
     int audioStreamIndex;
-    int eof;                    //是否parse到类eof标识位
-//    int abort_request;          //是否需要终端（当流close的时候可以终止）
-    int last_vis_time;          //上一次的播放时间
-    double frame_timer;         // 当前frame对应实际时间的累积值
-    double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
+    int eof;                            //是否parse到类eof标识位
+//    int abort_request;                //是否需要终端（当流close的时候可以终止）
+    int last_vis_time;                  //上一次的播放时间
+    double frame_timer;                 // 当前frame对应实际时间的累积值
+    double max_frame_duration;          // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
+    int frame_drops_late;               //记录drop video的数量
+    int frame_drops_early;
     
     Clock AudioClock;
     Clock VideoClock;

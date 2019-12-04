@@ -15,7 +15,7 @@ extern "C" {
 }
 NS_MEDIA_BEGIN
 
-//videoRefresh的状态
+// videoRefresh的状态
 enum FrameState{
     FRAME_NEED_NEXT,        // 表示可以获取下一帧
     FRAME_NEED_WAIT,        // 表示需要avsync 此帧需要等待
@@ -30,7 +30,7 @@ public:
     /*
      * Video输出线程的单例模式：饿汉模式
      */
-    static VideoRefreshThread *getIntanse()  // 饿汉模式
+    static VideoRefreshThread *getIntanse()
     {
         if(NULL == p_VideoOut) {
             SDL_LockMutex(mutex);

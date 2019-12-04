@@ -79,7 +79,7 @@ double VideoRefreshThread::compute_target_delay(double delay)
             delay = 2 * delay;
     }
 
-    printf("avsync: delay=%0.3f A-V=%f\n",
+    printf("avsync: video refresh thread delay=%0.3f A-V=%f\n",
             delay, -diff);
 
     return delay;
@@ -115,23 +115,13 @@ void VideoRefreshThread::run()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
         }
-        if (remaining_time > 0.0) {         // 目的是做音视频同步操作
+        // 目的是做音视频同步操作
+        if (remaining_time > 0.0) {
+            printf("avsync: video refresh thread need sleep time = %f\n", remaining_time);
             av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         }
-        
         if (sync_status == FRAME_NEED_NEXT)
         {
-            if (pPlayerContext->ic->streams[pPlayerContext->audioStreamIndex]) {
-                // 获取当前的时间
-                time = av_gettime_relative() / 1000000.0;
-                // 如果
-                if (pPlayerContext->last_vis_time + rdftspeed < time) {
-                    printf("avsync: pPlayerContext->last_vis_time = %f time = %f\n", pPlayerContext->last_vis_time, time);
-//                    video_image_display();
-                    pPlayerContext->last_vis_time = time;
-                }
-                remaining_time = FFMIN(remaining_time, pPlayerContext->last_vis_time + rdftspeed - time);
-            }
             // 说明当前存在视频流
             if (pPlayerContext->ic->streams[pPlayerContext->videoStreamIndex])
             {
@@ -139,7 +129,6 @@ void VideoRefreshThread::run()
                 if (FrameQueueFunc::frame_queue_nb_remaining(&pPlayerContext->videoDecodeRingBuffer) == 0)
                 {
                     // 如果没有则，delay
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     continue;
                 }
                 else
@@ -159,41 +148,46 @@ void VideoRefreshThread::run()
                     }
                     // 如果上一笔和当前的这笔serial不对，表示不连续。这边应该从新获取frame_timer的时间
                     if (lastvp->serial != vp->serial)
+                    {
                         pPlayerContext->frame_timer = av_gettime_relative() / 1000000.0; //
+                    }
                     
                     need_av_sync = NeedAVSync();
                     if (need_av_sync)
                     {
                         // 计算上笔应该持续的时间
                         last_duration = vp_duration(lastvp, vp);
-                        printf("avsync: last_duration = %f\n", last_duration);
 
                         // 根据当前的视频和主时钟（audio时钟）计算差值diff,根据不同情况调整delay值
                         delay = compute_target_delay(last_duration);
-                        printf("avsync: delay = %f\n", delay);
+                        printf("avsync: video refresh thread last duration = %f, delay = %f\n", last_duration, delay);
 
                         // 获取当前的系统时间值
                         time = av_gettime_relative() / 1000000.0;
+                        
                         // 如果上一帧显示时长未满，重复显示上一帧
                         // 判断当前frame_timer + delay值是否大于当前的系统时间，如果大于计算剩余时间，继续显示当前帧
                         if (time < pPlayerContext->frame_timer + delay) {
                             remaining_time = FFMIN(pPlayerContext->frame_timer + delay - time, remaining_time);
                             video_image_display();
-                            printf("avsync: show last frame remaining_time %f\n", remaining_time);
-//                            goto display;
+                            printf("avsync: video refresh thread show last frame time %f, frame_timer %f, delay %f\n", time, pPlayerContext->frame_timer, delay);
+                            continue;
                         }
                         
                         // 更新frame_timer时间，frame_timer更新为上一帧结束时刻，也是当前帧开始时刻
                         pPlayerContext->frame_timer += delay;
-                        // 如果delay大雨0
+                        // 如果delay大于0
                         if (delay > 0 && time - pPlayerContext->frame_timer > AV_SYNC_THRESHOLD_MAX)
+                        {
+                            printf("avsync: video refresh thread AV SYNC THRESHOLD MAX \n");
                             pPlayerContext->frame_timer = time;
+                        }
                         
                         // 更新video clock
                         SDL_LockMutex(pPlayerContext->videoDecodeRingBuffer.mutex);
                         if (!isnan(vp->pts))
                         {
-                            printf("avsync: update cur time = %f\n", vp->pts);
+                            printf("avsync: video refresh thread video Clock = %f\n", vp->pts);
                             update_video_pts(vp->pts, vp->pos, vp->serial);
                         }
                         SDL_UnlockMutex(pPlayerContext->videoDecodeRingBuffer.mutex);
@@ -203,33 +197,31 @@ void VideoRefreshThread::run()
                         {
                             Frame *nextvp = FrameQueueFunc::frame_queue_peek_next(&pPlayerContext->videoDecodeRingBuffer);
                             duration = vp_duration(vp, nextvp);
+                            printf("avsync: video refresh thread time %f, frame_timer %f, duration %f\n", time, pPlayerContext->frame_timer, duration);
+
                             // 如果当前时间要比这笔显示结束的时间（也就是下一笔开始时间）还大，则丢这一帧
                             if(time > pPlayerContext->frame_timer + duration)
                             {
-                                printf("avsync: drop video \n");
-
-//                                videoDecodeRingBuffer->frame_drops_late++;
+                                printf("avsync: video refresh thread drop video frame_drops_late %d\n", pPlayerContext->frame_drops_late);
+                                pPlayerContext->frame_drops_late++;
                                 FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
                                 continue;
                             }
                         }
                         
                         // 则正常显示
+                        printf("avsync: video refresh thread show video frame_num %d\n", frame_num);
                         FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
                         video_image_display();
                     }
                     else
                     {
-                    
                         //暂时不做av sync操作，带音频模块的接入
                         FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
                         video_image_display();
                     }
-                    
                 }
-
             }
-            
         }
     }
         
@@ -239,9 +231,7 @@ void VideoRefreshThread::video_image_display()
 {
     Frame *vp = FrameQueueFunc::frame_queue_peek_last(&pPlayerContext->videoDecodeRingBuffer);
     if (vp->frame) {
-        
         enum AVPixelFormat sw_pix_fmt;
-        
         sw_pix_fmt = pPlayerContext->videoDecoder->codecContext->sw_pix_fmt;
         if (sw_pix_fmt == AV_PIX_FMT_YUV420P || sw_pix_fmt == AV_PIX_FMT_YUVJ420P){
             VideoFrame *videoFrame = (VideoFrame *)malloc(sizeof(VideoFrame));
@@ -257,7 +247,6 @@ void VideoRefreshThread::video_image_display()
             copyYUVFrameData(vp->frame->data[1], videoFrame->pixels[1], vp->frame->linesize[1], vp->frame->width / 2, vp->frame->height / 2);
             copyYUVFrameData(vp->frame->data[2], videoFrame->pixels[2], vp->frame->linesize[2], vp->frame->width / 2, vp->frame->height / 2);
             Render(glView, videoFrame);
-            
             
             free(videoFrame->pixels[0]);
             free(videoFrame->pixels[1]);

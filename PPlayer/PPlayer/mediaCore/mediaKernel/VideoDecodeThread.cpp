@@ -35,7 +35,6 @@ int VideoDecodeThread::get_video_frame(AVFrame *frame)
     ret = pPlayerContext->videoPacketQueueFunc->packet_queue_get(&pPlayerContext->videoRingBuffer, &VideoPkt, 1, &pPlayerContext->videoDecoder->pkt_serial);
     if (ret < 0)
     {
-        
         return ret;
     }
     
@@ -90,6 +89,8 @@ int VideoDecodeThread::get_video_frame(AVFrame *frame)
             pPlayerContext->videoDecoder->pkt_serial == pPlayerContext->VideoClock.serial &&
             pPlayerContext->videoRingBuffer.nb_packets)
         {
+            printf("avsync:videodecode thread drop video, diff = %f, frame_drops_early %d\n", diff, pPlayerContext->frame_drops_early);
+            pPlayerContext->frame_drops_early++;
             av_frame_unref(frame);
             av_free_packet(&VideoPkt);
             return -1;

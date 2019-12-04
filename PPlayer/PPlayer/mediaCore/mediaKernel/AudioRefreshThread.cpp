@@ -39,9 +39,7 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     if (!isnan(pADT->audio_clock))
     {
         AvSyncClock::set_clock_at(&pADT->pPlayerContext->AudioClock, pADT->audio_clock, pADT->audio_clock_serial, audio_callback_time / 1000000.0);
-        
-        printf("avsync: pADT->audio_clock = %f\n", pADT->audio_clock);
-
+        printf("avsync: audio refresh thread audio Clock = %f\n", pADT->audio_clock);
     }
     
     int buffer_size_read = 0;
@@ -264,6 +262,8 @@ void AudioRefreshThread::run() {
     int64_t dec_channel_layout;
     int wanted_nb_samples;
     needStop = 0;
+    AVRational tb;
+
     while(!needStop) {
         if (!pPlayerContext) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -276,6 +276,8 @@ void AudioRefreshThread::run() {
         }
 
         pFrame = GetOneValidFrame();
+        
+
         if(NULL == pFrame) {
             continue;
         }

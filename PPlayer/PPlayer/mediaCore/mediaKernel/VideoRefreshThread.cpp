@@ -210,7 +210,6 @@ void VideoRefreshThread::run()
                         }
                         
                         // 则正常显示
-                        printf("avsync: video refresh thread show video frame_num %d\n", frame_num);
                         FrameQueueFunc::frame_queue_next(&pPlayerContext->videoDecodeRingBuffer);
                         video_image_display();
                     }

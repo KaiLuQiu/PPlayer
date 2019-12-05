@@ -154,6 +154,8 @@ private:
     int needStop;
     double audio_clock;
     int audio_clock_serial;
+    int audio_hw_buf_size;              // audio设置的hardWareSize大小
+
     
 };
 

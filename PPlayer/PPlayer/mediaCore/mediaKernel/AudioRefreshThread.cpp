@@ -38,7 +38,8 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     // 更新audio clock的时间
     if (!isnan(pADT->audio_clock))
     {
-        AvSyncClock::set_clock_at(&pADT->pPlayerContext->AudioClock, pADT->audio_clock, pADT->audio_clock_serial, audio_callback_time / 1000000.0);
+        // set_clock_at更新audclk时，audio_clock是当前audio_buf的显示结束时间(pts+duration)，由于audio driver本身会持有一小块缓冲区，典型地，会是两块交替使用，所以有2 * is->audio_hw_buf_size.
+        AvSyncClock::set_clock_at(&pADT->pPlayerContext->AudioClock, pADT->audio_clock - (double)(2 * pADT->audio_hw_buf_size) / pADT->pPlayerContext->audioInfoTarget.bytes_per_sec, pADT->audio_clock_serial, audio_callback_time / 1000000.0);
         printf("avsync: audio refresh thread audio Clock = %f\n", pADT->audio_clock);
     }
     
@@ -60,7 +61,6 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     
     pPCMBuffer->state = DISP_DONE;
 }
-
 
 int AudioRefreshThread::init(PlayerContext *pPlayer) {
     if (NULL == pPlayer)
@@ -119,6 +119,7 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
     wanted_spec.silence = 0;
     // SDL声音缓冲区尺寸，单位是单声道采样点尺寸x声道数
     // 一帧frame的大小
+//    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
     wanted_spec.samples = (pPlayerContext->audioInfo.frame_size ? pPlayerContext->audioInfo.frame_size : 1536);//ac-3 Dolby digital:1536
 //    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
     wanted_spec.callback = audio_callback;
@@ -179,6 +180,8 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
     
     // 播放audio
     SDL_PauseAudio(0);
+    // 输出设备的缓冲区大小，一般来说audio输出设备中有2两块buffer，进行交替渲染，所以说，在更新audio clock的时候，需要将这两块的buffer信息减去才是当当时最新播放的pts信息
+    audio_hw_buf_size = spec.size;
     return spec.size;
 }
 

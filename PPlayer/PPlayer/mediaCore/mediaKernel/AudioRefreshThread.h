@@ -31,7 +31,7 @@ typedef struct stPCMBuffer_T {
     ~stPCMBuffer_T() {
         SAFE_DELETE(bufferAddr);
     }
-    char *bufferAddr;
+    uint8_t *bufferAddr;
     int64_t bufferSize;
     int64_t pts;
     PCMBufferState_e state;

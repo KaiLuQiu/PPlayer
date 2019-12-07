@@ -24,6 +24,7 @@ extern "C"{
 
 }
 
+#include "SDL.h"
 #include <SDL_mutex.h>
 #include <SDL_thread.h>
 #include <SDL_timer.h>
@@ -148,23 +149,23 @@ typedef struct PacketQueue_T {
 typedef struct AudioInfo_T {
     AudioInfo_T()
     {
-        freq = -1;
-        channels = -1;
-        channel_layout = -1;
+        freq = 0;
+        channels = 0;
+        channel_layout = 0;
         fmt = AV_SAMPLE_FMT_NONE;
-        frame_size = -1;
-        bytes_per_sec = -1;
-        sample_rate = -1;
+        frame_size = 0;
+        bytes_per_sec = 0;
+        sample_rate = 0;
     }
     ~AudioInfo_T()
     {
-        freq = -1;
-        channels = -1;
-        channel_layout = -1;
+        freq = 0;
+        channels = 0;
+        channel_layout = 0;
         fmt = AV_SAMPLE_FMT_NONE;
-        frame_size = -1;
-        bytes_per_sec = -1;
-        sample_rate = -1;
+        frame_size = 0;
+        bytes_per_sec = 0;
+        sample_rate = 0;
     }
     int freq;
     int channels;

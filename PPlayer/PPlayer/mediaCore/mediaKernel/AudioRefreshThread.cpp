@@ -12,6 +12,7 @@
 #include "math.h"
 #include "AvSyncClock.h"
 
+
 NS_MEDIA_BEGIN
 // 类的静态指针需要在此初始化
 SDL_mutex *AudioRefreshThread::mutex = SDL_CreateMutex();
@@ -24,16 +25,7 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     int64_t audio_callback_time = av_gettime_relative();
 
     SDL_memset(stream, 0, len);
-    SDL_LockMutex(pADT->ADispPCMQueue.mutex);
-
-    if (pADT->ADispPCMQueue.Queue.empty()) {
-        SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
-        return;
-    }
-    
-    pPCMBuffer = pADT->ADispPCMQueue.Queue.front();
-    pADT->ADispPCMQueue.Queue.pop_front();
-    SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
+    printf("avsync: audio_callback len = %d\n", len);
 
     // 更新audio clock的时间
     if (!isnan(pADT->audio_clock))
@@ -46,6 +38,22 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     int buffer_size_read = 0;
     int buffer_size_index = 0;
     while (len > 0) {
+        // 如果buffer_size_index 大于bufferSize的大小的话，表明当前的这笔数据已经读完，需要读取下一笔数据了
+        // 此处代码我需要进行优化处理
+        if (pPCMBuffer == NULL || buffer_size_index >= pPCMBuffer->bufferSize) {
+            SDL_LockMutex(pADT->ADispPCMQueue.mutex);
+            if (pADT->ADispPCMQueue.Queue.empty()) {
+                SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
+                printf("avsync: no data\n");
+                break;
+            }
+            pPCMBuffer = pADT->ADispPCMQueue.Queue.front();
+            pADT->ADispPCMQueue.Queue.pop_front();
+            SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
+            printf("avsync: audio_callback buffer_size_read %d\n",pPCMBuffer->bufferSize);
+            buffer_size_index = 0;
+        }
+        
         buffer_size_read = pPCMBuffer->bufferSize - buffer_size_index;
         if (buffer_size_read > len) {
             buffer_size_read = len;
@@ -54,12 +62,12 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
             break;
         }
     
-        SDL_MixAudioFormat(stream, (const Uint8*)pPCMBuffer->bufferAddr + buffer_size_index, AUDIO_S16SYS, buffer_size_read, SDL_MIX_MAXVOLUME);
+        SDL_MixAudioFormat(stream,  (uint8_t*)pPCMBuffer->bufferAddr + buffer_size_index, AUDIO_S16SYS, buffer_size_read, 60);
         len -= buffer_size_read;
+        stream += buffer_size_read;
         buffer_size_index += buffer_size_read;
+        pPCMBuffer->state = DISP_DONE;
     }
-    
-    pPCMBuffer->state = DISP_DONE;
 }
 
 int AudioRefreshThread::init(PlayerContext *pPlayer) {
@@ -70,19 +78,20 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
     ADispPCMQueue.size = FRAME_QUEUE_SIZE + 1;
     // 初始化为PCMBuffers分配空间
     for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
-        PCMBuffers[i].bufferAddr = (char *)av_malloc(MAX_AUDIO_FRAME_SIZE * 2);
+        PCMBuffers[i].bufferAddr = (uint8_t *)av_malloc(MAX_AUDIO_FRAME_SIZE * 2);
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
         PCMBuffers[i].pts = -1;
     }
     
-    int64_t wanted_channel_layout = pPlayerContext->audioInfo.channel_layout ;
-    int wanted_nb_channels = pPlayerContext->audioInfo.channels ;
+    int64_t wanted_channel_layout = pPlayerContext->audioInfo.channel_layout;
+    int wanted_nb_channels = pPlayerContext->audioInfo.channels;
     int wanted_sample_rate = pPlayerContext->audioInfo.sample_rate;
     // 这边一定要设置为主线程运行，否则接下来SDL_Init就会fail
     // 设置期望的音频channel layout、nb_samples、sample_rate等参数
     SDL_SetMainReady();
     SDL_AudioSpec wanted_spec, spec;
+    
     const int next_nb_channels[] = {0, 0, 1, 6, 2, 6, 4, 6};
     const int next_sample_rates[] = {0, 44100, 48000, 96000, 192000};
     int next_sample_rate_idx = FF_ARRAY_ELEMS(next_sample_rates) - 1;
@@ -119,9 +128,8 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
     wanted_spec.silence = 0;
     // SDL声音缓冲区尺寸，单位是单声道采样点尺寸x声道数
     // 一帧frame的大小
-//    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
-    wanted_spec.samples = (pPlayerContext->audioInfo.frame_size ? pPlayerContext->audioInfo.frame_size : 1536);//ac-3 Dolby digital:1536
-//    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
+//    wanted_spec.samples = (pPlayerContext->audioInfo.frame_size ? pPlayerContext->audioInfo.frame_size : 1536);//ac-3 Dolby digital:1536
+    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
     wanted_spec.callback = audio_callback;
     // 提供给回调函数的参数
     // 打开音频设备并创建音频处理线程。期望的参数是wanted_spec，实际得到的硬件参数是spec
@@ -318,7 +326,7 @@ void AudioRefreshThread::run() {
             // 重采样输出参数：输出音频样本数(多加了256个样本)
             int out_count = (int64_t)pFrame->frame->nb_samples * pPlayerContext->audioInfoTarget.freq / pFrame->frame->sample_rate + 256;
             // 音频重采样
-            pPCMBuffer->bufferSize = mediaCore::getIntanse()->audioResample(pPCMBuffer->bufferAddr, out_count, pFrame->frame);
+            pPCMBuffer->bufferSize = mediaCore::getIntanse()->audioResample(&pPCMBuffer->bufferAddr, out_count, pFrame->frame);
             if (pPCMBuffer->bufferSize == 0) {
                 av_frame_unref(pFrame->frame);
                 pPCMBuffer->state = DISP_DONE;

@@ -73,7 +73,7 @@ public:
     /*
      * audio frame重采样
      */
-    int audioResample(char *out, int out_samples, AVFrame* frame);
+    int audioResample(uint8_t **out, int out_samples, AVFrame* frame);
 
     /*
      * 初始化，挂载demuxer filter muxer decoder等

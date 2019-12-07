@@ -316,7 +316,7 @@ SwrContext* mediaCore::getSwrContext()
     return swr_ctx;
 }
 
-int mediaCore::audioResample(char *out, int out_samples, AVFrame* frame)
+int mediaCore::audioResample(uint8_t **out, int out_samples, AVFrame* frame)
 {
     int resampled_data_size;
     
@@ -327,10 +327,10 @@ int mediaCore::audioResample(char *out, int out_samples, AVFrame* frame)
     
     const uint8_t **in = (const uint8_t **)frame->extended_data;
     
-    uint8_t *data[1];
-    data[0] = (uint8_t *)out;
+//    uint8_t *data[1];
+//    data[0] = (uint8_t *)out;
     // 音频重采样：返回值是重采样后得到的音频数据中单个声道的样本数
-    int len = swr_convert(swr_ctx, data, out_samples, in, frame->nb_samples);
+    int len = swr_convert(swr_ctx, out, out_samples, in, frame->nb_samples);
     if (len < 0)
     {
         return 0;

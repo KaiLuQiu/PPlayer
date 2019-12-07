@@ -155,7 +155,7 @@ private:
     double audio_clock;
     int audio_clock_serial;
     int audio_hw_buf_size;              // audio设置的hardWareSize大小
-
+    int buffer_size_index;              // 表示当前已经的读取的索引大小
     
 };
 

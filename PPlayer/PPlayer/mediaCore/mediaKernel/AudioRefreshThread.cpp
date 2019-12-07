@@ -19,62 +19,109 @@ SDL_mutex *AudioRefreshThread::mutex = SDL_CreateMutex();
 AudioRefreshThread* AudioRefreshThread::p_AudioOut = nullptr;
 
 void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int len) {
-    AudioRefreshThread *pADT = (AudioRefreshThread *)udata;
-    PCMBuffer * pPCMBuffer = NULL;
-    
+    AudioRefreshThread *pART = (AudioRefreshThread *)udata;
+    // 获取当前时间
     int64_t audio_callback_time = av_gettime_relative();
-
+    // 这步一定要有，否则声音会异常
     SDL_memset(stream, 0, len);
-    printf("avsync: audio_callback len = %d\n", len);
-
-    // 更新audio clock的时间
-    if (!isnan(pADT->audio_clock))
-    {
-        // set_clock_at更新audclk时，audio_clock是当前audio_buf的显示结束时间(pts+duration)，由于audio driver本身会持有一小块缓冲区，典型地，会是两块交替使用，所以有2 * is->audio_hw_buf_size.
-        AvSyncClock::set_clock_at(&pADT->pPlayerContext->AudioClock, pADT->audio_clock - (double)(2 * pADT->audio_hw_buf_size) / pADT->pPlayerContext->audioInfoTarget.bytes_per_sec, pADT->audio_clock_serial, audio_callback_time / 1000000.0);
-        printf("avsync: audio refresh thread audio Clock = %f\n", pADT->audio_clock);
+    // 表示获取当前这个队列列头的buffer
+    SDL_LockMutex(pART->ADispPCMQueue.mutex);
+    if (pART->ADispPCMQueue.Queue.empty()) {
+        SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+        printf("audio refresh thread: Not enough data!!!\n");
+        return;
     }
-    
+    // 从队列中获取一下笔可用buffer
+    PCMBuffer* pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+    // 如果读取到的为空的话，继续pop下一笔，容错处理
+    while (NULL == pPCMBuffer) {
+        // 首先将这笔从列头pop掉
+        pART->ADispPCMQueue.Queue.pop_front();
+        // 将当前的buffer size index 索引置为0
+        pART->buffer_size_index = 0;
+        // 将当前的buffer状态设置为已显示
+        pPCMBuffer->state = DISP_DONE;
+        if (!pART->ADispPCMQueue.Queue.empty()) {
+            pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+        } else {
+            break;
+        }
+    }
+    // 如果从队列中读取的pPCMBuffer都为空的话，直接返回吧
+    if (NULL == pPCMBuffer) {
+        printf("audio refresh thread: pPCMBuffer is null!!!\n");
+        return;
+    }
+    SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+
     int buffer_size_read = 0;
-    int buffer_size_index = 0;
     while (len > 0) {
         // 如果buffer_size_index 大于bufferSize的大小的话，表明当前的这笔数据已经读完，需要读取下一笔数据了
-        // 此处代码我需要进行优化处理
-        if (pPCMBuffer == NULL || buffer_size_index >= pPCMBuffer->bufferSize) {
-            SDL_LockMutex(pADT->ADispPCMQueue.mutex);
-            if (pADT->ADispPCMQueue.Queue.empty()) {
-                SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
-                printf("avsync: no data\n");
+        if (pART->buffer_size_index >= pPCMBuffer->bufferSize) {
+            SDL_LockMutex(pART->ADispPCMQueue.mutex);
+            // 首先将这笔从列头pop掉
+            pART->ADispPCMQueue.Queue.pop_front();
+            // 将当前的buffer size index 索引置为0
+            pART->buffer_size_index = 0;
+            // 将当前的buffer状态设置为已显示
+            pPCMBuffer->state = DISP_DONE;
+            // 如果当前的
+            if (pART->ADispPCMQueue.Queue.empty()) {
+                SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+                // 说明当前已经没有数据了，直接设置pPCMBuffer为空，让其直接返回
+                pPCMBuffer = NULL;
+                printf("audio refresh thread: Not enough data!!!\n");
                 break;
             }
-            pPCMBuffer = pADT->ADispPCMQueue.Queue.front();
-            pADT->ADispPCMQueue.Queue.pop_front();
-            SDL_UnlockMutex(pADT->ADispPCMQueue.mutex);
-            printf("avsync: audio_callback buffer_size_read %d\n",pPCMBuffer->bufferSize);
-            buffer_size_index = 0;
+            // 从队列中获取一笔新buffer数据
+            pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+            // 如果读取到的为空的话，继续pop下一笔，容错处理
+            while (NULL == pPCMBuffer) {
+               // 首先将这笔从列头pop掉
+               pART->ADispPCMQueue.Queue.pop_front();
+               pPCMBuffer->state = DISP_DONE;
+               if (!pART->ADispPCMQueue.Queue.empty()) {
+                   pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+               } else {
+                   break;
+               }
+           }
+            SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
         }
-        
-        buffer_size_read = pPCMBuffer->bufferSize - buffer_size_index;
+        if (NULL == pPCMBuffer) {
+            printf("audio refresh thread: pPCMBuffer is null!!!\n");
+            break;
+        }
+
+        buffer_size_read = pPCMBuffer->bufferSize - pART->buffer_size_index;
         if (buffer_size_read > len) {
             buffer_size_read = len;
         }
         if (buffer_size_read <= 0) {
             break;
         }
-    
-        SDL_MixAudioFormat(stream,  (uint8_t*)pPCMBuffer->bufferAddr + buffer_size_index, AUDIO_S16SYS, buffer_size_read, 60);
+
+        SDL_MixAudioFormat(stream,  (uint8_t*)pPCMBuffer->bufferAddr + pART->buffer_size_index, AUDIO_S16SYS, buffer_size_read, 60);
         len -= buffer_size_read;
         stream += buffer_size_read;
-        buffer_size_index += buffer_size_read;
-        pPCMBuffer->state = DISP_DONE;
+        pART->buffer_size_index += buffer_size_read;
+    }
+
+    // 更新audio clock的时间
+    if (!isnan(pART->audio_clock))
+    {
+        // set_clock_at更新audclk时，audio_clock是当前audio_buf的显示结束时间(pts+duration)，由于audio driver本身会持有一小块缓冲区，典型地，会是两块交替使用，所以有2 * is->audio_hw_buf_size.
+        AvSyncClock::set_clock_at(&pART->pPlayerContext->AudioClock, pART->audio_clock - (double)(2 * pART->audio_hw_buf_size) / pART->pPlayerContext->audioInfoTarget.bytes_per_sec, pART->audio_clock_serial, audio_callback_time / 1000000.0);
+        printf("avsync: audio refresh thread audio Clock = %f\n", pART->audio_clock);
     }
 }
+
 
 int AudioRefreshThread::init(PlayerContext *pPlayer) {
     if (NULL == pPlayer)
         return -1;
     pPlayerContext = pPlayer;
-    
+    buffer_size_index = 0;
     ADispPCMQueue.size = FRAME_QUEUE_SIZE + 1;
     // 初始化为PCMBuffers分配空间
     for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {

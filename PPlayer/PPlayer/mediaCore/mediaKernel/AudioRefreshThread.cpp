@@ -22,6 +22,7 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     AudioRefreshThread *pART = (AudioRefreshThread *)udata;
     // 获取当前时间
     int64_t audio_callback_time = av_gettime_relative();
+    int audio_write_buf_size = 0;
     // 这步一定要有，否则声音会异常
     SDL_memset(stream, 0, len);
     // 表示获取当前这个队列列头的buffer
@@ -106,14 +107,18 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
         stream += buffer_size_read;
         pART->buffer_size_index += buffer_size_read;
     }
-
+    
+    // 计算剩余量
+    if (NULL != pPCMBuffer)
+        audio_write_buf_size = pPCMBuffer->bufferSize - pART->buffer_size_index;
     // 更新audio clock的时间
     if (!isnan(pART->audio_clock))
     {
         // set_clock_at更新audclk时，audio_clock是当前audio_buf的显示结束时间(pts+duration)，由于audio driver本身会持有一小块缓冲区，典型地，会是两块交替使用，所以有2 * is->audio_hw_buf_size.
-        AvSyncClock::set_clock_at(&pART->pPlayerContext->AudioClock, pART->audio_clock - (double)(2 * pART->audio_hw_buf_size) / pART->pPlayerContext->audioInfoTarget.bytes_per_sec, pART->audio_clock_serial, audio_callback_time / 1000000.0);
+        AvSyncClock::set_clock_at(&pART->pPlayerContext->AudioClock, pART->audio_clock - (double)(2 * pART->audio_hw_buf_size + audio_write_buf_size) / pART->pPlayerContext->audioInfoTarget.bytes_per_sec, pART->audio_clock_serial, audio_callback_time / 1000000.0);
         printf("avsync: audio refresh thread audio Clock = %f\n", pART->audio_clock);
     }
+    
 }
 
 

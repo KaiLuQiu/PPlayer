@@ -15,14 +15,12 @@ NS_MEDIA_BEGIN
 
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
 #define SDL_AUDIO_MAX_CALLBACKS_PER_SEC 30
-#define MAX_AUDIO_FRAME_SIZE 192000
-
 
 typedef enum {
     DISP_NONE,
     DISP_WAIT,
     DISP_DONE
-} PCMBufferState_e;
+} PCMBufferState;
 
 typedef struct stPCMBuffer_T {
     stPCMBuffer_T() {
@@ -34,49 +32,21 @@ typedef struct stPCMBuffer_T {
     uint8_t *bufferAddr;
     int64_t bufferSize;
     int64_t pts;
-    PCMBufferState_e state;
+    PCMBufferState state;
 } PCMBuffer;
 
-typedef struct DispPCMQueue_T {
-    DispPCMQueue_T() {
-        rindex = 0;
-        windex = 0;
-        notUseNum = 0;
-        size = 0;
+typedef struct PCMBufferQueue_T {
+    PCMBufferQueue_T() {
         mutex = SDL_CreateMutex();
     }
-    ~DispPCMQueue_T() {
-        std::list<PCMBuffer *>::iterator item = Queue.begin();
-        for(; item != Queue.end(); )
-        {
-            std::list<PCMBuffer *>::iterator item_e = item++;
-            if(*item_e)
-            {
-                if(NULL != (*item_e)->bufferAddr)
-                {
-                    av_free((void *)(*item_e)->bufferAddr);
-                    (*item_e)->bufferAddr = NULL;
-                }
-                (*item_e)->state = DISP_NONE;
-                (*item_e)->bufferSize = 0;
-                (*item_e)->pts = -1;
-            }
-            Queue.erase(item_e);
-        }
+    ~PCMBufferQueue_T() {
+        // 这边可以直接clear,因为数据对象是指向PCMBuffers的元素的指针，而PCMBuffers是一个数组对象，里面的数据我会在对其进行统一释放
         Queue.clear();
-        rindex = 0;
-        windex = 0;
-        notUseNum = 0;
-        size = 0;
         SDL_DestroyMutex(mutex);
     }
     std::list<PCMBuffer *> Queue;
-    int rindex;
-    int windex;
-    int notUseNum;
-    int size;
     SDL_mutex *mutex;
-} DispPCMQueue;
+} PCMBufferQueue;
 
 
 class AudioRefreshThread : public std::thread {
@@ -150,7 +120,7 @@ private:
     static SDL_mutex *mutex;
     PlayerContext *pPlayerContext;
     PCMBuffer PCMBuffers[FRAME_QUEUE_SIZE];
-    DispPCMQueue ADispPCMQueue;
+    PCMBufferQueue pPCMBufferQueue;
     int needStop;
     double audio_clock;
     int audio_clock_serial;

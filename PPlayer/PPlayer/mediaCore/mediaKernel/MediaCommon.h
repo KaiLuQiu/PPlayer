@@ -43,6 +43,10 @@ extern "C"{
 #define SAMPLE_QUEUE_SIZE 18
 #define FRAME_QUEUE_SIZE FFMAX(SAMPLE_QUEUE_SIZE, FFMAX(VIDEO_PICTURE_QUEUE_SIZE, SUBPICTURE_QUEUE_SIZE))
 
+#ifndef SAFE_AV_FREE
+#define SAFE_AV_FREE(p) if(p != NULL) {av_free(p); p = NULL;}
+#endif
+
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(x) { if (x) delete (x); (x) = NULL; }    //定义安全释放函数
 #endif

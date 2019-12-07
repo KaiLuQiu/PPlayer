@@ -25,24 +25,24 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     // 这步一定要有，否则声音会异常
     SDL_memset(stream, 0, len);
     // 表示获取当前这个队列列头的buffer
-    SDL_LockMutex(pART->ADispPCMQueue.mutex);
-    if (pART->ADispPCMQueue.Queue.empty()) {
-        SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+    SDL_LockMutex(pART->pPCMBufferQueue.mutex);
+    if (pART->pPCMBufferQueue.Queue.empty()) {
+        SDL_UnlockMutex(pART->pPCMBufferQueue.mutex);
         printf("audio refresh thread: Not enough data!!!\n");
         return;
     }
     // 从队列中获取一下笔可用buffer
-    PCMBuffer* pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+    PCMBuffer* pPCMBuffer = pART->pPCMBufferQueue.Queue.front();
     // 如果读取到的为空的话，继续pop下一笔，容错处理
     while (NULL == pPCMBuffer) {
         // 首先将这笔从列头pop掉
-        pART->ADispPCMQueue.Queue.pop_front();
+        pART->pPCMBufferQueue.Queue.pop_front();
         // 将当前的buffer size index 索引置为0
         pART->buffer_size_index = 0;
         // 将当前的buffer状态设置为已显示
         pPCMBuffer->state = DISP_DONE;
-        if (!pART->ADispPCMQueue.Queue.empty()) {
-            pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+        if (!pART->pPCMBufferQueue.Queue.empty()) {
+            pPCMBuffer = pART->pPCMBufferQueue.Queue.front();
         } else {
             break;
         }
@@ -52,41 +52,41 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
         printf("audio refresh thread: pPCMBuffer is null!!!\n");
         return;
     }
-    SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+    SDL_UnlockMutex(pART->pPCMBufferQueue.mutex);
 
     int buffer_size_read = 0;
     while (len > 0) {
         // 如果buffer_size_index 大于bufferSize的大小的话，表明当前的这笔数据已经读完，需要读取下一笔数据了
         if (pART->buffer_size_index >= pPCMBuffer->bufferSize) {
-            SDL_LockMutex(pART->ADispPCMQueue.mutex);
+            SDL_LockMutex(pART->pPCMBufferQueue.mutex);
             // 首先将这笔从列头pop掉
-            pART->ADispPCMQueue.Queue.pop_front();
+            pART->pPCMBufferQueue.Queue.pop_front();
             // 将当前的buffer size index 索引置为0
             pART->buffer_size_index = 0;
             // 将当前的buffer状态设置为已显示
             pPCMBuffer->state = DISP_DONE;
             // 如果当前的
-            if (pART->ADispPCMQueue.Queue.empty()) {
-                SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+            if (pART->pPCMBufferQueue.Queue.empty()) {
+                SDL_UnlockMutex(pART->pPCMBufferQueue.mutex);
                 // 说明当前已经没有数据了，直接设置pPCMBuffer为空，让其直接返回
                 pPCMBuffer = NULL;
                 printf("audio refresh thread: Not enough data!!!\n");
                 break;
             }
             // 从队列中获取一笔新buffer数据
-            pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+            pPCMBuffer = pART->pPCMBufferQueue.Queue.front();
             // 如果读取到的为空的话，继续pop下一笔，容错处理
             while (NULL == pPCMBuffer) {
                // 首先将这笔从列头pop掉
-               pART->ADispPCMQueue.Queue.pop_front();
+               pART->pPCMBufferQueue.Queue.pop_front();
                pPCMBuffer->state = DISP_DONE;
-               if (!pART->ADispPCMQueue.Queue.empty()) {
-                   pPCMBuffer = pART->ADispPCMQueue.Queue.front();
+               if (!pART->pPCMBufferQueue.Queue.empty()) {
+                   pPCMBuffer = pART->pPCMBufferQueue.Queue.front();
                } else {
                    break;
                }
            }
-            SDL_UnlockMutex(pART->ADispPCMQueue.mutex);
+            SDL_UnlockMutex(pART->pPCMBufferQueue.mutex);
         }
         if (NULL == pPCMBuffer) {
             printf("audio refresh thread: pPCMBuffer is null!!!\n");
@@ -122,10 +122,9 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
         return -1;
     pPlayerContext = pPlayer;
     buffer_size_index = 0;
-    ADispPCMQueue.size = FRAME_QUEUE_SIZE + 1;
     // 初始化为PCMBuffers分配空间
     for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
-        PCMBuffers[i].bufferAddr = (uint8_t *)av_malloc(MAX_AUDIO_FRAME_SIZE * 2);
+        PCMBuffers[i].bufferAddr = NULL;
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
         PCMBuffers[i].pts = -1;
@@ -253,12 +252,11 @@ PCMBuffer *AudioRefreshThread::GetOneValidPCMBuffer() {
     int i;
     
     for (i = 0; i < FRAME_QUEUE_SIZE; i++) {
-        if (PCMBuffers[i].state != DISP_WAIT && PCMBuffers[i].bufferAddr != NULL) {
+        if (PCMBuffers[i].state != DISP_WAIT) {
             pPCMBuffer = &PCMBuffers[i];
             break;
         }
     }
-    
     if (i == FRAME_QUEUE_SIZE) {
         return NULL;
     }
@@ -293,30 +291,18 @@ void AudioRefreshThread::stop() {
 }
 
 void AudioRefreshThread::flush() {
-    std::list<PCMBuffer *>::iterator item = ADispPCMQueue.Queue.begin();
-    for(; item != ADispPCMQueue.Queue.end(); )
+    pPCMBufferQueue.Queue.clear();
+    for (int i = 0; i < FRAME_QUEUE_SIZE; i++)
     {
-        std::list<PCMBuffer *>::iterator item_e = item++;
-        if(*item_e)
-        {
-            if(NULL != (*item_e)->bufferAddr)
-            {
-                av_free((void *)(*item_e)->bufferAddr);
-                (*item_e)->bufferAddr = NULL;
-            }
-            (*item_e)->state = DISP_NONE;
-            (*item_e)->bufferSize = 0;
-            (*item_e)->pts = -1;
-        }
-        ADispPCMQueue.Queue.erase(item_e);
+        PCMBuffers[i].state = DISP_NONE;
+        PCMBuffers[i].bufferSize = 0;
+        PCMBuffers[i].pts = -1;
     }
-    ADispPCMQueue.Queue.clear();
 }
 
 void AudioRefreshThread::run() {
     Frame *pFrame = NULL;
     PCMBuffer *pPCMBuffer = NULL;
-    int data_size = 0;
     int64_t dec_channel_layout;
     int wanted_nb_samples;
     needStop = 0;
@@ -334,16 +320,9 @@ void AudioRefreshThread::run() {
         }
 
         pFrame = GetOneValidFrame();
-        
-
         if(NULL == pFrame) {
             continue;
         }
-        
-        // 根据frame中指定的音频参数获取缓冲区的大小
-        data_size = av_samples_get_buffer_size(NULL, pFrame->frame->channels,
-                                               pFrame->frame->nb_samples,
-                                               (AVSampleFormat)pFrame->frame->format, 1);
 
         // 计算dec_channel_layout，用于确认是否需要重新初始化重采样
         // 获取声道布局
@@ -369,20 +348,47 @@ void AudioRefreshThread::run() {
         // 判断重采样器是否创建成功
         // 如果初始化了重采样，则对这一帧数据重采样输出
         if (mediaCore::getIntanse()->getSwrContext()) {
+            // 使用前先将之前的buffer内存给释放了
+            SAFE_AV_FREE(pPCMBuffer->bufferAddr);
             // 进行重采样过程
             // 重采样输出参数：输出音频样本数(多加了256个样本)
             int out_count = (int64_t)pFrame->frame->nb_samples * pPlayerContext->audioInfoTarget.freq / pFrame->frame->sample_rate + 256;
+            // 计算BufferSize
+            int out_size  = av_samples_get_buffer_size(NULL, pPlayerContext->audioInfoTarget.channels, out_count, pPlayerContext->audioInfoTarget.fmt, 0);
+            // new一块新的内存地址
+            pPCMBuffer->bufferAddr = (uint8_t *)av_malloc(out_size);
+            if (pPCMBuffer->bufferAddr == NULL) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                av_frame_unref(pFrame->frame);
+                continue;
+            }
             // 音频重采样
             pPCMBuffer->bufferSize = mediaCore::getIntanse()->audioResample(&pPCMBuffer->bufferAddr, out_count, pFrame->frame);
             if (pPCMBuffer->bufferSize == 0) {
                 av_frame_unref(pFrame->frame);
-                pPCMBuffer->state = DISP_DONE;
                 continue;
             }
-            // 更新pcmBuffer的pts时间
-            pPCMBuffer->pts = pFrame->frame->pts;
+        } else {
+            // 使用前先将之前的buffer内存给释放了
+            SAFE_AV_FREE(pPCMBuffer->bufferAddr);
+            // 计算BufferSize
+            // 根据frame中指定的音频参数获取缓冲区的大小
+            int data_size = av_samples_get_buffer_size(NULL, pFrame->frame->channels,
+                                                       pFrame->frame->nb_samples,
+                                                       (AVSampleFormat)pFrame->frame->format, 1);
+            // new一块新的内存地址
+            pPCMBuffer->bufferAddr = (uint8_t *)av_malloc(data_size);
+            if (pPCMBuffer->bufferAddr == NULL) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                av_frame_unref(pFrame->frame);
+                continue;
+            }
+            memcpy(pPCMBuffer->bufferAddr, pFrame->frame->data[0], data_size);
+            pPCMBuffer->bufferSize = data_size;
         }
         
+        // 更新pcmBuffer的pts时间
+        pPCMBuffer->pts = pFrame->frame->pts;
         // 更新audio clock时钟
         if (!isnan(pFrame->pts))
             audio_clock = pFrame->pts + (double) pFrame->frame->nb_samples / pFrame->frame->sample_rate;
@@ -391,12 +397,14 @@ void AudioRefreshThread::run() {
         
         // 更新audio clock的序列号
         audio_clock_serial = pFrame->serial;
-        
+
         pPCMBuffer->pts = pFrame->frame->pts;
-        SDL_LockMutex(ADispPCMQueue.mutex);
+        SDL_LockMutex(pPCMBufferQueue.mutex);
         pPCMBuffer->state = DISP_WAIT;
-        ADispPCMQueue.Queue.push_back(pPCMBuffer);
-        SDL_UnlockMutex(ADispPCMQueue.mutex);
+        pPCMBufferQueue.Queue.push_back(pPCMBuffer);
+        SDL_UnlockMutex(pPCMBufferQueue.mutex);
+        // frame引用计数减1
+        av_frame_unref(pFrame->frame);
     }
 }
 
@@ -408,46 +416,31 @@ AudioRefreshThread::AudioRefreshThread() {
 
 AudioRefreshThread::~AudioRefreshThread() {
     SDL_CloseAudio();//Close SDL
-    
-    std::list<PCMBuffer *>::iterator item = ADispPCMQueue.Queue.begin();
-    for(; item != ADispPCMQueue.Queue.end(); )
+    SDL_Quit();
+
+    pPCMBufferQueue.Queue.clear();
+    for (int i = 0; i < FRAME_QUEUE_SIZE; i++)
     {
-        std::list<PCMBuffer *>::iterator item_e = item++;
-        if(*item_e)
-        {
-            if(NULL != (*item_e)->bufferAddr)
-            {
-                av_free((void *)(*item_e)->bufferAddr);
-                (*item_e)->bufferAddr = NULL;
-            }
-            (*item_e)->state = DISP_NONE;
-            (*item_e)->bufferSize = 0;
-            (*item_e)->pts = -1;
-        }
-        ADispPCMQueue.Queue.erase(item_e);
+        SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
+        PCMBuffers[i].state = DISP_NONE;
+        PCMBuffers[i].bufferSize = 0;
+        PCMBuffers[i].pts = -1;
     }
-    ADispPCMQueue.Queue.clear();
 }
 
 void AudioRefreshThread::deinit() {
-    std::list<PCMBuffer *>::iterator item = ADispPCMQueue.Queue.begin();
-    for(; item != ADispPCMQueue.Queue.end(); )
+    
+    SDL_CloseAudio();//Close SDL
+    SDL_Quit();
+    
+    pPCMBufferQueue.Queue.clear();
+    for (int i = 0; i < FRAME_QUEUE_SIZE; i++)
     {
-        std::list<PCMBuffer *>::iterator item_e = item++;
-        if(*item_e)
-        {
-            if(NULL != (*item_e)->bufferAddr)
-            {
-                av_free((void *)(*item_e)->bufferAddr);
-                (*item_e)->bufferAddr = NULL;
-            }
-            (*item_e)->state = DISP_NONE;
-            (*item_e)->bufferSize = 0;
-            (*item_e)->pts = -1;
-        }
-        ADispPCMQueue.Queue.erase(item_e);
+        SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
+        PCMBuffers[i].state = DISP_NONE;
+        PCMBuffers[i].bufferSize = 0;
+        PCMBuffers[i].pts = -1;
     }
-    ADispPCMQueue.Queue.clear();
 }
 
 

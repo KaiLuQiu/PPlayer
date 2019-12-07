@@ -119,7 +119,7 @@ private:
     static AudioRefreshThread *p_AudioOut;
     static SDL_mutex *mutex;
     PlayerContext *pPlayerContext;
-    PCMBuffer PCMBuffers[FRAME_QUEUE_SIZE];
+    PCMBuffer PCMBuffers[PCM_QUEUE_SIZE];
     PCMBufferQueue pPCMBufferQueue;
     int needStop;
     double audio_clock;

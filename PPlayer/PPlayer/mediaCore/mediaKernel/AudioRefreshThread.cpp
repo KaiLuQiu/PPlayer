@@ -123,7 +123,7 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
     pPlayerContext = pPlayer;
     buffer_size_index = 0;
     // 初始化为PCMBuffers分配空间
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++) {
+    for (int i = 0; i < PCM_QUEUE_SIZE; i++) {
         PCMBuffers[i].bufferAddr = NULL;
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
@@ -251,13 +251,13 @@ PCMBuffer *AudioRefreshThread::GetOneValidPCMBuffer() {
     PCMBuffer *pPCMBuffer = NULL;
     int i;
     
-    for (i = 0; i < FRAME_QUEUE_SIZE; i++) {
+    for (i = 0; i < PCM_QUEUE_SIZE; i++) {
         if (PCMBuffers[i].state != DISP_WAIT) {
             pPCMBuffer = &PCMBuffers[i];
             break;
         }
     }
-    if (i == FRAME_QUEUE_SIZE) {
+    if (i == PCM_QUEUE_SIZE) {
         return NULL;
     }
     
@@ -292,7 +292,7 @@ void AudioRefreshThread::stop() {
 
 void AudioRefreshThread::flush() {
     pPCMBufferQueue.Queue.clear();
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++)
+    for (int i = 0; i < PCM_QUEUE_SIZE; i++)
     {
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
@@ -419,7 +419,7 @@ AudioRefreshThread::~AudioRefreshThread() {
     SDL_Quit();
 
     pPCMBufferQueue.Queue.clear();
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++)
+    for (int i = 0; i < PCM_QUEUE_SIZE; i++)
     {
         SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
         PCMBuffers[i].state = DISP_NONE;
@@ -434,7 +434,7 @@ void AudioRefreshThread::deinit() {
     SDL_Quit();
     
     pPCMBufferQueue.Queue.clear();
-    for (int i = 0; i < FRAME_QUEUE_SIZE; i++)
+    for (int i = 0; i < PCM_QUEUE_SIZE; i++)
     {
         SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
         PCMBuffers[i].state = DISP_NONE;

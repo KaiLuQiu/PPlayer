@@ -26,9 +26,7 @@
 }
 
 -(void) prepareAsync {
-    
     media::PPlayer::getInstance()->prepareAsync();
-    
 }
 
 -(void) setView:(void *)view
@@ -39,11 +37,10 @@
 
 -(void) start {
     media::PPlayer::getInstance()->start();
-
 }
 
--(void) pause {
-    
+-(void) pause:(Boolean)isPause {
+    media::PPlayer::getInstance()->pause(isPause);
 }
 
 -(void) stop {

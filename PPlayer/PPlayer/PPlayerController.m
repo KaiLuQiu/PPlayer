@@ -46,14 +46,20 @@
     [_pStartButton addTarget:self action:@selector(clickStartButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_pStartButton];
     
-    _pPauseButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    _pPauseButton.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
-    [_pPauseButton setTitle:@"暂停播放" forState:UIControlStateNormal];
-    [_pPauseButton setTitleColor:[UIColor colorWithRed:1 green:1 blue:1 alpha:1] forState:(UIControlState)UIControlStateNormal];
-    _pPauseButton.contentMode = UIViewContentModeCenter;
-    _pPauseButton.backgroundColor = [UIColor colorWithRed:0 green:1 blue:0 alpha:1];
-    [_pPauseButton addTarget:self action:@selector(clickPauseButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_pPauseButton];
+    _pText = [[UITextField alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pText.textColor = [UIColor redColor];
+    _pText.textAlignment = NSTextAlignmentCenter;
+    [_pText setText:@"正常播放:"];
+    [self.view addSubview:_pText];
+    
+    _pPauseSwitch = [[UISwitch alloc] init];
+    _pPauseSwitch.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
+    _pPauseSwitch.on = NO;
+    [_pPauseSwitch setOnTintColor:[UIColor orangeColor]];
+    [_pPauseSwitch setThumbTintColor:[UIColor blueColor]];
+    [_pPauseSwitch setTintColor:[UIColor greenColor]];
+    [_pPauseSwitch addTarget:self action:@selector(clickPauseSwitch:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:_pPauseSwitch];
     
     _pStopButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _pStopButton.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 26, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
@@ -80,11 +86,17 @@
     [_player start];
 }
 
-- (void)clickPauseButton:(id)sender {
-    if(self.pPauseButton == nil) {
+- (void)clickPauseSwitch:(UISwitch *)sw {
+    if(self.pPauseSwitch == nil) {
         return;
     }
-    [_player pause];
+    if (sw.on == YES) {
+        [_pText setText:@"暂停播放:"];
+        [_player pause:true];
+    } else {
+        [_pText setText:@"正常播放:"];
+        [_player pause:false];
+    }
 }
 
 - (void)clickStopButton:(id)sender {

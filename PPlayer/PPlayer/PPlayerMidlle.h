@@ -18,7 +18,7 @@
 
 -(void)start;
 
--(void)pause;
+-(void)pause:(Boolean)isPause;
 
 -(void)stop;
 

@@ -31,19 +31,14 @@ int message::message_queue(MessageCmd cmd)
     return true;
 }
 
-int message::message_dequeue(MessageCmd *cmd)
+void message::message_dequeue(MessageCmd &cmd)
 {
     mutex.lock();
     if (!messageQueue->empty()) {
-        *cmd = messageQueue->front();
+        cmd = messageQueue->front();
         messageQueue->pop_front();
     }
-    else {
-        mutex.unlock();
-        return false;
-    }
     mutex.unlock();
-    return true;
 }
 
 int message::message_cmd_size()

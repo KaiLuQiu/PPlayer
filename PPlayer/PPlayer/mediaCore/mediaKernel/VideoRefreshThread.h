@@ -108,12 +108,18 @@ public:
      */
     void setView(void *view);
 
+    /*
+     * 将msg指令入队列
+     */
+    bool queueMessage(MessageCmd msgInfo);
     VideoRefreshThread();
     virtual ~VideoRefreshThread();
 private:
     void *glView;
-    bool bVideoFreeRun;  // 不进行avsync，让video自由播放
+    bool bVideoFreeRun;                   // 不进行avsync，让video自由播放
     PlayerContext *pPlayerContext;
+    message *pMessageQueue;               // 当前的message信息
+    MessageCmd pCurMessage;               // 当前的播放状态
     bool needStop;
     int framedrop;
     static VideoRefreshThread* p_VideoOut;

@@ -104,6 +104,11 @@ public:
      * 重刷audio输出
      */
     void flush();
+    
+     /*
+      * 将msg指令入队列
+      */
+     bool queueMessage(MessageCmd msgInfo);
     virtual ~AudioRefreshThread();
     int bFirstFrame;
 private:
@@ -128,10 +133,13 @@ private:
     PCMBuffer PCMBuffers[PCM_QUEUE_SIZE];
     PCMBufferQueue pPCMBufferQueue;
     int needStop;
+    message *pMessageQueue;                     // 当前的message信息
+    MessageCmd pCurMessage;                     // 当前的播放状态
+
     double audio_clock;
     int audio_clock_serial;
-    int audio_hw_buf_size;              // audio设置的hardWareSize大小
-    int buffer_size_index;              // 表示当前已经的读取的索引大小
+    int audio_hw_buf_size;                      // audio设置的hardWareSize大小
+    int buffer_size_index;                      // 表示当前已经的读取的索引大小
     
 };
 

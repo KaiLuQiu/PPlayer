@@ -12,7 +12,6 @@
 #include "math.h"
 #include "AvSyncClock.h"
 
-
 NS_MEDIA_BEGIN
 // 类的静态指针需要在此初始化
 SDL_mutex *AudioRefreshThread::mutex = SDL_CreateMutex();
@@ -25,6 +24,10 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     int audio_write_buf_size = 0;
     // 这步一定要有，否则声音会异常
     SDL_memset(stream, 0, len);
+    // 如果当前的状态为pause状态则直接返回输出静音效果
+    if (pART->pCurMessage == MESSAGE_CMD_PAUSE) {
+        return;
+    }
     // 表示获取当前这个队列列头的buffer
     SDL_LockMutex(pART->pPCMBufferQueue.mutex);
     if (pART->pPCMBufferQueue.Queue.empty()) {
@@ -325,7 +328,17 @@ void AudioRefreshThread::run() {
     AVRational tb;
 
     while(!needStop) {
+        // 从消息队列中获取一个消息
+        if (pMessageQueue != NULL) {
+            pMessageQueue->message_dequeue(pCurMessage);
+        }
+        
         if (!pPlayerContext) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+        }
+        // 如果当前的进入pause状态则进入等待阶段
+        if (pCurMessage == MESSAGE_CMD_PAUSE) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
@@ -423,12 +436,17 @@ AudioRefreshThread::AudioRefreshThread() {
     pPlayerContext = NULL;
     bFirstFrame = 1;
     needStop = 0;
+    pMessageQueue = new message();
+    if (NULL == pMessageQueue) {
+        printf("message is NULL!!!");
+    }
+    pCurMessage = MESSAGE_CMD_NONE;
 }
 
 AudioRefreshThread::~AudioRefreshThread() {
     SDL_CloseAudio();//Close SDL
     SDL_Quit();
-
+    SAFE_DELETE(pMessageQueue);
     pPCMBufferQueue.Queue.clear();
     for (int i = 0; i < PCM_QUEUE_SIZE; i++)
     {
@@ -456,6 +474,16 @@ void AudioRefreshThread::deinit() {
         PCMBuffers[i].sample_rate = 0;
         PCMBuffers[i].nb_samples = 0;
     }
+}
+
+bool AudioRefreshThread::queueMessage(MessageCmd msgInfo)
+{
+    if (NULL == pMessageQueue) {
+        printf("message is NULL!!!");
+        return false;
+    }
+    pMessageQueue->message_queue(msgInfo);
+    return true;
 }
 
 

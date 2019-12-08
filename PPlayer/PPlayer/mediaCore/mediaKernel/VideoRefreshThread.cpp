@@ -20,12 +20,16 @@ VideoRefreshThread::VideoRefreshThread()
     bVideoFreeRun = 0;
     needStop = 0;
     framedrop = -1;
-
+    pMessageQueue = new message();
+    if (NULL == pMessageQueue) {
+        printf("message is NULL!!!");
+    }
+    pCurMessage = MESSAGE_CMD_NONE;
 }
 
 VideoRefreshThread::~VideoRefreshThread()
 {
-    
+    SAFE_DELETE(pMessageQueue);
 }
 
 void VideoRefreshThread::init(PlayerContext *playerContext)
@@ -110,11 +114,22 @@ void VideoRefreshThread::run()
     while (!needStop)
     {
         Frame *sp, *sp2;
+        // 从消息队列中获取一个消息
+        if (pMessageQueue != NULL) {
+            pMessageQueue->message_dequeue(pCurMessage);
+        }
+        
         if (!pPlayerContext)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
         }
+        // 如果当前的进入pause状态则进入等待阶段
+        if (pCurMessage == MESSAGE_CMD_PAUSE) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+        }
+
         // 目的是做音视频同步操作
         if (remaining_time > 0.0) {
             printf("avsync: video refresh thread need sleep time = %f\n", remaining_time);
@@ -264,9 +279,18 @@ void VideoRefreshThread::copyYUVFrameData(uint8_t *src, uint8_t *dst, int linesi
     }
 }
 
-
 void VideoRefreshThread::stop()
 {
     needStop = 1;
+}
+
+bool VideoRefreshThread::queueMessage(MessageCmd msgInfo)
+{
+    if (NULL == pMessageQueue) {
+        printf("message is NULL!!!");
+        return false;
+    }
+    pMessageQueue->message_queue(msgInfo);
+    return true;
 }
 NS_MEDIA_END

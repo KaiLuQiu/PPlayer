@@ -58,6 +58,20 @@ extern "C"{
 #define SAFE_FREE(p) if(p != NULL) {free(p); p = NULL;}
 #endif
 
+typedef enum
+{
+    PLAYER_STATE_NONE,
+    PLAYER_STATE_PAUSE,
+    PLAYER_STATE_RESUME,
+    PLAYER_STATE_SEEK,
+    PLAYER_STATE_START,
+    PLAYER_STATE_STOP,
+    PLAYER_STATE_FLUSH,
+    PLAYER_STATE_FORCE_EOF,
+    PLAYER_STATE_REINIT,
+}PlayerState;
+
+
 typedef struct Clock_T {
     Clock_T()
     {

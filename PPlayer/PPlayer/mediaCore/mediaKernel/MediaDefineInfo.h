@@ -9,6 +9,7 @@
 #define MediaDefineInfo_H
 #include "MediaCommon.h"
 #include "PacketQueueFunc.h"
+#include "messageQueue.hpp"
 
 NS_MEDIA_BEGIN
 
@@ -32,11 +33,13 @@ typedef struct PlayerContext_T {
 //        abort_request = 0;
         frame_drops_late = 0;
         frame_drops_early = 0;
+        playerState = PLAYER_STATE_NONE;
         
         videoPacketQueueFunc = NULL;
         audioPacketQueueFunc = NULL;
         videoDecoder = NULL;
         audioDecoder = NULL;
+        
         
         
         video_flush_pkt = new AVPacket();
@@ -66,6 +69,7 @@ typedef struct PlayerContext_T {
         max_frame_duration = 0.0;
         frame_drops_late = 0.0;
         frame_drops_early = 0;
+        playerState = PLAYER_STATE_NONE;
 
         SAFE_DELETE(videoPacketQueueFunc);
         SAFE_DELETE(audioPacketQueueFunc);
@@ -106,6 +110,8 @@ typedef struct PlayerContext_T {
     int videoStreamIndex;
     int audioStreamIndex;
     int eof;                            //是否parse到类eof标识位
+    PlayerState playerState;            // 记录当前播放状态
+
 //    int abort_request;                //是否需要终端（当流close的时候可以终止）
     int last_vis_time;                  //上一次的播放时间
     double frame_timer;                 // 当前frame对应实际时间的累积值

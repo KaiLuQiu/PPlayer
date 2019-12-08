@@ -72,8 +72,13 @@ public:
      */
     void setSeekType(int type);
 
+    /*
+     * 将msg指令入队列
+     */
+    bool queueMessage(MessageCmd msgInfo);
     virtual ~DemuxThread();
     DemuxThread();
+
 private:
     static SDL_mutex *mutex;
     static DemuxThread* pDemuxer;
@@ -85,6 +90,8 @@ private:
     PlayerContext *pPlayerContext;
     PacketQueueFunc *videoPackeQueueFunc;
     PacketQueueFunc *audioPackeQueueFunc;
+    // 当前的message信息
+    message *pMessageQueue;
 
     AVPacket* video_flush_pkt;
     AVPacket* audio_flush_pkt;

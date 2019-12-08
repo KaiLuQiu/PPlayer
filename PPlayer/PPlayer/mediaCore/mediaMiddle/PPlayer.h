@@ -19,7 +19,6 @@
 
 
 NS_MEDIA_BEGIN
-
 class PPlayer
 {
 public:
@@ -60,7 +59,7 @@ public:
     /*
      * 进入暂停状态
      */
-    bool pause();
+    bool pause(bool state);
     
     /*
      * 进行seek的过程

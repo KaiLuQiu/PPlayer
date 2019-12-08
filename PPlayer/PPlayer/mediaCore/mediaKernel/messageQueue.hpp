@@ -31,7 +31,7 @@ public:
     message();
     virtual ~message();
     int message_queue(MessageCmd cmd);
-    int message_dequeue(MessageCmd *cmd);
+    void message_dequeue(MessageCmd &cmd);
     int message_cmd_size();
     int message_is_empty();
 private:

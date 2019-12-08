@@ -22,11 +22,15 @@ DemuxThread::DemuxThread()
     pNeedStop = false;
     videoPackeQueueFunc = NULL;
     audioPackeQueueFunc = NULL;
+    pMessageQueue = new message();
+    if (NULL == pMessageQueue) {
+        printf("message is NULL!!!");
+    }
 }
 
 DemuxThread::~DemuxThread()
 {
-    
+    SAFE_DELETE(pMessageQueue);
 }
 
 void DemuxThread::init(PlayerContext *playerContext)
@@ -154,6 +158,16 @@ void DemuxThread::run()
 void DemuxThread::setSeekType(int type)
 {
     seek_by_bytes = type;
+}
+
+bool DemuxThread::queueMessage(MessageCmd msgInfo)
+{
+    if (NULL == pMessageQueue) {
+        printf("message is NULL!!!");
+        return false;
+    }
+    pMessageQueue->message_queue(msgInfo);
+    return true;
 }
 
 NS_MEDIA_END

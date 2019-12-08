@@ -7,6 +7,7 @@
 //
 
 #include "PPlayer.h"
+#include "AvSyncClock.h"
 NS_MEDIA_BEGIN
 
 PPlayer* PPlayer::p_Player = nullptr;
@@ -65,11 +66,35 @@ bool PPlayer::start()
 {
     VideoRefreshThread::getIntanse()->start();
     AudioRefreshThread::getIntanse()->start();
+    pPlayerContext->playerState = PLAYER_STATE_START;
     return true;
 }
 
-bool PPlayer::pause()
+bool PPlayer::pause(bool state)
 {
+    MessageCmd msgInfo;
+    // 暂停播放
+    if(true == state) {
+        msgInfo = MESSAGE_CMD_PAUSE;
+        VideoRefreshThread::getIntanse()->queueMessage(msgInfo);
+        AudioRefreshThread::getIntanse()->queueMessage(msgInfo);
+        DemuxThread::getIntanse()->queueMessage(msgInfo);
+        pPlayerContext->AudioClock.paused = 1;
+        pPlayerContext->VideoClock.paused = 1;
+        pPlayerContext->playerState = PLAYER_STATE_PAUSE;
+    }
+    else {
+        msgInfo = MESSAGE_CMD_NONE;
+        // 更新frame_timer;  因为暂停过程中系统时间是一直在走的，last_updated是暂停时刻的系统时间
+        pPlayerContext->frame_timer += av_gettime_relative() / 1000000.0 - pPlayerContext->VideoClock.last_updated;
+        AvSyncClock::set_clock(&pPlayerContext->VideoClock, AvSyncClock::get_clock(&pPlayerContext->VideoClock), pPlayerContext->VideoClock.serial);
+        VideoRefreshThread::getIntanse()->queueMessage(msgInfo);
+        AudioRefreshThread::getIntanse()->queueMessage(msgInfo);
+        DemuxThread::getIntanse()->queueMessage(msgInfo);
+        pPlayerContext->AudioClock.paused = 0;
+        pPlayerContext->VideoClock.paused = 0;
+        pPlayerContext->playerState = PLAYER_STATE_START;
+    }
     return true;
 }
 

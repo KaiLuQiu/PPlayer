@@ -27,6 +27,7 @@
 		365936EC23880DA300C98247 /* compileShaderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 365936E623880DA300C98247 /* compileShaderTool.m */; };
 		365936ED23880DA300C98247 /* mvp_vsh.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 365936E923880DA300C98247 /* mvp_vsh.glsl */; };
 		365936EE23880DA300C98247 /* YUV420P_fsh.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 365936EB23880DA300C98247 /* YUV420P_fsh.glsl */; };
+		365F1DF8239C9A2900202B26 /* messageQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365F1DF7239C9A2900202B26 /* messageQueue.cpp */; };
 		369BDCFF237FAE68001A9EBC /* MediaCommon.h in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEC237FAE68001A9EBC /* MediaCommon.h */; };
 		369BDD00237FAE68001A9EBC /* mediaCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEE237FAE68001A9EBC /* mediaCore.cpp */; };
 		369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */; };
@@ -183,6 +184,8 @@
 		365936E723880DA300C98247 /* compileShaderTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compileShaderTool.h; sourceTree = "<group>"; };
 		365936E923880DA300C98247 /* mvp_vsh.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mvp_vsh.glsl; sourceTree = "<group>"; };
 		365936EB23880DA300C98247 /* YUV420P_fsh.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = YUV420P_fsh.glsl; sourceTree = "<group>"; };
+		365F1DF6239C9A2900202B26 /* messageQueue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = messageQueue.hpp; sourceTree = "<group>"; };
+		365F1DF7239C9A2900202B26 /* messageQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = messageQueue.cpp; sourceTree = "<group>"; };
 		369BDCEA237FAE68001A9EBC /* AudioRefreshThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRefreshThread.h; sourceTree = "<group>"; };
 		369BDCEB237FAE68001A9EBC /* FrameQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameQueueFunc.h; sourceTree = "<group>"; };
 		369BDCEC237FAE68001A9EBC /* MediaCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaCommon.h; sourceTree = "<group>"; };
@@ -619,6 +622,8 @@
 				369BDCEB237FAE68001A9EBC /* FrameQueueFunc.h */,
 				369BDCF6237FAE68001A9EBC /* FrameQueueFunc.cpp */,
 				369BDCEC237FAE68001A9EBC /* MediaCommon.h */,
+				365F1DF7239C9A2900202B26 /* messageQueue.cpp */,
+				365F1DF6239C9A2900202B26 /* messageQueue.hpp */,
 				369BDCF1237FAE68001A9EBC /* MediaDefineInfo.h */,
 				369BDCED237FAE68001A9EBC /* DemuxThread.h */,
 				369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */,
@@ -1084,6 +1089,7 @@
 				369BDD08237FAE68001A9EBC /* PPlayer.cpp in Sources */,
 				3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */,
 				365936EC23880DA300C98247 /* compileShaderTool.m in Sources */,
+				365F1DF8239C9A2900202B26 /* messageQueue.cpp in Sources */,
 				369BDD04237FAE68001A9EBC /* FrameQueueFunc.cpp in Sources */,
 				642857D923766C45003DFEE5 /* PPlayerMidlle.mm in Sources */,
 				36C7A73D238C0C14003250C1 /* OpenGLView.m in Sources */,
@@ -1257,7 +1263,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = CWEB665WS6;
+				DEVELOPMENT_TEAM = 233YFHV8C6;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/PPlayer/FFmpeg-iOS/include",
 					"$(PROJECT_DIR)/PPlayer/SDL2/include",
@@ -1290,7 +1296,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = CWEB665WS6;
+				DEVELOPMENT_TEAM = 233YFHV8C6;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/PPlayer/FFmpeg-iOS/include",
 					"$(PROJECT_DIR)/PPlayer/SDL2/include",

@@ -12,6 +12,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PPlayerController : UIViewController
 
+#define SCREENWIDTH         ([UIScreen mainScreen].bounds.size.width)
+#define SCREENHEIGHT        ([UIScreen mainScreen].bounds.size.height)
+#define SCREENWIDTH_D40     (SCREENWIDTH / 40)
+#define SCREENHEIGHT_D40    (SCREENHEIGHT / 40)
+
+
+@property UIButton*         pStartButton;
+@property UIButton*         pPauseButton;
+@property UIButton*         pStopButton;
+
 @end
 
 NS_ASSUME_NONNULL_END

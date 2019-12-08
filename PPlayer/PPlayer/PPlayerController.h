@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIButton*         pStopButton;
 @property (nonatomic)         UITextField*      pText;
 @property (nonatomic)         UILabel*          pCurPos;
+@property (nonatomic)         UILabel*          pCurDuration;
 
 @end
 

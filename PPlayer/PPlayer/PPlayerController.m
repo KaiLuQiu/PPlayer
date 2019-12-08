@@ -54,6 +54,7 @@
     [_pText setText:@"正常播放:"];
     [self.view addSubview:_pText];
     
+    
     _pPauseSwitch = [[UISwitch alloc] init];
     _pPauseSwitch.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
     _pPauseSwitch.on = NO;
@@ -76,6 +77,11 @@
     _pCurPos.textAlignment = NSTextAlignmentCenter;
     [self.view addSubview:_pCurPos];
     
+    _pCurDuration = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 32, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pCurDuration.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pCurDuration];
+    
+    
     _player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
     [_player setView:(__bridge void *)(playerView)];
     [_player prepareAsync];
@@ -87,6 +93,9 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             float curPos = [_player getCurPos];
             _pCurPos.text = [NSString stringWithFormat:@"%f", curPos];
+            float duration = [_player getDuration];
+            _pCurDuration.text = [NSString stringWithFormat:@"%f", duration];
+
         });
     });
     dispatch_resume(_timer);

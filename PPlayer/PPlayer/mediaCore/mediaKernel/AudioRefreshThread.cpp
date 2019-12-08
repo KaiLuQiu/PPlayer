@@ -108,17 +108,22 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
         pART->buffer_size_index += buffer_size_read;
     }
     
-    // 计算剩余量
-    if (NULL != pPCMBuffer)
+    if (NULL != pPCMBuffer) {
+        // 计算剩余量
         audio_write_buf_size = pPCMBuffer->bufferSize - pART->buffer_size_index;
-    // 更新audio clock的时间
-    if (!isnan(pART->audio_clock))
-    {
-        // set_clock_at更新audclk时，audio_clock是当前audio_buf的显示结束时间(pts+duration)，由于audio driver本身会持有一小块缓冲区，典型地，会是两块交替使用，所以有2 * is->audio_hw_buf_size.
-        AvSyncClock::set_clock_at(&pART->pPlayerContext->AudioClock, pART->audio_clock - (double)(2 * pART->audio_hw_buf_size + audio_write_buf_size) / pART->pPlayerContext->audioInfoTarget.bytes_per_sec, pART->audio_clock_serial, audio_callback_time / 1000000.0);
-        printf("avsync: audio refresh thread audio Clock = %f\n", pART->audio_clock);
+        // 更新audio clock时钟
+        if (!isnan(pPCMBuffer->pts)) {
+            pART->audio_clock = pPCMBuffer->pts + (double) pPCMBuffer->nb_samples / pPCMBuffer->sample_rate;
+        }
+        else
+            pART->audio_clock = NAN;
+        // 更新audio clock的时间
+        if (!isnan(pART->audio_clock))
+        {
+            // set_clock_at更新audclk时，audio_clock是当前audio_buf的显示结束时间(pts+duration)，由于audio driver本身会持有一小块缓冲区，典型地，会是两块交替使用，所以有2 * is->audio_hw_buf_size.
+            AvSyncClock::set_clock_at(&pART->pPlayerContext->AudioClock, pART->audio_clock - (double)(2 * pART->audio_hw_buf_size + audio_write_buf_size) / pART->pPlayerContext->audioInfoTarget.bytes_per_sec, pART->audio_clock_serial, audio_callback_time / 1000000.0);
+        }
     }
-    
 }
 
 
@@ -127,12 +132,15 @@ int AudioRefreshThread::init(PlayerContext *pPlayer) {
         return -1;
     pPlayerContext = pPlayer;
     buffer_size_index = 0;
+    audio_clock = NAN;
     // 初始化为PCMBuffers分配空间
     for (int i = 0; i < PCM_QUEUE_SIZE; i++) {
         PCMBuffers[i].bufferAddr = NULL;
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+        PCMBuffers[i].pts = 0.0;
+        PCMBuffers[i].sample_rate = 0;
+        PCMBuffers[i].nb_samples = 0;
     }
     
     int64_t wanted_channel_layout = pPlayerContext->audioInfo.channel_layout;
@@ -299,9 +307,12 @@ void AudioRefreshThread::flush() {
     pPCMBufferQueue.Queue.clear();
     for (int i = 0; i < PCM_QUEUE_SIZE; i++)
     {
+        SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+        PCMBuffers[i].pts = 0.0;
+        PCMBuffers[i].sample_rate = 0;
+        PCMBuffers[i].nb_samples = 0;
     }
 }
 
@@ -392,20 +403,15 @@ void AudioRefreshThread::run() {
             pPCMBuffer->bufferSize = data_size;
         }
         
-        // 更新pcmBuffer的pts时间
-        pPCMBuffer->pts = pFrame->frame->pts;
-        // 更新audio clock时钟
-        if (!isnan(pFrame->pts))
-            audio_clock = pFrame->pts + (double) pFrame->frame->nb_samples / pFrame->frame->sample_rate;
-        else
-            audio_clock = NAN;
-        
+        // 更新pcmBuffer的pts sample_rate nb_samples信息
+        pPCMBuffer->pts = pFrame->pts;
+        pPCMBuffer->sample_rate = pFrame->frame->sample_rate;
+        pPCMBuffer->nb_samples = pFrame->frame->nb_samples;
+        pPCMBuffer->state = DISP_WAIT;
         // 更新audio clock的序列号
         audio_clock_serial = pFrame->serial;
 
-        pPCMBuffer->pts = pFrame->frame->pts;
         SDL_LockMutex(pPCMBufferQueue.mutex);
-        pPCMBuffer->state = DISP_WAIT;
         pPCMBufferQueue.Queue.push_back(pPCMBuffer);
         SDL_UnlockMutex(pPCMBufferQueue.mutex);
         // frame引用计数减1
@@ -429,7 +435,9 @@ AudioRefreshThread::~AudioRefreshThread() {
         SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+        PCMBuffers[i].pts = 0.0;
+        PCMBuffers[i].sample_rate = 0;
+        PCMBuffers[i].nb_samples = 0;
     }
 }
 
@@ -444,7 +452,9 @@ void AudioRefreshThread::deinit() {
         SAFE_AV_FREE(PCMBuffers[i].bufferAddr);
         PCMBuffers[i].state = DISP_NONE;
         PCMBuffers[i].bufferSize = 0;
-        PCMBuffers[i].pts = -1;
+        PCMBuffers[i].pts = 0.0;
+        PCMBuffers[i].sample_rate = 0;
+        PCMBuffers[i].nb_samples = 0;
     }
 }
 

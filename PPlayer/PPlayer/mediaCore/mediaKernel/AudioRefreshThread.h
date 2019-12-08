@@ -24,6 +24,10 @@ typedef enum {
 
 typedef struct stPCMBuffer_T {
     stPCMBuffer_T() {
+        sample_rate = 0;
+        nb_samples = 0;
+        pts = 0.0;
+        bufferSize = 0;
         bufferAddr = NULL;
     }
     ~stPCMBuffer_T() {
@@ -31,7 +35,9 @@ typedef struct stPCMBuffer_T {
     }
     uint8_t *bufferAddr;
     int64_t bufferSize;
-    int64_t pts;
+    double pts;
+    int nb_samples;
+    int sample_rate;
     PCMBufferState state;
 } PCMBuffer;
 

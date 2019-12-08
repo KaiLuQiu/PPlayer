@@ -30,7 +30,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSString* path = [self getFileFromMainbundleAbsolutePath:@"video/bboy.mp4"];
+    NSString* path = [self getFileFromMainbundleAbsolutePath:@"video/hiphop.mp4"];
     self.view.backgroundColor = [UIColor whiteColor];
     OpenGLView *playerView = [[OpenGLView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
     playerView.backgroundColor = [UIColor blackColor];

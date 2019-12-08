@@ -72,6 +72,7 @@
     
     _player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
     [_player setView:(__bridge void *)(playerView)];
+    [_player prepareAsync];
 }
 
 - (void)dealloc{
@@ -82,7 +83,6 @@
     if(self.pStartButton == nil) {
         return;
     }
-    [_player prepareAsync];
     [_player start];
 }
 

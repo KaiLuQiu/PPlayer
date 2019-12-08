@@ -36,11 +36,22 @@
 }
 
 -(void) start {
-    media::PPlayer::getInstance()->start();
+    PlayerState curState = media::PPlayer::getInstance()->getPlayerContext()->playerState;
+    // prepared状态后，才能正式播放
+    if(curState == PLAYER_STATE_PREPARED) {
+        media::PPlayer::getInstance()->start();
+    }
 }
 
 -(void) pause:(Boolean)isPause {
-    media::PPlayer::getInstance()->pause(isPause);
+    PlayerState curState = media::PPlayer::getInstance()->getPlayerContext()->playerState;
+    if (curState == PLAYER_STATE_START ||
+        curState == PLAYER_STATE_SEEK ||
+        curState == PLAYER_STATE_RESUME ||
+        curState == PLAYER_STATE_FLUSH ||
+        curState == PLAYER_STATE_PAUSE) {
+        media::PPlayer::getInstance()->pause(isPause);
+    }
 }
 
 -(void) stop {
@@ -58,5 +69,6 @@
 -(float)getSpeed {
     return 0.0;
 }
+
 
 @end

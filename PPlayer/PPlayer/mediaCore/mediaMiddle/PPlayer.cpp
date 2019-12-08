@@ -55,6 +55,8 @@ void PPlayer::prepareAsync()
         VideoDecodeThread::getIntanse()->start();
         AudioDecodeThread::getIntanse()->start();
     }
+    // 这边一般要render第一帧之后才能上发prepared消息
+    pPlayerContext->playerState = PLAYER_STATE_PREPARED;
 }
 
 void PPlayer::prepare()
@@ -64,9 +66,9 @@ void PPlayer::prepare()
 
 bool PPlayer::start()
 {
+    pPlayerContext->playerState = PLAYER_STATE_START;
     VideoRefreshThread::getIntanse()->start();
     AudioRefreshThread::getIntanse()->start();
-    pPlayerContext->playerState = PLAYER_STATE_START;
     return true;
 }
 

@@ -31,7 +31,7 @@ public:
             if(NULL == p_Player) {
                 p_Player = new (std::nothrow)PPlayer();
                 if(p_Player == NULL) {
-                    printf("PPlayer getInstance is NULL!");
+                    printf("PPlayer getInstance is NULL!\n");
                 }
             }
             SDL_UnlockMutex(mutex);

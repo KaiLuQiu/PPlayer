@@ -22,7 +22,7 @@ VideoRefreshThread::VideoRefreshThread()
     framedrop = -1;
     pMessageQueue = new message();
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!");
+        printf("message is NULL!!!\n");
     }
     pCurMessage = MESSAGE_CMD_NONE;
 }
@@ -287,7 +287,7 @@ void VideoRefreshThread::stop()
 bool VideoRefreshThread::queueMessage(MessageCmd msgInfo)
 {
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!");
+        printf("message is NULL!!!\n");
         return false;
     }
     pMessageQueue->message_queue(msgInfo);

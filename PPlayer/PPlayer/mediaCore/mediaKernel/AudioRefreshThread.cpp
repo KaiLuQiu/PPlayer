@@ -438,7 +438,7 @@ AudioRefreshThread::AudioRefreshThread() {
     needStop = 0;
     pMessageQueue = new message();
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!");
+        printf("message is NULL!!!\n");
     }
     pCurMessage = MESSAGE_CMD_NONE;
 }
@@ -479,7 +479,7 @@ void AudioRefreshThread::deinit() {
 bool AudioRefreshThread::queueMessage(MessageCmd msgInfo)
 {
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!");
+        printf("message is NULL!!!\n");
         return false;
     }
     pMessageQueue->message_queue(msgInfo);

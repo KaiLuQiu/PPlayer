@@ -24,7 +24,7 @@ public:
             if(NULL == p_Decoder) {
                 p_Decoder = new (std::nothrow)AudioDecodeThread();
                 if(p_Decoder == NULL) {
-                    printf("AudioDecodeThread getInstance is NULL!");
+                    printf("AudioDecodeThread getInstance is NULL!\n");
                 }
             }
             SDL_UnlockMutex(mutex);

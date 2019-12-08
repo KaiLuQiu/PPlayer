@@ -24,7 +24,7 @@ public:
             if(NULL == p_Core) {
                 p_Core = new (std::nothrow)mediaCore();
                 if(p_Core == NULL) {
-                    printf("mediaCore getInstance is NULL!");
+                    printf("mediaCore getInstance is NULL!\n");
                 }
             }
             SDL_UnlockMutex(mutex);

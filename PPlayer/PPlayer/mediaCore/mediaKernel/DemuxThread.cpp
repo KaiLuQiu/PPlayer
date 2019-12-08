@@ -24,7 +24,7 @@ DemuxThread::DemuxThread()
     audioPackeQueueFunc = NULL;
     pMessageQueue = new message();
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!");
+        printf("message is NULL!!!\n");
     }
 }
 
@@ -99,18 +99,18 @@ void DemuxThread::run()
         if(!pPlayerContext)             //表示当前的播放器上下文还没有准备好，可以先delay10ms
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            printf("pPlayerContext is NUll");
+            printf("pPlayerContext is NUll\n");
             continue;
         }
         if(videoPackeQueueFunc == NULL || audioPackeQueueFunc == NULL)
         {
-            printf("PackeQueueFunc is NUll");
+            printf("PackeQueueFunc is NUll\n");
             break;
         }
         if(videoRingBuffer->size + audioRingBuffer->size > MAX_SIZE)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            printf("ringbuffer is full");
+            printf("ringbuffer is full\n");
             continue;
         }
         

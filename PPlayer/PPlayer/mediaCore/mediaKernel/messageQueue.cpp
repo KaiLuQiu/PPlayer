@@ -11,7 +11,7 @@ message::message()
 {
     messageQueue = new std::list<MessageCmd>();
     if (messageQueue == NULL) {
-        printf("message Queue is NULL!!!");
+        printf("message Queue is NULL!!!\n");
     }
 }
 

@@ -48,7 +48,7 @@ bool mediaCore::StreamOpen(std::string pUrl)
     p_PlayerContext->ic = avformat_alloc_context();   //对AvFormat内存空间的申请
     if (!p_PlayerContext->ic)
     {
-        printf("avformat alloc fail/n");
+        printf("avformat alloc fail\n");
         return false;
     }
     //打开AvFormat
@@ -61,7 +61,7 @@ bool mediaCore::StreamOpen(std::string pUrl)
     err = avformat_find_stream_info(p_PlayerContext->ic, NULL);     //去parse流的相关信息
     if (err < 0) {
         
-        printf("avformat_find_stream_info  fail/n");
+        printf("avformat_find_stream_info  fail\n");
         return false;
     }
     

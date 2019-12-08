@@ -24,7 +24,7 @@ public:
             if(NULL == p_Decoder) {
                 p_Decoder = new (std::nothrow)VideoDecodeThread();
                 if(p_Decoder == NULL) {
-                    printf("VideoDecodeThread getInstance is NULL!");
+                    printf("VideoDecodeThread getInstance is NULL!\n");
                 }
             }
             SDL_UnlockMutex(mutex);

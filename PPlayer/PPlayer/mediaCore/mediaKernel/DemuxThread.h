@@ -27,7 +27,7 @@ public:
             if(NULL == pDemuxer) {
                 pDemuxer = new (std::nothrow)DemuxThread();
                 if(pDemuxer == NULL) {
-                    printf("DemuxThread getInstance is NULL!");
+                    printf("DemuxThread getInstance is NULL!\n");
                 }
             }
             SDL_UnlockMutex(mutex);

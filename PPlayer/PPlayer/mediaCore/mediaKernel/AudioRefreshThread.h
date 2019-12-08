@@ -66,7 +66,7 @@ public:
             if(NULL == p_AudioOut) {
                 p_AudioOut = new (std::nothrow)AudioRefreshThread();
                 if(p_AudioOut == NULL) {
-                    printf("AudioDecodeThread getInstance is NULL!");
+                    printf("AudioDecodeThread getInstance is NULL! \n");
                 }
             }
             SDL_UnlockMutex(mutex);

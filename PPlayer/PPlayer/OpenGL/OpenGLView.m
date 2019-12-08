@@ -129,7 +129,7 @@ static const GLfloat texcoords[8] = {
     if (link_status == GL_FALSE) {
         GLchar messages[256];
         glGetProgramInfoLog(program, sizeof(messages), 0, &messages[0]);
-        printf("%s", messages);
+        printf("%s\n", messages);
     }
     // 获取vertex shader中attribute变量的引用
     av4_position = glGetAttribLocation(program, "av4_position");

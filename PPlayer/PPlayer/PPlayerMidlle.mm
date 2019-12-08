@@ -58,8 +58,10 @@
     
 }
 
--(int64_t)getCurPos {
-    return 0;
+-(float)getCurPos {
+    float pos = (float)media::PPlayer::getInstance()->getCurPos() / 1000;
+    printf("cur pos %f\n", pos);
+    return pos;
 }
 
 -(void)setSpeed {
@@ -70,5 +72,8 @@
     return 0.0;
 }
 
+-(float)getDuration {
+   return (float)media::PPlayer::getInstance()->getDuration() / 1000;
+}
 
 @end

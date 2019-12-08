@@ -22,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain,nonatomic)  UISwitch*         pPauseSwitch;
 @property (nonatomic, strong) UIButton*         pStopButton;
 @property (nonatomic)         UITextField*      pText;
+@property (nonatomic)         UILabel*          pCurPos;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -125,9 +125,31 @@ bool PPlayer::setLoop(bool loop)
     return true;
 }
 
-int PPlayer::getCurPos()
+int64_t PPlayer::getCurPos()
 {
-    return 0;
+    PlayerContext* playerInfo = pPlayerContext;
+    if(playerInfo == NULL || playerInfo->ic == NULL)
+        return 0;
+
+    int64_t start_time = playerInfo->ic->start_time;
+    int64_t start_diff = 0;
+    
+   if (start_time > 0 && start_time != AV_NOPTS_VALUE)
+       start_diff = av_rescale(start_time, 1000, AV_TIME_BASE);
+   
+    int64_t pos = 0;
+    double pos_clock = AvSyncClock::get_master_clock(playerInfo);
+    if (isnan(pos_clock)) {
+        pos = av_rescale(playerInfo->seek_pos, 1000, AV_TIME_BASE);
+    } else {
+        pos = pos_clock * 1000;
+    }
+
+   if (pos < 0 || pos < start_diff)
+       return 0;
+
+   int64_t adjust_pos = pos - start_diff;
+   return (long)adjust_pos;
 }
 
 bool PPlayer::setSpeed()
@@ -138,6 +160,19 @@ bool PPlayer::setSpeed()
 float PPlayer::getSpeed()
 {
     return 0;
+}
+
+long PPlayer::getDuration()
+{
+    PlayerContext* playerInfo = pPlayerContext;
+
+     if (!playerInfo || !playerInfo->ic)
+        return 0;
+    int64_t duration = av_rescale(playerInfo->ic->duration, 1000, AV_TIME_BASE);
+    if (duration < 0)
+        return 0;
+    
+    return (long)duration;
 }
 
 NS_MEDIA_END

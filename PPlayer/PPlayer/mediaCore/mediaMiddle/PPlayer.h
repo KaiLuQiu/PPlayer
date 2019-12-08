@@ -89,8 +89,8 @@ public:
     /*
      * 获取当前播放的位置信息
      */
-    int getCurPos();
-
+    int64_t getCurPos();
+    
     /*
      * 设置播放速度
      */
@@ -101,6 +101,10 @@ public:
      */
     float getSpeed();
 
+    /*
+     * 获取总时长
+     */
+    long getDuration();
     /*
      * 设置用于渲染显示的view
      */

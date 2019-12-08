@@ -14,7 +14,7 @@
 
 -(void)prepareAsync;
 
--(void) setView:(void *)view;
+-(void)setView:(void *)view;
 
 -(void)start;
 

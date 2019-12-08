@@ -19,7 +19,7 @@ PPlayer::PPlayer()
 }
 PPlayer::~PPlayer()
 {
-    
+    SAFE_DELETE(pPlayerContext);
 }
 
 // 这边暂时只保留url信息
@@ -36,7 +36,6 @@ int PPlayer::setView(void *view)
 
 void PPlayer::prepareAsync()
 {
-    pPlayerContext = new PlayerContext();
     mediaCore::getIntanse()->Init(pPlayerContext);
     // avformat和avcodec都打开了
     bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
@@ -66,7 +65,6 @@ bool PPlayer::start()
 {
     VideoRefreshThread::getIntanse()->start();
     AudioRefreshThread::getIntanse()->start();
-
     return true;
 }
 

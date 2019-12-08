@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic)         UITextField*      pText;
 @property (nonatomic)         UILabel*          pCurPos;
 @property (nonatomic)         UILabel*          pCurDuration;
+@property (nonatomic)         UISlider*         pVolumeSilder;
+@property (nonatomic)         UILabel*          pVolumeText;
+
 
 @end
 

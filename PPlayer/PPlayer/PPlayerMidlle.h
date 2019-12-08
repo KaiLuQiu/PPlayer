@@ -22,12 +22,14 @@
 
 -(void)stop;
 
--(float)getCurPos;
+-(int64_t)getCurPos;
 
 -(void)setSpeed;
 
 -(float)getSpeed;
 
--(float)getDuration;
+-(int64_t)getDuration;
+
+-(void)setVolume:(float)value;
 @end
 

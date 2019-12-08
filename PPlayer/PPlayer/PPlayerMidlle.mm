@@ -58,9 +58,8 @@
     
 }
 
--(float)getCurPos {
-    float pos = (float)media::PPlayer::getInstance()->getCurPos() / 1000;
-    printf("cur pos %f\n", pos);
+-(int64_t)getCurPos {
+    int64_t pos = media::PPlayer::getInstance()->getCurPos() / 1000;
     return pos;
 }
 
@@ -72,8 +71,12 @@
     return 0.0;
 }
 
--(float)getDuration {
-   return (float)media::PPlayer::getInstance()->getDuration() / 1000;
+-(int64_t)getDuration {
+   return media::PPlayer::getInstance()->getDuration() / 1000;
+}
+
+-(void)setVolume:(float)value {
+    media::PPlayer::getInstance()->setVolume(value);
 }
 
 @end

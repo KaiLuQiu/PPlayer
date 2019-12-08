@@ -33,6 +33,7 @@ typedef struct PlayerContext_T {
 //        abort_request = 0;
         frame_drops_late = 0;
         frame_drops_early = 0;
+        volumeValue = 0;
         playerState = PLAYER_STATE_NONE;
         
         videoPacketQueueFunc = NULL;
@@ -69,6 +70,7 @@ typedef struct PlayerContext_T {
         max_frame_duration = 0.0;
         frame_drops_late = 0.0;
         frame_drops_early = 0;
+        volumeValue = 0;
         playerState = PLAYER_STATE_NONE;
 
         SAFE_DELETE(videoPacketQueueFunc);
@@ -104,13 +106,14 @@ typedef struct PlayerContext_T {
     AudioInfo audioInfo;                // SDL支持的音频参数，重采样转换;
     AudioInfo audioInfoTarget;          // SDL支持的音频参数，重采样转换;
     int audio_hw_buf_size;              // SDL音频缓冲区大小(单位字节)
-    bool keep_last;                     //是否保存最后一帧
+    bool keep_last;                     // 是否保存最后一帧
     int width;                      
     int height;
     int videoStreamIndex;
     int audioStreamIndex;
-    int eof;                            //是否parse到类eof标识位
+    int eof;                            // 是否parse到类eof标识位
     PlayerState playerState;            // 记录当前播放状态
+    float volumeValue;                  // 设置声音值
 
 //    int abort_request;                //是否需要终端（当流close的时候可以终止）
     int last_vis_time;                  //上一次的播放时间

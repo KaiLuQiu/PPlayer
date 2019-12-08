@@ -105,6 +105,12 @@ public:
      * 获取总时长
      */
     long getDuration();
+    
+    /*
+     * 设置音量
+     */
+    void setVolume(float value);
+    
     /*
      * 设置用于渲染显示的view
      */

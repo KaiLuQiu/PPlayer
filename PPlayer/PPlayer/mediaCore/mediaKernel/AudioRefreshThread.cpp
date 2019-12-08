@@ -105,7 +105,7 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
             break;
         }
 
-        SDL_MixAudioFormat(stream,  (uint8_t*)pPCMBuffer->bufferAddr + pART->buffer_size_index, AUDIO_S16SYS, buffer_size_read, 60);
+        SDL_MixAudioFormat(stream,  (uint8_t*)pPCMBuffer->bufferAddr + pART->buffer_size_index, AUDIO_S16SYS, buffer_size_read, pART->pPlayerContext->volumeValue);
         len -= buffer_size_read;
         stream += buffer_size_read;
         pART->buffer_size_index += buffer_size_read;

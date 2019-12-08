@@ -17,6 +17,7 @@ SDL_mutex* PPlayer::mutex = SDL_CreateMutex();
 PPlayer::PPlayer()
 {
     pPlayerContext = new PlayerContext();
+    pPlayerContext->volumeValue = 50.0;
 }
 PPlayer::~PPlayer()
 {
@@ -174,5 +175,15 @@ long PPlayer::getDuration()
     
     return (long)duration;
 }
+
+void PPlayer::setVolume(float value)
+{
+    PlayerContext* playerInfo = pPlayerContext;
+
+    if (NULL != playerInfo) {
+        pPlayerContext->volumeValue = value;
+    }
+}
+
 
 NS_MEDIA_END

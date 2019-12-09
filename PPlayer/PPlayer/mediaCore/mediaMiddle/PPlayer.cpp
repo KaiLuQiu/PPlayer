@@ -87,7 +87,7 @@ bool PPlayer::pause(bool state)
         pPlayerContext->playerState = PLAYER_STATE_PAUSE;
     }
     else {
-        msgInfo = MESSAGE_CMD_NONE;
+        msgInfo = MESSAGE_CMD_START;
         // 更新frame_timer;  因为暂停过程中系统时间是一直在走的，last_updated是暂停时刻的系统时间
         pPlayerContext->frame_timer += av_gettime_relative() / 1000000.0 - pPlayerContext->VideoClock.last_updated;
         AvSyncClock::set_clock(&pPlayerContext->VideoClock, AvSyncClock::get_clock(&pPlayerContext->VideoClock), pPlayerContext->VideoClock.serial);

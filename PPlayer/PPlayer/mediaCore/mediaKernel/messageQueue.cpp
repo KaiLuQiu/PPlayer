@@ -37,6 +37,8 @@ void message::message_dequeue(MessageCmd &cmd)
     if (!messageQueue->empty()) {
         cmd = messageQueue->front();
         messageQueue->pop_front();
+    } else {
+        cmd = MESSAGE_CMD_NONE;
     }
     mutex.unlock();
 }

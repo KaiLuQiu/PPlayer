@@ -25,7 +25,7 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     // 这步一定要有，否则声音会异常
     SDL_memset(stream, 0, len);
     // 如果当前的状态为pause状态则直接返回输出静音效果
-    if (pART->pCurMessage == MESSAGE_CMD_PAUSE) {
+    if (true == pART->pPause) {
         return;
     }
     // 表示获取当前这个队列列头的buffer
@@ -331,6 +331,10 @@ void AudioRefreshThread::run() {
         // 从消息队列中获取一个消息
         if (pMessageQueue != NULL) {
             pMessageQueue->message_dequeue(pCurMessage);
+            if (MESSAGE_CMD_PAUSE == pCurMessage)
+                pPause = true;
+            else if(MESSAGE_CMD_START == pCurMessage)
+                pPause = false;
         }
         
         if (!pPlayerContext) {
@@ -338,7 +342,7 @@ void AudioRefreshThread::run() {
             continue;
         }
         // 如果当前的进入pause状态则进入等待阶段
-        if (pCurMessage == MESSAGE_CMD_PAUSE) {
+        if (true == pPause) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
@@ -436,6 +440,7 @@ AudioRefreshThread::AudioRefreshThread() {
     pPlayerContext = NULL;
     bFirstFrame = 1;
     needStop = 0;
+    pPause = false;
     pMessageQueue = new message();
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!\n");

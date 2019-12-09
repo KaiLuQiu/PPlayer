@@ -20,6 +20,7 @@ VideoRefreshThread::VideoRefreshThread()
     bVideoFreeRun = 0;
     needStop = 0;
     framedrop = -1;
+    pPause = false;
     pMessageQueue = new message();
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!\n");
@@ -117,6 +118,10 @@ void VideoRefreshThread::run()
         // 从消息队列中获取一个消息
         if (pMessageQueue != NULL) {
             pMessageQueue->message_dequeue(pCurMessage);
+            if (MESSAGE_CMD_PAUSE == pCurMessage)
+                pPause = true;
+            else if(MESSAGE_CMD_START == pCurMessage)
+                pPause = false;
         }
         
         if (!pPlayerContext)
@@ -125,7 +130,7 @@ void VideoRefreshThread::run()
             continue;
         }
         // 如果当前的进入pause状态则进入等待阶段
-        if (pCurMessage == MESSAGE_CMD_PAUSE) {
+        if (true == pPause) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }

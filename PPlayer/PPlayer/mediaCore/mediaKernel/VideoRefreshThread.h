@@ -122,6 +122,7 @@ private:
     MessageCmd pCurMessage;               // 当前的播放状态
     bool needStop;
     int framedrop;
+    bool pPause;                          // 当前是否是pause状态
     static VideoRefreshThread* p_VideoOut;
     static SDL_mutex *mutex;
 };

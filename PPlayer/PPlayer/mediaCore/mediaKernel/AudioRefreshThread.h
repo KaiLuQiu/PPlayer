@@ -136,6 +136,7 @@ private:
     message *pMessageQueue;                     // 当前的message信息
     MessageCmd pCurMessage;                     // 当前的播放状态
 
+    bool pPause;                               // 当前是否是pause状态
     double audio_clock;
     int audio_clock_serial;
     int audio_hw_buf_size;                      // audio设置的hardWareSize大小

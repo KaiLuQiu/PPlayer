@@ -18,6 +18,7 @@
 
 @interface PPlayerController () {
     PPlayerMidlle *_player;
+    dispatch_source_t _timer;
 }
 
 @end
@@ -26,6 +27,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
+    dispatch_source_cancel(_timer);
 }
 
 - (void)viewDidLoad {
@@ -52,6 +54,7 @@
     [_pText setText:@"正常播放:"];
     [self.view addSubview:_pText];
     
+    
     _pPauseSwitch = [[UISwitch alloc] init];
     _pPauseSwitch.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
     _pPauseSwitch.on = NO;
@@ -70,13 +73,47 @@
     [_pStopButton addTarget:self action:@selector(clickStopButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_pStopButton];
     
+    _pCurPos = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 29, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pCurPos.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pCurPos];
+    
+    _pCurDuration = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 32, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pCurDuration.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pCurDuration];
+    
+    _pVolumeSilder = [[UISlider alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 35, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 2)];
+    _pVolumeSilder.continuous = YES;
+    _pVolumeSilder.minimumValue = 0;
+    _pVolumeSilder.maximumValue = 100;
+    [_pVolumeSilder addTarget:self action:@selector(VolumeSlider:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:_pVolumeSilder];
+    
     _player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
     [_player setView:(__bridge void *)(playerView)];
     [_player prepareAsync];
+    
+    _pVolumeText = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 38, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 1)];
+    _pVolumeText.textColor = [UIColor orangeColor];
+    _pVolumeText.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pVolumeText];
+    
+    
+    _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+    dispatch_source_set_timer(_timer, DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC, 0);
+    dispatch_source_set_event_handler(_timer, ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            int64_t curPos = [_player getCurPos];
+            _pCurPos.text = [self timeToStr:curPos];
+            int64_t duration = [_player getDuration];
+            _pCurDuration.text = [self timeToStr:duration];
+        });
+    });
+    dispatch_resume(_timer);
 }
 
 - (void)dealloc{
     NSLog(@"VideoViewController dealloc");
+    _timer = nil;
 }
 
 - (void)clickStartButton:(id)sender {
@@ -103,8 +140,32 @@
     if(self.pStopButton == nil) {
         return;
     }
-    
 }
+
+- (void)VolumeSlider:(id)sender {
+    UISlider *slider = (UISlider *)sender;
+    _pVolumeText.text = [NSString stringWithFormat:@"%.0f", slider.value];
+    float value = slider.value;
+    [_player setVolume:value];
+}
+
+#pragma mark 时间转换工具
+- (NSString *)timeToStr: (long)totalTime {
+    NSString *totalStr = nil;
+    NSInteger time = (NSInteger)totalTime;
+    if (time < 60) {
+        // 秒
+        totalStr = [NSString stringWithFormat:@"00:00:%02ld", (long)time];
+    } else if (time >= 60 && time < 60 * 60) {
+        // 分钟
+        totalStr = [NSString stringWithFormat:@"00:%02ld:%02ld", (long)time / 60, (long)time % 60];
+    } else if (time >= 60 * 60) {
+        // 小时
+        totalStr = [NSString stringWithFormat:@"%02ld:%02ld:%02ld", (long)time / (60 * 60), ((long)time % (60 * 60)) / 60, (long)time % 60];
+    }
+    return totalStr;
+}
+
 /**
  *  @fun:getFileFromMainbundleAbsolutePath 获取资源文件绝对路径，以mainbundle为基础路径进行路径拼接，
  *  @fileCompent: 资源文件存放目录的相对路径

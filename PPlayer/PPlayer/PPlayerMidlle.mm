@@ -59,7 +59,8 @@
 }
 
 -(int64_t)getCurPos {
-    return 0;
+    int64_t pos = media::PPlayer::getInstance()->getCurPos() / 1000;
+    return pos;
 }
 
 -(void)setSpeed {
@@ -70,5 +71,12 @@
     return 0.0;
 }
 
+-(int64_t)getDuration {
+   return media::PPlayer::getInstance()->getDuration() / 1000;
+}
+
+-(void)setVolume:(float)value {
+    media::PPlayer::getInstance()->setVolume(value);
+}
 
 @end

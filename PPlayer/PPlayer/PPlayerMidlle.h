@@ -27,5 +27,9 @@
 -(void)setSpeed;
 
 -(float)getSpeed;
+
+-(int64_t)getDuration;
+
+-(void)setVolume:(float)value;
 @end
 

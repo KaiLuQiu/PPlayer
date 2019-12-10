@@ -17,6 +17,7 @@ SDL_mutex* PPlayer::mutex = SDL_CreateMutex();
 PPlayer::PPlayer()
 {
     pPlayerContext = new PlayerContext();
+    pPlayerContext->volumeValue = 50.0;
 }
 PPlayer::~PPlayer()
 {
@@ -86,7 +87,7 @@ bool PPlayer::pause(bool state)
         pPlayerContext->playerState = PLAYER_STATE_PAUSE;
     }
     else {
-        msgInfo = MESSAGE_CMD_NONE;
+        msgInfo = MESSAGE_CMD_START;
         // 更新frame_timer;  因为暂停过程中系统时间是一直在走的，last_updated是暂停时刻的系统时间
         pPlayerContext->frame_timer += av_gettime_relative() / 1000000.0 - pPlayerContext->VideoClock.last_updated;
         AvSyncClock::set_clock(&pPlayerContext->VideoClock, AvSyncClock::get_clock(&pPlayerContext->VideoClock), pPlayerContext->VideoClock.serial);
@@ -125,9 +126,31 @@ bool PPlayer::setLoop(bool loop)
     return true;
 }
 
-int PPlayer::getCurPos()
+int64_t PPlayer::getCurPos()
 {
-    return 0;
+    PlayerContext* playerInfo = pPlayerContext;
+    if(playerInfo == NULL || playerInfo->ic == NULL)
+        return 0;
+
+    int64_t start_time = playerInfo->ic->start_time;
+    int64_t start_diff = 0;
+    
+   if (start_time > 0 && start_time != AV_NOPTS_VALUE)
+       start_diff = av_rescale(start_time, 1000, AV_TIME_BASE);
+   
+    int64_t pos = 0;
+    double pos_clock = AvSyncClock::get_master_clock(playerInfo);
+    if (isnan(pos_clock)) {
+        pos = av_rescale(playerInfo->seek_pos, 1000, AV_TIME_BASE);
+    } else {
+        pos = pos_clock * 1000;
+    }
+
+   if (pos < 0 || pos < start_diff)
+       return 0;
+
+   int64_t adjust_pos = pos - start_diff;
+   return (long)adjust_pos;
 }
 
 bool PPlayer::setSpeed()
@@ -139,5 +162,28 @@ float PPlayer::getSpeed()
 {
     return 0;
 }
+
+long PPlayer::getDuration()
+{
+    PlayerContext* playerInfo = pPlayerContext;
+
+     if (!playerInfo || !playerInfo->ic)
+        return 0;
+    int64_t duration = av_rescale(playerInfo->ic->duration, 1000, AV_TIME_BASE);
+    if (duration < 0)
+        return 0;
+    
+    return (long)duration;
+}
+
+void PPlayer::setVolume(float value)
+{
+    PlayerContext* playerInfo = pPlayerContext;
+
+    if (NULL != playerInfo) {
+        pPlayerContext->volumeValue = value;
+    }
+}
+
 
 NS_MEDIA_END

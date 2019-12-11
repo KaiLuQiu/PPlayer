@@ -46,8 +46,7 @@ bool mediaCore::StreamOpen(std::string pUrl)
     int st_index[AVMEDIA_TYPE_NB]; //流索引数组
     memset(st_index, -1, sizeof(st_index));
     p_PlayerContext->ic = avformat_alloc_context();   //对AvFormat内存空间的申请
-    if (!p_PlayerContext->ic)
-    {
+    if (!p_PlayerContext->ic) {
         printf("avformat alloc fail\n");
         return false;
     }
@@ -93,16 +92,15 @@ bool mediaCore::StreamOpen(std::string pUrl)
     int ret = -1;
     //如果存在视频流的,则打开
     /* open the streams */
-    for (unsigned int i = 0; i < p_PlayerContext->ic->nb_streams; i++)
-    {
+    for (unsigned int i = 0; i < p_PlayerContext->ic->nb_streams; i++) {
         AVCodecContext *p_CodecContex = p_PlayerContext->ic->streams[i]->codec;
-        if ((p_CodecContex->codec_type == AVMEDIA_TYPE_VIDEO) && (st_index[AVMEDIA_TYPE_VIDEO] >= 0))//视频流
-        {
+        //视频流
+        if ((p_CodecContex->codec_type == AVMEDIA_TYPE_VIDEO) && (st_index[AVMEDIA_TYPE_VIDEO] >= 0)) {
             p_PlayerContext->videoDecoder = new DecoderContext();
             OpenVideoDecode(i);
         }
-        else if ((p_CodecContex->codec_type == AVMEDIA_TYPE_AUDIO) && (st_index[AVMEDIA_TYPE_AUDIO] >= 0))//音频流
-        {
+        //音频流
+        else if ((p_CodecContex->codec_type == AVMEDIA_TYPE_AUDIO) && (st_index[AVMEDIA_TYPE_AUDIO] >= 0)) {
             p_PlayerContext->audioDecoder = new DecoderContext();
             OpenAudioDecode(i);
         }
@@ -127,15 +125,11 @@ bool mediaCore::OpenVideoDecode(int streamIndex)
     float fps = r2d(p_PlayerContext->ic->streams[streamIndex]->r_frame_rate);
     
     AVCodec *codec = avcodec_find_decoder(p_PlayerContext->videoDecoder->codecContext->codec_id);
-    if (!codec)
-    {
+    if (!codec) {
         return false;
-    }
-    else
-    {
+    } else {
         int ret = avcodec_open2(p_PlayerContext->videoDecoder->codecContext, codec, NULL);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             char buff[1024] = { 0 };
             av_strerror(ret, buff, sizeof(buff));
             return false;
@@ -163,27 +157,20 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
     av_codec_set_pkt_timebase(p_PlayerContext->audioDecoder->codecContext, p_PlayerContext->ic->streams[streamIndex]->time_base);
     
     AVCodec *codec = avcodec_find_decoder(p_PlayerContext->audioDecoder->codecContext->codec_id);
-    if (!codec)
-    {
+    if (!codec) {
         return false;
-    }
-    else
-    {
+    } else {
         int ret = avcodec_open2(p_PlayerContext->audioDecoder->codecContext, codec, NULL);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             char buff[1024] = { 0 };
             av_strerror(ret, buff, sizeof(buff));
             return false;
         }
-        
         p_PlayerContext->audioInfo.freq = p_PlayerContext->audioDecoder->codecContext->sample_rate;
         p_PlayerContext->audioInfo.channels = p_PlayerContext->audioDecoder->codecContext->channels;
         p_PlayerContext->audioInfo.frame_size = p_PlayerContext->audioDecoder->codecContext->frame_size;
         p_PlayerContext->audioInfo.channel_layout = p_PlayerContext->audioDecoder->codecContext->channel_layout;
         p_PlayerContext->audioInfo.sample_rate = p_PlayerContext->audioDecoder->codecContext->sample_rate;
-
-        
     }
     return true;
 }
@@ -193,14 +180,12 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
     DecoderContext *codecContext;
     SDL_LockMutex(mutex);
     
-    if (!p_PlayerContext->ic || pkt == NULL || frame == NULL )
-    {
+    if (!p_PlayerContext->ic || pkt == NULL || frame == NULL) {
         SDL_UnlockMutex(mutex);
         return -1;
     }
     
-    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex)
-    {
+    if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex) {
         SDL_UnlockMutex(mutex);
         return -1;
     }
@@ -212,18 +197,14 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
     
     int ret = avcodec_send_packet(codecContext->codecContext, pkt);
 
-    if (ret < 0)
-    {
-        if(ret == AVERROR(EAGAIN))
-        {
+    if (ret < 0) {
+        if(ret == AVERROR(EAGAIN)) {
             int a= 0;
         }
-        if(ret == AVERROR_EOF)
-        {
+        if(ret == AVERROR_EOF) {
             int b = 0;
         }
-        if(ret == AVERROR(EINVAL))
-        {
+        if(ret == AVERROR(EINVAL)) {
             int c = 0;
         }
 //        AVERROR(EAGAIN)：当前不接受输出，必须重新发送
@@ -236,32 +217,24 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
     
     ret = avcodec_receive_frame(codecContext->codecContext, frame);
     if (ret < 0) {
-        
         SDL_UnlockMutex(mutex);
         return ret;
     }
     
-    if (pkt->stream_index == p_PlayerContext->audioStreamIndex)
-    {
+    if (pkt->stream_index == p_PlayerContext->audioStreamIndex) {
         // 获取audio的time_base
         AVRational tb = (AVRational){1, frame->sample_rate};
-        if (frame->pts != AV_NOPTS_VALUE)
-        {
+        if (frame->pts != AV_NOPTS_VALUE) {
             // 用于time_base之间转换,相当于执行a*b/c
             frame->pts = av_rescale_q(frame->pts, av_codec_get_pkt_timebase(codecContext->codecContext), tb);
-        }
-        else if (codecContext->next_pts != AV_NOPTS_VALUE)
-        {
+        } else if (codecContext->next_pts != AV_NOPTS_VALUE) {
             frame->pts = av_rescale_q(codecContext->next_pts, codecContext->next_pts_tb, tb);
         }
-        if (frame->pts != AV_NOPTS_VALUE)
-        {
+        if (frame->pts != AV_NOPTS_VALUE) {
             codecContext->next_pts = frame->pts + frame->nb_samples;
             codecContext->next_pts_tb = tb;
         }
-    }
-    else if(pkt->stream_index == p_PlayerContext->videoStreamIndex)
-    {
+    } else if(pkt->stream_index == p_PlayerContext->videoStreamIndex) {
         frame->pts = frame->best_effort_timestamp;
     }
 
@@ -270,12 +243,31 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
     return 1;
 }
 
+int mediaCore::Seek(float pos, int type)
+{
+    int ret = -1;
+    SDL_LockMutex(mutex);
+    if (!p_PlayerContext->ic) {
+        SDL_UnlockMutex(mutex);
+        return false;
+    }
+    int64_t seek_min    = INT64_MIN;
+    int64_t seek_max    = INT64_MAX;
+    int64_t duration = av_rescale(p_PlayerContext->ic->duration, 1000, AV_TIME_BASE);
+    int64_t seek_target = (pos * duration / 1000) * AV_TIME_BASE;
+    ret = avformat_seek_file(p_PlayerContext->ic, -1, seek_min, seek_target, seek_max, type);
+    if (ret < 0) {
+        av_log(NULL, AV_LOG_ERROR,
+                       "%s: error while seeking\n", p_PlayerContext->ic->filename);
+    }
+    SDL_UnlockMutex(mutex);
+    return ret;
+}
 
 
 int mediaCore::ResSampleInit(Frame* pFrame, int64_t dec_channel_layout)
 {
-    if(swr_ctx == NULL)
-    {
+    if(swr_ctx == NULL) {
         swr_ctx = swr_alloc();
     }
     // 释放之前的重采样对象
@@ -320,19 +312,15 @@ int mediaCore::audioResample(uint8_t **out, int out_samples, AVFrame* frame)
 {
     int resampled_data_size;
     
-    if (!p_PlayerContext->ic || !frame || !out)
-    {
+    if (!p_PlayerContext->ic || !frame || !out) {
         return 0;
     }
     
     const uint8_t **in = (const uint8_t **)frame->extended_data;
-    
-//    uint8_t *data[1];
-//    data[0] = (uint8_t *)out;
+
     // 音频重采样：返回值是重采样后得到的音频数据中单个声道的样本数
     int len = swr_convert(swr_ctx, out, out_samples, in, frame->nb_samples);
-    if (len < 0)
-    {
+    if (len < 0) {
         return 0;
     }
     

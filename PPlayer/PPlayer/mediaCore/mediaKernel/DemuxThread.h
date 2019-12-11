@@ -75,7 +75,7 @@ public:
     /*
      * 将msg指令入队列
      */
-    bool queueMessage(MessageCmd msgInfo);
+    bool queueMessage(msgInfo msg);
     virtual ~DemuxThread();
     DemuxThread();
 
@@ -92,6 +92,10 @@ private:
     PacketQueueFunc *audioPackeQueueFunc;
     // 当前的message信息
     message *pMessageQueue;
+    // 当前的播放状态
+    msgInfo pCurMessage;
+    bool    pSeek;
+    float   pSeekPos;
 
     AVPacket* video_flush_pkt;
     AVPacket* audio_flush_pkt;

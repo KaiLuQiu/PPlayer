@@ -9,7 +9,7 @@
 
 message::message()
 {
-    messageQueue = new std::list<MessageCmd>();
+    messageQueue = new std::list<msgInfo>();
     if (messageQueue == NULL) {
         printf("message Queue is NULL!!!\n");
     }
@@ -23,22 +23,23 @@ message::~message()
     }
 }
 
-int message::message_queue(MessageCmd cmd)
+int message::message_queue(msgInfo msg)
 {
     mutex.lock();
-    messageQueue->push_back(cmd);
+    messageQueue->push_back(msg);
     mutex.unlock();
     return true;
 }
 
-void message::message_dequeue(MessageCmd &cmd)
+void message::message_dequeue(msgInfo &msg)
 {
     mutex.lock();
     if (!messageQueue->empty()) {
-        cmd = messageQueue->front();
+        msg = messageQueue->front();
         messageQueue->pop_front();
     } else {
-        cmd = MESSAGE_CMD_NONE;
+        msg.cmd = MESSAGE_CMD_NONE;
+        msg.data = -1;
     }
     mutex.unlock();
 }

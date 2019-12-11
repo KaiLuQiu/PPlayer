@@ -58,6 +58,11 @@
     
 }
 
+-(void) seek:(float)pos {
+    media::PPlayer::getInstance()->seek(pos);
+}
+
+
 -(int64_t)getCurPos {
     int64_t pos = media::PPlayer::getInstance()->getCurPos() / 1000;
     return pos;

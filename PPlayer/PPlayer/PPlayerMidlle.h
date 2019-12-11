@@ -22,6 +22,8 @@
 
 -(void)stop;
 
+-(void)seek:(float)pos;
+
 -(int64_t)getCurPos;
 
 -(void)setSpeed;

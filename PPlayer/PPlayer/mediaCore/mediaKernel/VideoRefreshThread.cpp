@@ -25,7 +25,8 @@ VideoRefreshThread::VideoRefreshThread()
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!\n");
     }
-    pCurMessage = MESSAGE_CMD_NONE;
+    pCurMessage.cmd = MESSAGE_CMD_NONE;
+    pCurMessage.data = -1;
 }
 
 VideoRefreshThread::~VideoRefreshThread()
@@ -118,9 +119,9 @@ void VideoRefreshThread::run()
         // 从消息队列中获取一个消息
         if (pMessageQueue != NULL) {
             pMessageQueue->message_dequeue(pCurMessage);
-            if (MESSAGE_CMD_PAUSE == pCurMessage)
+            if (MESSAGE_CMD_PAUSE == pCurMessage.cmd)
                 pPause = true;
-            else if(MESSAGE_CMD_START == pCurMessage)
+            else if(MESSAGE_CMD_START == pCurMessage.cmd)
                 pPause = false;
         }
         
@@ -289,13 +290,13 @@ void VideoRefreshThread::stop()
     needStop = 1;
 }
 
-bool VideoRefreshThread::queueMessage(MessageCmd msgInfo)
+bool VideoRefreshThread::queueMessage(msgInfo msg)
 {
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!\n");
         return false;
     }
-    pMessageQueue->message_queue(msgInfo);
+    pMessageQueue->message_queue(msg);
     return true;
 }
 NS_MEDIA_END

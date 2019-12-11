@@ -45,12 +45,6 @@ int VideoDecodeThread::get_video_frame(AVFrame *frame)
         return -1;
     }
     
-    if (VideoPkt.stream_index != pPlayerContext->videoStreamIndex)
-    {
-        av_free_packet(&VideoPkt);
-        return -1;
-    }
-    
     //如果当前这个拿到这个包pkt序列和queue里的packet序列不同，则代表过时的packet,
     if(VideoPkt.data == pPlayerContext->video_flush_pkt->data)         // 这个video flush pkt 目前我时直接指向demuxer线程创建的那个
     {
@@ -62,6 +56,12 @@ int VideoDecodeThread::get_video_frame(AVFrame *frame)
         pPlayerContext->videoDecoder->finished = 0;
         pPlayerContext->videoDecoder->next_pts = pPlayerContext->videoDecoder->start_pts;
         pPlayerContext->videoDecoder->next_pts_tb = pPlayerContext->videoDecoder->start_pts_tb;
+        av_free_packet(&VideoPkt);
+        return -1;
+    }
+    
+    if (VideoPkt.stream_index != pPlayerContext->videoStreamIndex)
+    {
         av_free_packet(&VideoPkt);
         return -1;
     }

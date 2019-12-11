@@ -108,7 +108,7 @@ public:
      /*
       * 将msg指令入队列
       */
-     bool queueMessage(MessageCmd msgInfo);
+     bool queueMessage(msgInfo msg);
     virtual ~AudioRefreshThread();
     int bFirstFrame;
 private:
@@ -134,9 +134,11 @@ private:
     PCMBufferQueue pPCMBufferQueue;
     int needStop;
     message *pMessageQueue;                     // 当前的message信息
-    MessageCmd pCurMessage;                     // 当前的播放状态
+    msgInfo pCurMessage;                     // 当前的播放状态
 
     bool pPause;                               // 当前是否是pause状态
+    bool pSeek;
+
     double audio_clock;
     int audio_clock_serial;
     int audio_hw_buf_size;                      // audio设置的hardWareSize大小

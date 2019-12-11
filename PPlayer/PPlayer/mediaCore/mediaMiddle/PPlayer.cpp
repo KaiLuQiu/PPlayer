@@ -75,35 +75,48 @@ bool PPlayer::start()
 
 bool PPlayer::pause(bool state)
 {
-    MessageCmd msgInfo;
+    msgInfo msg;
     // 暂停播放
     if(true == state) {
-        msgInfo = MESSAGE_CMD_PAUSE;
-        VideoRefreshThread::getIntanse()->queueMessage(msgInfo);
-        AudioRefreshThread::getIntanse()->queueMessage(msgInfo);
-        DemuxThread::getIntanse()->queueMessage(msgInfo);
+        msg.cmd = MESSAGE_CMD_PAUSE;
+        msg.data = -1;
+        VideoRefreshThread::getIntanse()->queueMessage(msg);
+        AudioRefreshThread::getIntanse()->queueMessage(msg);
+        DemuxThread::getIntanse()->queueMessage(msg);
         pPlayerContext->AudioClock.paused = 1;
         pPlayerContext->VideoClock.paused = 1;
         pPlayerContext->playerState = PLAYER_STATE_PAUSE;
     }
     else {
-        msgInfo = MESSAGE_CMD_START;
+        msg.cmd = MESSAGE_CMD_START;
+        msg.data = -1;
         // 更新frame_timer;  因为暂停过程中系统时间是一直在走的，last_updated是暂停时刻的系统时间
         pPlayerContext->frame_timer += av_gettime_relative() / 1000000.0 - pPlayerContext->VideoClock.last_updated;
         AvSyncClock::set_clock(&pPlayerContext->VideoClock, AvSyncClock::get_clock(&pPlayerContext->VideoClock), pPlayerContext->VideoClock.serial);
-        VideoRefreshThread::getIntanse()->queueMessage(msgInfo);
-        AudioRefreshThread::getIntanse()->queueMessage(msgInfo);
-        DemuxThread::getIntanse()->queueMessage(msgInfo);
+        VideoRefreshThread::getIntanse()->queueMessage(msg);
+        AudioRefreshThread::getIntanse()->queueMessage(msg);
+        DemuxThread::getIntanse()->queueMessage(msg);
         pPlayerContext->AudioClock.paused = 0;
         pPlayerContext->VideoClock.paused = 0;
         pPlayerContext->playerState = PLAYER_STATE_START;
     }
+    
     return true;
 }
 
-bool PPlayer::seek(int64_t pos)
+int PPlayer::seek(float pos)
 {
-    return true;
+    int ret;
+    if (PLAYER_STATE_NONE != pPlayerContext->playerState) {
+        msgInfo msg;
+        msg.cmd = MESSAGE_CMD_SEEK;
+        msg.data = pos;
+        // seek到当前位置的后一个I frame
+        DemuxThread::getIntanse()->queueMessage(msg);
+    } else {
+        ret = -1;
+    }
+    return ret;
 }
 
 bool PPlayer::resume()

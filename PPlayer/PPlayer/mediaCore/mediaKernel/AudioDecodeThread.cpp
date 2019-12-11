@@ -5,6 +5,7 @@
 //  Created by 邱开禄 on 2019/11/14.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
+#include "AudioRefreshThread.h"
 
 #include "AudioDecodeThread.h"
 #include "mediaCore.h"
@@ -58,18 +59,11 @@ int AudioDecodeThread::get_audio_frame(AVFrame *frame)
     ret = pPlayerContext->audioPacketQueueFunc->packet_queue_get(&pPlayerContext->audioRingBuffer, &AudioPkt, 1, &pPlayerContext->audioDecoder->pkt_serial);
     if (ret < 0)
     {
-        
         return ret;
     }
     
     // 如果当前读取到的序列号和队列序列号不一样说明当前连续，可能有seek过程导致
     if(pPlayerContext->audioDecoder->pkt_serial != pPlayerContext->audioRingBuffer.serial)
-    {
-        av_free_packet(&AudioPkt);
-        return -1;
-    }
-    
-    if (AudioPkt.stream_index != pPlayerContext->audioStreamIndex)
     {
         av_free_packet(&AudioPkt);
         return -1;
@@ -86,6 +80,12 @@ int AudioDecodeThread::get_audio_frame(AVFrame *frame)
         pPlayerContext->audioDecoder->finished = 0;
         pPlayerContext->audioDecoder->next_pts = pPlayerContext->audioDecoder->start_pts;
         pPlayerContext->audioDecoder->next_pts_tb = pPlayerContext->audioDecoder->start_pts_tb;
+        av_free_packet(&AudioPkt);
+        return -1;
+    }
+    
+    if (AudioPkt.stream_index != pPlayerContext->audioStreamIndex)
+    {
         av_free_packet(&AudioPkt);
         return -1;
     }
@@ -151,7 +151,6 @@ void AudioDecodeThread::run()
         int64_t pos = frame->pkt_pos;
         int serial =  pPlayerContext->audioDecoder->pkt_serial;
         double duration = av_q2d((AVRational){frame->nb_samples, frame->sample_rate});
-       
         queue_audio(frame, pts, duration, pos, serial);
         av_frame_unref(frame);
     }

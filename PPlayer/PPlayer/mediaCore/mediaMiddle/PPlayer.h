@@ -64,7 +64,7 @@ public:
     /*
      * 进行seek的过程
      */
-    bool seek(int64_t pos);
+    int seek(float pos);
     
     /*
      * 进行resume重新同步过程

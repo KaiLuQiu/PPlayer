@@ -7,6 +7,10 @@
 //
 
 #include "Demuxthread.h"
+#include "mediaCore.h"
+#include "AudioRefreshThread.h"
+
+
 NS_MEDIA_BEGIN
 
 // 类的静态指针需要在此初始化
@@ -22,6 +26,8 @@ DemuxThread::DemuxThread()
     pNeedStop = false;
     videoPackeQueueFunc = NULL;
     audioPackeQueueFunc = NULL;
+    pSeek = false;
+    pSeekPos = -1;
     pMessageQueue = new message();
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!\n");
@@ -102,6 +108,27 @@ void DemuxThread::run()
             printf("pPlayerContext is NUll\n");
             continue;
         }
+        if (pMessageQueue != NULL) {
+            pMessageQueue->message_dequeue(pCurMessage);
+            if (MESSAGE_CMD_SEEK == pCurMessage.cmd) {
+                pSeek = true;
+                pSeekPos = pCurMessage.data;
+            }
+        }
+        if (true == pSeek) {
+            if (pSeekPos != -1) {
+                ret = mediaCore::getIntanse()->Seek(pSeekPos, AVSEEK_FLAG_BACKWARD);
+                // 清空audio packet队列
+                audioPackeQueueFunc->packet_queue_flush(audioRingBuffer);
+                audioPackeQueueFunc->packet_queue_put(audioRingBuffer, pPlayerContext->audio_flush_pkt);
+                // 清空video packet队列
+                videoPackeQueueFunc->packet_queue_flush(videoRingBuffer);
+                videoPackeQueueFunc->packet_queue_put(videoRingBuffer, pPlayerContext->video_flush_pkt);
+            }
+            pSeekPos = -1;
+            pSeek = false;
+        }
+
         if(videoPackeQueueFunc == NULL || audioPackeQueueFunc == NULL)
         {
             printf("PackeQueueFunc is NUll\n");
@@ -113,6 +140,7 @@ void DemuxThread::run()
             printf("ringbuffer is full\n");
             continue;
         }
+
         
         int ret = av_read_frame(pPlayerContext->ic, &pkt);
 
@@ -160,13 +188,13 @@ void DemuxThread::setSeekType(int type)
     seek_by_bytes = type;
 }
 
-bool DemuxThread::queueMessage(MessageCmd msgInfo)
+bool DemuxThread::queueMessage(msgInfo msg)
 {
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!");
         return false;
     }
-    pMessageQueue->message_queue(msgInfo);
+    pMessageQueue->message_queue(msg);
     return true;
 }
 

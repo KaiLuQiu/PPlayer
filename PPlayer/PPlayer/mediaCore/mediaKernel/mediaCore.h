@@ -56,6 +56,11 @@ public:
     int Decode(const AVPacket *pkt, AVFrame *frame);
     
     /*
+     * 输入要seek的点（0～100），设置seek的type, 进行seek过程
+     */
+    int Seek(float pos, int type);
+    
+    /*
      * 打开audio输出
      */
     int audio_open();

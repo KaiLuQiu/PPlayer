@@ -26,18 +26,31 @@ typedef enum {
     MESSAGE_CMD_CHANGE_SPEED,
 }MessageCmd;
 
+typedef struct msgInfo_T{
+    msgInfo_T() {
+        cmd = MESSAGE_CMD_NONE;
+        data = -1;
+    }
+    ~msgInfo_T() {
+        cmd = MESSAGE_CMD_NONE;
+        data = -1;
+    }
+    MessageCmd cmd;
+    float data;
+}msgInfo;
+
 class message
 {
 public:
     message();
     virtual ~message();
-    int message_queue(MessageCmd cmd);
-    void message_dequeue(MessageCmd &cmd);
+    int message_queue(msgInfo cmd);
+    void message_dequeue(msgInfo &cmd);
     int message_cmd_size();
     int message_is_empty();
 private:
     std::mutex mutex;
-    std::list<MessageCmd> *messageQueue;
+    std::list<msgInfo> *messageQueue;
 };
 
 

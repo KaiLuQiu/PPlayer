@@ -111,7 +111,7 @@ public:
     /*
      * 将msg指令入队列
      */
-    bool queueMessage(MessageCmd msgInfo);
+    bool queueMessage(msgInfo msg);
     VideoRefreshThread();
     virtual ~VideoRefreshThread();
 private:
@@ -119,7 +119,7 @@ private:
     bool bVideoFreeRun;                   // 不进行avsync，让video自由播放
     PlayerContext *pPlayerContext;
     message *pMessageQueue;               // 当前的message信息
-    MessageCmd pCurMessage;               // 当前的播放状态
+    msgInfo pCurMessage;               // 当前的播放状态
     bool needStop;
     int framedrop;
     bool pPause;                          // 当前是否是pause状态

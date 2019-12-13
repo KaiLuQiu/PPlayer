@@ -2,8 +2,8 @@
 //  ViewController.m
 //  PPlayer
 //
-//  Created by 孙鹏举 on 2018/10/11.
-//  Copyright © 2018年 孙鹏举. All rights reserved.
+//  Created by 邱开禄 on 2019/11/14.
+//  Copyright © 2019年 邱开禄. All rights reserved.
 //
 
 #import "PPlayerMidlle.h"
@@ -14,8 +14,8 @@
 
 @end
 
-@implementation PPlayerMidlle
 
+@implementation PPlayerMidlle
 
 -(id) initPlayer:(const char*)URL {
     if(!(self = [super init])) {
@@ -27,6 +27,8 @@
 
 -(void) prepareAsync {
     media::PPlayer::getInstance()->prepareAsync();
+    if (self.pPreparedListener)
+        [self.pPreparedListener onPrepared];
 }
 
 -(void) setView:(void *)view
@@ -82,6 +84,26 @@
 
 -(void)setVolume:(float)value {
     media::PPlayer::getInstance()->setVolume(value);
+}
+
+-(void)setOnPreparedListener:(id<OnPreparedListener>)listener {
+    self.pPreparedListener = listener;
+}
+
+-(void)setOnCompletionListener:(id<OnCompletionListener>)listener {
+    self.pCompletionListener = listener;
+}
+
+-(void)setOnSeekCompletionListener:(id<OnSeekCompletionListener>)listener {
+    self.pSeekCompletionListener = listener;
+}
+
+-(void)setOnErrorListener:(id<OnErrorListener>)listener {
+    self.pErrorListener = listener;
+}
+
+-(void)setOnInfoListener:(id<OnInfoListener>)listener {
+    self.pInfoListener = listener;
 }
 
 @end

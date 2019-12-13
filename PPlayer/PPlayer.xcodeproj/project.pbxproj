@@ -23,11 +23,13 @@
 		19200DFA216F677C00EF7D6F /* SDL_config.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 19200DEC216F677C00EF7D6F /* SDL_config.h.in */; };
 		197EF9A4221AAF850015F02F /* PPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 197EF9A3221AAF850015F02F /* PPlayerController.m */; };
 		3604E91E23801C6300E693D4 /* video in Resources */ = {isa = PBXBuildFile; fileRef = 3604E91D23801C6300E693D4 /* video */; };
+		3617FE3323A1424300370250 /* PPlayerMidlle.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3617FE3023A1424300370250 /* PPlayerMidlle.mm */; };
 		3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */; };
 		365936EC23880DA300C98247 /* compileShaderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 365936E623880DA300C98247 /* compileShaderTool.m */; };
 		365936ED23880DA300C98247 /* mvp_vsh.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 365936E923880DA300C98247 /* mvp_vsh.glsl */; };
 		365936EE23880DA300C98247 /* YUV420P_fsh.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 365936EB23880DA300C98247 /* YUV420P_fsh.glsl */; };
 		365F1DF8239C9A2900202B26 /* messageQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365F1DF7239C9A2900202B26 /* messageQueue.cpp */; };
+		368610C223A0A78500900CD0 /* mediaListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368610C023A0A78500900CD0 /* mediaListener.cpp */; };
 		369BDCFF237FAE68001A9EBC /* MediaCommon.h in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEC237FAE68001A9EBC /* MediaCommon.h */; };
 		369BDD00237FAE68001A9EBC /* mediaCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEE237FAE68001A9EBC /* mediaCore.cpp */; };
 		369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */; };
@@ -41,7 +43,6 @@
 		36C7A73D238C0C14003250C1 /* OpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C7A73C238C0C14003250C1 /* OpenGLView.m */; };
 		36C7A743238C0C6D003250C1 /* render_frame.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C7A740238C0C6C003250C1 /* render_frame.m */; };
 		36C7A744238C0C6D003250C1 /* OpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C7A741238C0C6C003250C1 /* OpenGLView.m */; };
-		642857D923766C45003DFEE5 /* PPlayerMidlle.mm in Sources */ = {isa = PBXBuildFile; fileRef = 642857D823766C44003DFEE5 /* PPlayerMidlle.mm */; };
 		643A2D832377F9DD000426FB /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 643A2D7C2377F9DD000426FB /* libavutil.a */; };
 		643A2D842377F9DD000426FB /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 643A2D7D2377F9DD000426FB /* libavfilter.a */; };
 		643A2D852377F9DD000426FB /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 643A2D7E2377F9DD000426FB /* libavcodec.a */; };
@@ -178,6 +179,9 @@
 		197EF9A2221AAF850015F02F /* PPlayerController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PPlayerController.h; sourceTree = "<group>"; };
 		197EF9A3221AAF850015F02F /* PPlayerController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PPlayerController.m; sourceTree = "<group>"; };
 		3604E91D23801C6300E693D4 /* video */ = {isa = PBXFileReference; lastKnownFileType = folder; path = video; sourceTree = "<group>"; };
+		3617FE3023A1424300370250 /* PPlayerMidlle.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PPlayerMidlle.mm; sourceTree = "<group>"; };
+		3617FE3123A1424300370250 /* PPlayerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPlayerDelegate.h; sourceTree = "<group>"; };
+		3617FE3223A1424300370250 /* PPlayerMidlle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPlayerMidlle.h; sourceTree = "<group>"; };
 		3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PacketQueueFunc.cpp; sourceTree = "<group>"; };
 		3625584B2380C3CE00BB843F /* PacketQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueueFunc.h; sourceTree = "<group>"; };
 		365936E623880DA300C98247 /* compileShaderTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = compileShaderTool.m; sourceTree = "<group>"; };
@@ -186,6 +190,8 @@
 		365936EB23880DA300C98247 /* YUV420P_fsh.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = YUV420P_fsh.glsl; sourceTree = "<group>"; };
 		365F1DF6239C9A2900202B26 /* messageQueue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = messageQueue.hpp; sourceTree = "<group>"; };
 		365F1DF7239C9A2900202B26 /* messageQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = messageQueue.cpp; sourceTree = "<group>"; };
+		368610C023A0A78500900CD0 /* mediaListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mediaListener.cpp; sourceTree = "<group>"; };
+		368610C123A0A78500900CD0 /* mediaListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mediaListener.h; sourceTree = "<group>"; };
 		369BDCEA237FAE68001A9EBC /* AudioRefreshThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRefreshThread.h; sourceTree = "<group>"; };
 		369BDCEB237FAE68001A9EBC /* FrameQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameQueueFunc.h; sourceTree = "<group>"; };
 		369BDCEC237FAE68001A9EBC /* MediaCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaCommon.h; sourceTree = "<group>"; };
@@ -212,8 +218,6 @@
 		36C7A740238C0C6C003250C1 /* render_frame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = render_frame.m; sourceTree = "<group>"; };
 		36C7A741238C0C6C003250C1 /* OpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenGLView.m; sourceTree = "<group>"; };
 		36C7A742238C0C6C003250C1 /* render_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render_frame.h; sourceTree = "<group>"; };
-		642857D723766C44003DFEE5 /* PPlayerMidlle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPlayerMidlle.h; sourceTree = "<group>"; };
-		642857D823766C44003DFEE5 /* PPlayerMidlle.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PPlayerMidlle.mm; sourceTree = "<group>"; };
 		643A2D042377F9DD000426FB /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		643A2D052377F9DD000426FB /* buffersrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersrc.h; sourceTree = "<group>"; };
 		643A2D062377F9DD000426FB /* buffersink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersink.h; sourceTree = "<group>"; };
@@ -420,8 +424,6 @@
 				19200BCF216F65B000EF7D6F /* AppDelegate.m */,
 				19200BD1216F65B000EF7D6F /* ViewController.h */,
 				19200BD2216F65B100EF7D6F /* ViewController.m */,
-				642857D723766C44003DFEE5 /* PPlayerMidlle.h */,
-				642857D823766C44003DFEE5 /* PPlayerMidlle.mm */,
 				197EF9A2221AAF850015F02F /* PPlayerController.h */,
 				197EF9A3221AAF850015F02F /* PPlayerController.m */,
 				19200BD4216F65B100EF7D6F /* Main.storyboard */,
@@ -570,6 +572,32 @@
 			path = include;
 			sourceTree = "<group>";
 		};
+		3617FE2C23A141DB00370250 /* platform */ = {
+			isa = PBXGroup;
+			children = (
+				3617FE2D23A1420900370250 /* android */,
+				3617FE2E23A1420900370250 /* ios */,
+			);
+			path = platform;
+			sourceTree = "<group>";
+		};
+		3617FE2D23A1420900370250 /* android */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = android;
+			sourceTree = "<group>";
+		};
+		3617FE2E23A1420900370250 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				3617FE3123A1424300370250 /* PPlayerDelegate.h */,
+				3617FE3223A1424300370250 /* PPlayerMidlle.h */,
+				3617FE3023A1424300370250 /* PPlayerMidlle.mm */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
 		365936E423880DA300C98247 /* GLES2 */ = {
 			isa = PBXGroup;
 			children = (
@@ -608,6 +636,7 @@
 		369BDCE8237FAE68001A9EBC /* mediaCore */ = {
 			isa = PBXGroup;
 			children = (
+				3617FE2C23A141DB00370250 /* platform */,
 				369BDCE9237FAE68001A9EBC /* mediaKernel */,
 				369BDCFC237FAE68001A9EBC /* mediaMiddle */,
 			);
@@ -634,6 +663,8 @@
 				369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */,
 				369BDCF0237FAE68001A9EBC /* VideoDecodeThread.h */,
 				369BDCF2237FAE68001A9EBC /* AvSyncClock.h */,
+				368610C023A0A78500900CD0 /* mediaListener.cpp */,
+				368610C123A0A78500900CD0 /* mediaListener.h */,
 				369BDCF8237FAE68001A9EBC /* AvSyncClock.cpp */,
 				369BDCF9237FAE68001A9EBC /* VideoRefreshThread.h */,
 				369BDCF7237FAE68001A9EBC /* VideoRefreshThread.cpp */,
@@ -1084,6 +1115,7 @@
 				19200BD3216F65B100EF7D6F /* ViewController.m in Sources */,
 				19200BDE216F65B200EF7D6F /* main.m in Sources */,
 				19200BD0216F65B000EF7D6F /* AppDelegate.m in Sources */,
+				3617FE3323A1424300370250 /* PPlayerMidlle.mm in Sources */,
 				36C7A743238C0C6D003250C1 /* render_frame.m in Sources */,
 				369BDD05237FAE68001A9EBC /* VideoRefreshThread.cpp in Sources */,
 				369BDD08237FAE68001A9EBC /* PPlayer.cpp in Sources */,
@@ -1091,7 +1123,7 @@
 				365936EC23880DA300C98247 /* compileShaderTool.m in Sources */,
 				365F1DF8239C9A2900202B26 /* messageQueue.cpp in Sources */,
 				369BDD04237FAE68001A9EBC /* FrameQueueFunc.cpp in Sources */,
-				642857D923766C45003DFEE5 /* PPlayerMidlle.mm in Sources */,
+				368610C223A0A78500900CD0 /* mediaListener.cpp in Sources */,
 				36C7A73D238C0C14003250C1 /* OpenGLView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1283,7 +1315,7 @@
 					"$(PROJECT_DIR)/PPlayer/x264-iOS/lib",
 					"$(PROJECT_DIR)/PPlayer/fdk-aac-ios/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = KevinQiu.PPlayer;
+				PRODUCT_BUNDLE_IDENTIFIER = "KevinQiu.PPlayer-qkl6";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1316,7 +1348,7 @@
 					"$(PROJECT_DIR)/PPlayer/x264-iOS/lib",
 					"$(PROJECT_DIR)/PPlayer/fdk-aac-ios/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = KevinQiu.PPlayer;
+				PRODUCT_BUNDLE_IDENTIFIER = "KevinQiu.PPlayer-qkl6";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";

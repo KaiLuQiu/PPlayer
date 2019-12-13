@@ -41,8 +41,6 @@ typedef struct PlayerContext_T {
         videoDecoder = NULL;
         audioDecoder = NULL;
         
-        
-        
         video_flush_pkt = new AVPacket();
         audio_flush_pkt = new AVPacket();
         

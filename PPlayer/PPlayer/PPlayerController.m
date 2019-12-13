@@ -11,13 +11,14 @@
 #import <AVFoundation/AVFoundation.h>
 #import <GameController/GameController.h>
 #import <CoreMotion/CoreMotion.h>
-
+#import "PPlayerDelegate.h"
 #import "PPlayerMidlle.h"
 #import "OpenGLView.h"
 #include "render_frame.h"
 
-@interface PPlayerController () {
+@interface PPlayerController ()<OnPreparedListener, OnCompletionListener, OnSeekCompletionListener, OnErrorListener, OnInfoListener> {
     PPlayerMidlle *_player;
+    OpenGLView *playerView;
     dispatch_source_t _timer;
 }
 
@@ -32,13 +33,68 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    [self InitGLView];
+    [self InitText];
+    [self InitLabel];
+    [self InitButton];
+    [self InitSlider];
     
     NSString* path = [self getFileFromMainbundleAbsolutePath:@"video/hiphop.mp4"];
-    self.view.backgroundColor = [UIColor whiteColor];
-    OpenGLView *playerView = [[OpenGLView alloc] initWithFrame:CGRectMake(0, 100, self.view.frame.size.width, self.view.frame.size.width/16*9)];
+    _player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
+    [_player setView:(__bridge void *)(playerView)];
+    
+    // 设置监听器
+    [self setPlayerStateListener];
+    
+    [self PrepareAsync];
+    
+    [self GetPlayerTimeInfo];
+}
+
+#pragma mark 初始化GLView
+- (void) InitGLView {
+    playerView = [[OpenGLView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
     playerView.backgroundColor = [UIColor blackColor];
     [self.view addSubview:playerView];
+}
+
+#pragma mark 初始化label控件
+- (void) InitLabel {
+    _pCurPos = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 29, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pCurPos.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pCurPos];
     
+    _pCurDuration = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 32, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pCurDuration.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pCurDuration];
+    
+    _pVolumeText = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 38, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 1)];
+    _pVolumeText.textColor = [UIColor orangeColor];
+    _pVolumeText.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pVolumeText];
+}
+
+#pragma mark 初始化文本控件
+- (void) InitText {
+    _pText = [[UITextField alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
+    _pText.textColor = [UIColor redColor];
+    _pText.textAlignment = NSTextAlignmentCenter;
+    [_pText setText:@"正常播放:"];
+    [self.view addSubview:_pText];
+}
+
+#pragma mark 初始化滑杆控件
+- (void) InitSlider {
+    _pVolumeSilder = [[UISlider alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 35, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 2)];
+    _pVolumeSilder.continuous = YES;
+    _pVolumeSilder.minimumValue = 0;
+    _pVolumeSilder.maximumValue = 100;
+    [_pVolumeSilder addTarget:self action:@selector(VolumeSlider:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:_pVolumeSilder];
+}
+#pragma mark 初始化按钮控件
+- (void) InitButton {
     _pStartButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _pStartButton.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 20, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
     [_pStartButton setTitle:@"开始播放" forState:UIControlStateNormal];
@@ -47,14 +103,7 @@
     _pStartButton.backgroundColor = [UIColor colorWithRed:0 green:1 blue:0 alpha:1];
     [_pStartButton addTarget:self action:@selector(clickStartButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_pStartButton];
-    
-    _pText = [[UITextField alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
-    _pText.textColor = [UIColor redColor];
-    _pText.textAlignment = NSTextAlignmentCenter;
-    [_pText setText:@"正常播放:"];
-    [self.view addSubview:_pText];
-    
-    
+
     _pPauseSwitch = [[UISwitch alloc] init];
     _pPauseSwitch.frame = CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 23, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
     _pPauseSwitch.on = NO;
@@ -73,42 +122,14 @@
     [_pStopButton addTarget:self action:@selector(clickStopButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_pStopButton];
     
-    _pCurPos = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 29, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
-    _pCurPos.textAlignment = NSTextAlignmentCenter;
-    [self.view addSubview:_pCurPos];
-    
-    _pCurDuration = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 30, SCREENHEIGHT_D40 * 32, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2)];
-    _pCurDuration.textAlignment = NSTextAlignmentCenter;
-    [self.view addSubview:_pCurDuration];
-    
-    _pVolumeSilder = [[UISlider alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 35, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 2)];
-    _pVolumeSilder.continuous = YES;
-    _pVolumeSilder.minimumValue = 0;
-    _pVolumeSilder.maximumValue = 100;
-    [_pVolumeSilder addTarget:self action:@selector(VolumeSlider:) forControlEvents:UIControlEventValueChanged];
-    [self.view addSubview:_pVolumeSilder];
-    
-    _player = [[PPlayerMidlle alloc] initPlayer:[path UTF8String]];
-    [_player setView:(__bridge void *)(playerView)];
-    [_player prepareAsync];
-    
-    _pVolumeText = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 38, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 1)];
-    _pVolumeText.textColor = [UIColor orangeColor];
-    _pVolumeText.textAlignment = NSTextAlignmentCenter;
-    [self.view addSubview:_pVolumeText];
-    
-    
-    _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
-    dispatch_source_set_timer(_timer, DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC, 0);
-    dispatch_source_set_event_handler(_timer, ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            int64_t curPos = [_player getCurPos];
-            _pCurPos.text = [self timeToStr:curPos];
-            int64_t duration = [_player getDuration];
-            _pCurDuration.text = [self timeToStr:duration];
-        });
-    });
-    dispatch_resume(_timer);
+    _pSeekButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    _pSeekButton.frame = CGRectMake(SCREENWIDTH_D40 * 25, SCREENHEIGHT_D40 * 20, SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 2);
+    [_pSeekButton setTitle:@"seek" forState:UIControlStateNormal];
+    [_pSeekButton setTitleColor:[UIColor colorWithRed:1 green:1 blue:1 alpha:1] forState:(UIControlState)UIControlStateNormal];
+    _pSeekButton.contentMode = UIViewContentModeCenter;
+    _pSeekButton.backgroundColor = [UIColor colorWithRed:0 green:1 blue:0 alpha:1];
+    [_pSeekButton addTarget:self action:@selector(clickSeekButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_pSeekButton];
 }
 
 - (void)dealloc{
@@ -142,11 +163,32 @@
     }
 }
 
+- (void)clickSeekButton:(id)sender {
+    if(self.pSeekButton == nil) {
+        return;
+    }
+    [_player seek:0.5];
+}
+
 - (void)VolumeSlider:(id)sender {
     UISlider *slider = (UISlider *)sender;
     _pVolumeText.text = [NSString stringWithFormat:@"%.0f", slider.value];
     float value = slider.value;
     [_player setVolume:value];
+}
+
+- (void)GetPlayerTimeInfo {
+    _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+    dispatch_source_set_timer(_timer, DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC, 0);
+    dispatch_source_set_event_handler(_timer, ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            int64_t curPos = [_player getCurPos];
+            _pCurPos.text = [self timeToStr:curPos];
+            int64_t duration = [_player getDuration];
+            _pCurDuration.text = [self timeToStr:duration];
+        });
+    });
+    dispatch_resume(_timer);
 }
 
 #pragma mark 时间转换工具
@@ -175,5 +217,44 @@
     return [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], fileCompent];
 }
 
+#pragma mark 设置监听器
+-(void) setPlayerStateListener {
+    [_player setOnPreparedListener:self];
+    [_player setOnInfoListener:self];
+    [_player setOnErrorListener:self];
+    [_player setOnCompletionListener:self];
+    [_player setOnSeekCompletionListener:self];
+}
+
+#pragma mark PrepareAsync
+-(void)PrepareAsync{
+    [_player prepareAsync];
+}
+
+#pragma mark PPlayer PROTOCOL
+#pragma mark - OnPreparedListener
+-(void) onPrepared {
+    printf("pplayer: Prepared !!!\n");
+}
+
+#pragma mark - OnCompletionListener
+-(void) onCompletion {
+    
+}
+
+#pragma mark - OnSeekCompletionListener
+-(void) OnSeekCompletion {
+    
+}
+
+#pragma mark - OnErrorListener
+-(void) OnError {
+    
+}
+
+#pragma mark - OnInfoListener
+-(void) OnInfo {
+    
+}
 @end
 

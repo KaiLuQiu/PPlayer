@@ -144,7 +144,6 @@ void PacketQueueFunc::packet_queue_flush(PacketQueue *q)
     for(; item != q->AvPacketList.end(); )
     {
         std::list<P_AVPacket *>::iterator item_e = item++;
-//        SAFE_DELETE(*item_e);
         av_packet_unref(&(*item_e)->pkt);           //先释放avpacket
         av_freep(&(*item_e));
         q->AvPacketList.erase(item_e);

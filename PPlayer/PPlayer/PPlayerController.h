@@ -17,10 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
 #define SCREENWIDTH_D40     (SCREENWIDTH / 40)
 #define SCREENHEIGHT_D40    (SCREENHEIGHT / 40)
 
-
 @property (nonatomic, strong) UIButton*         pStartButton;
 @property (retain,nonatomic)  UISwitch*         pPauseSwitch;
 @property (nonatomic, strong) UIButton*         pStopButton;
+@property (nonatomic, strong) UIButton*         pSeekButton;
+
 @property (nonatomic)         UITextField*      pText;
 @property (nonatomic)         UILabel*          pCurPos;
 @property (nonatomic)         UILabel*          pCurDuration;

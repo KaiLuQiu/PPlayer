@@ -25,6 +25,8 @@
 		3604E91E23801C6300E693D4 /* video in Resources */ = {isa = PBXBuildFile; fileRef = 3604E91D23801C6300E693D4 /* video */; };
 		3617FE3323A1424300370250 /* PPlayerMidlle.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3617FE3023A1424300370250 /* PPlayerMidlle.mm */; };
 		3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */; };
+		36504E3823A4A415002036C5 /* EventHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36504E3523A4A414002036C5 /* EventHandler.cpp */; };
+		36504E3923A4A415002036C5 /* Message.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36504E3723A4A415002036C5 /* Message.cpp */; };
 		365936EC23880DA300C98247 /* compileShaderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 365936E623880DA300C98247 /* compileShaderTool.m */; };
 		365936ED23880DA300C98247 /* mvp_vsh.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 365936E923880DA300C98247 /* mvp_vsh.glsl */; };
 		365936EE23880DA300C98247 /* YUV420P_fsh.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 365936EB23880DA300C98247 /* YUV420P_fsh.glsl */; };
@@ -184,6 +186,10 @@
 		3617FE3223A1424300370250 /* PPlayerMidlle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPlayerMidlle.h; sourceTree = "<group>"; };
 		3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PacketQueueFunc.cpp; sourceTree = "<group>"; };
 		3625584B2380C3CE00BB843F /* PacketQueueFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueueFunc.h; sourceTree = "<group>"; };
+		36504E3423A4A414002036C5 /* EventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventHandler.h; sourceTree = "<group>"; };
+		36504E3523A4A414002036C5 /* EventHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EventHandler.cpp; sourceTree = "<group>"; };
+		36504E3623A4A415002036C5 /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Message.h; sourceTree = "<group>"; };
+		36504E3723A4A415002036C5 /* Message.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Message.cpp; sourceTree = "<group>"; };
 		365936E623880DA300C98247 /* compileShaderTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = compileShaderTool.m; sourceTree = "<group>"; };
 		365936E723880DA300C98247 /* compileShaderTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compileShaderTool.h; sourceTree = "<group>"; };
 		365936E923880DA300C98247 /* mvp_vsh.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mvp_vsh.glsl; sourceTree = "<group>"; };
@@ -677,6 +683,10 @@
 		369BDCFC237FAE68001A9EBC /* mediaMiddle */ = {
 			isa = PBXGroup;
 			children = (
+				36504E3523A4A414002036C5 /* EventHandler.cpp */,
+				36504E3423A4A414002036C5 /* EventHandler.h */,
+				36504E3723A4A415002036C5 /* Message.cpp */,
+				36504E3623A4A415002036C5 /* Message.h */,
 				369BDCFD237FAE68001A9EBC /* PPlayer.h */,
 				369BDCFE237FAE68001A9EBC /* PPlayer.cpp */,
 			);
@@ -1111,6 +1121,7 @@
 				369BDD06237FAE68001A9EBC /* AvSyncClock.cpp in Sources */,
 				36C7A744238C0C6D003250C1 /* OpenGLView.m in Sources */,
 				369BDD00237FAE68001A9EBC /* mediaCore.cpp in Sources */,
+				36504E3823A4A415002036C5 /* EventHandler.cpp in Sources */,
 				369BDCFF237FAE68001A9EBC /* MediaCommon.h in Sources */,
 				19200BD3216F65B100EF7D6F /* ViewController.m in Sources */,
 				19200BDE216F65B200EF7D6F /* main.m in Sources */,
@@ -1119,6 +1130,7 @@
 				36C7A743238C0C6D003250C1 /* render_frame.m in Sources */,
 				369BDD05237FAE68001A9EBC /* VideoRefreshThread.cpp in Sources */,
 				369BDD08237FAE68001A9EBC /* PPlayer.cpp in Sources */,
+				36504E3923A4A415002036C5 /* Message.cpp in Sources */,
 				3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */,
 				365936EC23880DA300C98247 /* compileShaderTool.m in Sources */,
 				365F1DF8239C9A2900202B26 /* messageQueue.cpp in Sources */,

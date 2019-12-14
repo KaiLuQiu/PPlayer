@@ -11,7 +11,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import <GameController/GameController.h>
 #import <CoreMotion/CoreMotion.h>
-#import "PPlayerDelegate.h"
 #import "PPlayerMidlle.h"
 #import "OpenGLView.h"
 #include "render_frame.h"

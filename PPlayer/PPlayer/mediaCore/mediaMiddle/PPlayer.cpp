@@ -16,12 +16,23 @@ SDL_mutex* PPlayer::mutex = SDL_CreateMutex();
 
 PPlayer::PPlayer()
 {
-    pPlayerContext = new PlayerContext();
+    
+    pPlayerContext = new (std::nothrow)PlayerContext();
+    if (NULL == pPlayerContext) {
+        printf("new player fail!!! \n");
+    }
+    handler = new (std::nothrow)EventHandler();
+    if (NULL == handler) {
+        printf("new handler fail!!! \n");
+    }
+    handler->setMediaPlayer(this);
     pPlayerContext->volumeValue = 50.0;
 }
+
 PPlayer::~PPlayer()
 {
     SAFE_DELETE(pPlayerContext);
+    SAFE_DELETE(handler);
 }
 
 // 这边暂时只保留url信息
@@ -33,6 +44,7 @@ void PPlayer::setDataSource(std::string url)
 int PPlayer::setView(void *view)
 {
     VideoRefreshThread::getIntanse()->setView(view);
+    
     return 1;
 }
 
@@ -58,6 +70,9 @@ void PPlayer::prepareAsync()
     }
     // 这边一般要render第一帧之后才能上发prepared消息
     pPlayerContext->playerState = PLAYER_STATE_PREPARED;
+    Message msg;
+    msg.m_what = 1;
+    handler->sendMessage(msg);
 }
 
 void PPlayer::prepare()
@@ -198,5 +213,31 @@ void PPlayer::setVolume(float value)
     }
 }
 
+void PPlayer::mEventHandler(Message& msg)
+{
+    switch(msg.m_what){
+    case PPLAYER_MEDIA_NOP:
+        break;
 
+    case PPLAYER_MEDIA_SEEK:
+        break;
+
+    case PPLAYER_MEDIA_PREPARED:
+        break;
+
+    case PPLAYER_MEDIA_SEEK_COMPLETE:
+        break;
+
+    case PPLAYER_MEDIA_SEEK_FAIL:
+        break;
+
+    case PPLAYER_MEDIA_ON_COMPLETE:
+        break;
+
+    default:
+        break;
+    }
+
+    printf("in hander mssage %d\n", msg.m_what);
+}
 NS_MEDIA_END

@@ -16,9 +16,22 @@
 #include "AudioDecodeThread.h"
 #include "VideoRefreshThread.h"
 #include "AudioRefreshThread.h"
-
+#include "EventHandler.h"
+#include "Message.h"
 
 NS_MEDIA_BEGIN
+
+typedef enum {
+    PPLAYER_MEDIA_NOP,
+    PPLAYER_MEDIA_PREPARED,
+    PPLAYER_MEDIA_SEEK,
+    PPLAYER_MEDIA_SEEK_FAIL,
+    PPLAYER_MEDIA_SEEK_COMPLETE,
+    PPLAYER_MEDIA_ON_COMPLETE,
+    PPLAYER_MEDIA_PAUSE,
+    PPLAYER_MEDIA_ERROR,
+};
+
 class PPlayer
 {
 public:
@@ -126,6 +139,10 @@ public:
     PPlayer();
     
     /*
+     * mEventHandler
+     */
+    void mEventHandler(Message& msg);
+    /*
      * 获析构函数一定不能私有话，否则可能导致内存泄漏
      */
     virtual ~PPlayer();
@@ -133,6 +150,7 @@ private:
     PlayerContext *pPlayerContext;
     static PPlayer *p_Player;
     static SDL_mutex *mutex;
+    EventHandler *handler;
     std::string pUrl;
 };
 

@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#ifndef PPlayerDelegate_H
+#define PPlayerDelegate_H
 
 @protocol OnPreparedListener <NSObject>
 -(void) onPrepared;
@@ -27,3 +29,5 @@
 @protocol OnInfoListener <NSObject>
 -(void) onCompletion;
 @end
+
+#endif

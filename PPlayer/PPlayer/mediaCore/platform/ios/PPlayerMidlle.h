@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "PPlayerDelegate.h"
-
+#ifndef PPlayerMidlle_H
+#define PPlayerMidlle_H
 
 @interface PPlayerMidlle : NSObject
 
@@ -20,7 +21,6 @@
 @property (nonatomic, assign) id <OnSeekCompletionListener> pSeekCompletionListener;
 @property (nonatomic, assign) id <OnErrorListener> pErrorListener;
 @property (nonatomic, assign) id <OnInfoListener> pInfoListener;
-
 
 -(id) initPlayer:(const char*)URL;
 
@@ -74,3 +74,5 @@
 
 @end
 
+
+#endif

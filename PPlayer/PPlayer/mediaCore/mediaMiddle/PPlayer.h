@@ -21,17 +21,6 @@
 
 NS_MEDIA_BEGIN
 
-typedef enum {
-    PPLAYER_MEDIA_NOP,
-    PPLAYER_MEDIA_PREPARED,
-    PPLAYER_MEDIA_SEEK,
-    PPLAYER_MEDIA_SEEK_FAIL,
-    PPLAYER_MEDIA_SEEK_COMPLETE,
-    PPLAYER_MEDIA_ON_COMPLETE,
-    PPLAYER_MEDIA_PAUSE,
-    PPLAYER_MEDIA_ERROR,
-};
-
 class PPlayer
 {
 public:
@@ -150,7 +139,7 @@ private:
     PlayerContext *pPlayerContext;
     static PPlayer *p_Player;
     static SDL_mutex *mutex;
-    EventHandler *handler;
+    EventHandler *pHandler;
     std::string pUrl;
 };
 

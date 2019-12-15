@@ -24,10 +24,14 @@ AudioDecodeThread::~AudioDecodeThread()
 AudioDecodeThread::AudioDecodeThread()
 {
     needStop = 0;
+    pHandler = NULL;
 }
 
-bool AudioDecodeThread::init(PlayerContext *playerContext)
+bool AudioDecodeThread::init(PlayerContext *playerContext, EventHandler *handler)
 {
+    if (NULL == handler || NULL == playerContext)
+        return false;
+    pHandler = handler;
     pPlayerContext = playerContext;
     if(pPlayerContext->audioPacketQueueFunc == NULL)
     {
@@ -44,8 +48,6 @@ bool AudioDecodeThread::init(PlayerContext *playerContext)
     
     // 初始化audio的同步时钟
     AvSyncClock::init_clock(&pPlayerContext->AudioClock, &pPlayerContext->audioRingBuffer.serial);
-
-    
     return true;
     
 }

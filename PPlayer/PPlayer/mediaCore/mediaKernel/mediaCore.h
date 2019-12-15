@@ -9,6 +9,7 @@
 #ifndef mediaCore_H
 #define mediaCore_H
 #include "MediaDefineInfo.h"
+#include "EventHandler.h"
 #include <string>
 NS_MEDIA_BEGIN
 
@@ -43,8 +44,8 @@ public:
     /*
      * mediaCore初始化
      */
-    void Init(PlayerContext *p_PlayerContext);
-    
+    bool Init(PlayerContext *playerContext, EventHandler *handler);
+
     /*
      * 根据url打开流信息
      */
@@ -95,6 +96,7 @@ private:
      * 开启audio解码器
      */
     bool OpenAudioDecode(int streamIndex);
+    EventHandler *pHandler;
     static mediaCore *p_Core;
     static SDL_mutex *mutex;
     AVFormatContext *avFormatContext;

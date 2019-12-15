@@ -10,6 +10,7 @@
 #define VideoDecodeThread_H
 #include "MediaDefineInfo.h"
 #include <thread>
+#include "EventHandler.h"
 
 NS_MEDIA_BEGIN
 class VideoDecodeThread : public std::thread
@@ -35,7 +36,7 @@ public:
     /*
      * Video解码线程的初始化过程
      */
-    bool init(PlayerContext *playerContext);
+    bool init(PlayerContext *playerContext, EventHandler *handler);
     
     /*
      * Video解码线程主要运行代码
@@ -72,6 +73,7 @@ private:
     PlayerContext *pPlayerContext;
     static VideoDecodeThread* p_Decoder;
     static SDL_mutex *mutex;
+    EventHandler *pHandler;
     int needStop;
 };
 

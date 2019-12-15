@@ -34,7 +34,7 @@ typedef struct PlayerContext_T {
         frame_drops_late = 0;
         frame_drops_early = 0;
         volumeValue = 0;
-        playerState = PLAYER_STATE_NONE;
+        playerState = PLAYER_MEDIA_NOP;
         
         videoPacketQueueFunc = NULL;
         audioPacketQueueFunc = NULL;
@@ -69,7 +69,7 @@ typedef struct PlayerContext_T {
         frame_drops_late = 0.0;
         frame_drops_early = 0;
         volumeValue = 0;
-        playerState = PLAYER_STATE_NONE;
+        playerState = PLAYER_MEDIA_NOP;
 
         SAFE_DELETE(videoPacketQueueFunc);
         SAFE_DELETE(audioPacketQueueFunc);

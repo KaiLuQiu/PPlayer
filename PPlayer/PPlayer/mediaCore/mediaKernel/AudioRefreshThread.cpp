@@ -130,10 +130,10 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     }
 }
 
-
-int AudioRefreshThread::init(PlayerContext *pPlayer) {
-    if (NULL == pPlayer)
+bool AudioRefreshThread::init(PlayerContext *pPlayer, EventHandler *handler) {
+    if (NULL == handler || NULL == pPlayer)
         return -1;
+    pHandler = handler;
     pPlayerContext = pPlayer;
     buffer_size_index = 0;
     audio_clock = NAN;
@@ -444,6 +444,7 @@ void AudioRefreshThread::run() {
 }
 
 AudioRefreshThread::AudioRefreshThread() {
+    pHandler = NULL;
     pPlayerContext = NULL;
     bFirstFrame = 1;
     needStop = 0;

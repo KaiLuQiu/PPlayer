@@ -24,6 +24,7 @@ SDL_mutex *mediaCore::mutex = SDL_CreateMutex();      //类的静态指针需要
 mediaCore::mediaCore()
 {
     avFormatContext = NULL;
+    pHandler = NULL;
     swr_ctx = NULL;
     av_register_all();      // 挂载demuxer filter muxer decoder等
     avformat_network_init();
@@ -34,9 +35,13 @@ mediaCore::~mediaCore()
 
 }
 
-void mediaCore::Init(PlayerContext *playerContext)
+bool mediaCore::Init(PlayerContext *playerContext, EventHandler *handler)
 {
+    if (NULL == handler || NULL == playerContext)
+         return false;
+    pHandler = handler;
     p_PlayerContext = playerContext;
+    return true;
 }
 
 bool mediaCore::StreamOpen(std::string pUrl)

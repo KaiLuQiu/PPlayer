@@ -22,6 +22,7 @@ DemuxThread* DemuxThread::pDemuxer = nullptr;
 
 DemuxThread::DemuxThread()
 {
+    pHandler = NULL;
     seek_by_bytes = -1;
     pNeedStop = false;
     videoPackeQueueFunc = NULL;
@@ -39,8 +40,11 @@ DemuxThread::~DemuxThread()
     SAFE_DELETE(pMessageQueue);
 }
 
-void DemuxThread::init(PlayerContext *playerContext)
+bool DemuxThread::init(PlayerContext *playerContext, EventHandler *handler)
 {
+    if (NULL == handler || NULL == playerContext)
+        return false;
+    pHandler = handler;
     pPlayerContext = playerContext;
     videoRingBuffer = &playerContext->videoRingBuffer;
     audioRingBuffer = &playerContext->audioRingBuffer;
@@ -71,6 +75,7 @@ void DemuxThread::init(PlayerContext *playerContext)
     
     videoPackeQueueFunc->packet_queue_init(videoRingBuffer);
     audioPackeQueueFunc->packet_queue_init(audioRingBuffer);
+    return true;
 }
 
 void DemuxThread::flush()
@@ -118,12 +123,23 @@ void DemuxThread::run()
         if (true == pSeek) {
             if (pSeekPos != -1) {
                 ret = mediaCore::getIntanse()->Seek(pSeekPos, AVSEEK_FLAG_BACKWARD);
-                // 清空audio packet队列
-                audioPackeQueueFunc->packet_queue_flush(audioRingBuffer);
-                audioPackeQueueFunc->packet_queue_put(audioRingBuffer, pPlayerContext->audio_flush_pkt);
-                // 清空video packet队列
-                videoPackeQueueFunc->packet_queue_flush(videoRingBuffer);
-                videoPackeQueueFunc->packet_queue_put(videoRingBuffer, pPlayerContext->video_flush_pkt);
+                if (ret >= 0) {
+                    // 清空audio packet队列
+                    audioPackeQueueFunc->packet_queue_flush(audioRingBuffer);
+                    audioPackeQueueFunc->packet_queue_put(audioRingBuffer, pPlayerContext->audio_flush_pkt);
+                    // 清空video packet队列
+                    videoPackeQueueFunc->packet_queue_flush(videoRingBuffer);
+                    videoPackeQueueFunc->packet_queue_put(videoRingBuffer, pPlayerContext->video_flush_pkt);
+                    // 清空PCMBuffer
+                    AudioRefreshThread::getIntanse()->flush();
+                    // 发送seek完成的消息
+                    if (NULL != pHandler)
+                        pHandler->sendOnSeekCompletion();
+                } else {
+                    // 发送seek 失败的消息
+                    if (NULL != pHandler)
+                        pHandler->sendOnSeekFail();
+                }
             }
             pSeekPos = -1;
             pSeek = false;

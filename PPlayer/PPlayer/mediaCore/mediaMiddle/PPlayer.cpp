@@ -21,18 +21,18 @@ PPlayer::PPlayer()
     if (NULL == pPlayerContext) {
         printf("new player fail!!! \n");
     }
-    handler = new (std::nothrow)EventHandler();
-    if (NULL == handler) {
+    pHandler = new (std::nothrow)EventHandler();
+    if (NULL == pHandler) {
         printf("new handler fail!!! \n");
     }
-    handler->setMediaPlayer(this);
+    pHandler->setMediaPlayer(this);
     pPlayerContext->volumeValue = 50.0;
 }
 
 PPlayer::~PPlayer()
 {
     SAFE_DELETE(pPlayerContext);
-    SAFE_DELETE(handler);
+    SAFE_DELETE(pHandler);
 }
 
 // 这边暂时只保留url信息
@@ -44,24 +44,23 @@ void PPlayer::setDataSource(std::string url)
 int PPlayer::setView(void *view)
 {
     VideoRefreshThread::getIntanse()->setView(view);
-    
     return 1;
 }
 
 void PPlayer::prepareAsync()
 {
-    mediaCore::getIntanse()->Init(pPlayerContext);
+    mediaCore::getIntanse()->Init(pPlayerContext, pHandler);
     // avformat和avcodec都打开了
     bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
     if(ret == true)
     {
-        DemuxThread::getIntanse()->init(pPlayerContext);
+        DemuxThread::getIntanse()->init(pPlayerContext, pHandler);
         // 初始化videodecoder，主要是startPacketQueue
-        VideoDecodeThread::getIntanse()->init(pPlayerContext);
-        VideoRefreshThread::getIntanse()->init(pPlayerContext);
-        AudioRefreshThread::getIntanse()->init(pPlayerContext);
+        VideoDecodeThread::getIntanse()->init(pPlayerContext, pHandler);
+        VideoRefreshThread::getIntanse()->init(pPlayerContext, pHandler);
+        AudioRefreshThread::getIntanse()->init(pPlayerContext, pHandler);
         // 初始化videodecoder，主要是startPacketQueue
-        AudioDecodeThread::getIntanse()->init(pPlayerContext);
+        AudioDecodeThread::getIntanse()->init(pPlayerContext, pHandler);
         // 开启demuxer线程读取数据包
         DemuxThread::getIntanse()->start();
         // videoDecode和audioDecode可以在prepareAsync的时候就开启，当显示线程则不可。为了加快第一帧的show
@@ -69,10 +68,7 @@ void PPlayer::prepareAsync()
         AudioDecodeThread::getIntanse()->start();
     }
     // 这边一般要render第一帧之后才能上发prepared消息
-    pPlayerContext->playerState = PLAYER_STATE_PREPARED;
-    Message msg;
-    msg.m_what = 1;
-    handler->sendMessage(msg);
+    pHandler->sendOnPrepared();
 }
 
 void PPlayer::prepare()
@@ -82,9 +78,9 @@ void PPlayer::prepare()
 
 bool PPlayer::start()
 {
-    pPlayerContext->playerState = PLAYER_STATE_START;
     VideoRefreshThread::getIntanse()->start();
     AudioRefreshThread::getIntanse()->start();
+    pHandler->sendOnStart();
     return true;
 }
 
@@ -100,7 +96,6 @@ bool PPlayer::pause(bool state)
         DemuxThread::getIntanse()->queueMessage(msg);
         pPlayerContext->AudioClock.paused = 1;
         pPlayerContext->VideoClock.paused = 1;
-        pPlayerContext->playerState = PLAYER_STATE_PAUSE;
     }
     else {
         msg.cmd = MESSAGE_CMD_START;
@@ -113,7 +108,6 @@ bool PPlayer::pause(bool state)
         DemuxThread::getIntanse()->queueMessage(msg);
         pPlayerContext->AudioClock.paused = 0;
         pPlayerContext->VideoClock.paused = 0;
-        pPlayerContext->playerState = PLAYER_STATE_START;
     }
     
     return true;
@@ -122,7 +116,7 @@ bool PPlayer::pause(bool state)
 int PPlayer::seek(float pos)
 {
     int ret;
-    if (PLAYER_STATE_NONE != pPlayerContext->playerState) {
+    if (PLAYER_MEDIA_NOP != pPlayerContext->playerState) {
         msgInfo msg;
         msg.cmd = MESSAGE_CMD_SEEK;
         msg.data = pos;
@@ -216,24 +210,44 @@ void PPlayer::setVolume(float value)
 void PPlayer::mEventHandler(Message& msg)
 {
     switch(msg.m_what){
-    case PPLAYER_MEDIA_NOP:
+    case PLAYER_MEDIA_NOP:
         break;
 
-    case PPLAYER_MEDIA_SEEK:
+    case PLAYER_MEDIA_SEEK:
         break;
 
-    case PPLAYER_MEDIA_PREPARED:
+    case PLAYER_MEDIA_PREPARED:
+            
+        pPlayerContext->playerState = PLAYER_MEDIA_PREPARED;
         break;
 
-    case PPLAYER_MEDIA_SEEK_COMPLETE:
+    case PLAYER_MEDIA_SEEK_COMPLETE:
         break;
 
-    case PPLAYER_MEDIA_SEEK_FAIL:
+    case PLAYER_MEDIA_SEEK_FAIL:
         break;
 
-    case PPLAYER_MEDIA_ON_COMPLETE:
+    case PLAYER_MEDIA_PLAYBACK_COMPLETE:
         break;
-
+            
+    case PLAYER_MEDIA_SET_VIDEO_SIZE:
+            
+        break;
+    case PLAYER_MEDIA_ERROR:
+            
+        break;
+            
+    case PLAYER_MEDIA_INFO:
+            
+        break;
+    case PLAYER_MEDIA_PAUSE:
+        
+        pPlayerContext->playerState = PLAYER_MEDIA_PAUSE;
+        break;
+    case PLAYER_MEDIA_START:
+            
+        pPlayerContext->playerState = PLAYER_MEDIA_START;
+        break;
     default:
         break;
     }

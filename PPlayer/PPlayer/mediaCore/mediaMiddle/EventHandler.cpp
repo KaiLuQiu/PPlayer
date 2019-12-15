@@ -77,6 +77,64 @@ void EventHandler::handleMessage(Message& msg)
     printf("in Hander %d\n!!!", msg.m_what);
 }
 
+void EventHandler::sendOnPrepared()
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_PREPARED;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnPause()
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_PAUSE;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnStart()
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_START;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnCompletion()
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_PLAYBACK_COMPLETE;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnSeekCompletion()
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_SEEK_COMPLETE;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnSeekFail()
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_SEEK_FAIL;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnError(int what, int arg1)
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_ERROR;
+    msg.m_arg1 = arg1;
+    sendMessage(msg);
+}
+
+void EventHandler::sendOnInfo(int what, int arg1)
+{
+    Message msg;
+    msg.m_what = PLAYER_MEDIA_INFO;
+    msg.m_arg1 = arg1;
+    sendMessage(msg);
+}
+
 bool EventHandler::sendMessageAtTime(Message& msg, long uptimeMillis)
 {
 	if(uptimeMillis < 0 )

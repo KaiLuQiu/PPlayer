@@ -17,6 +17,7 @@ VideoRefreshThread* VideoRefreshThread::p_VideoOut = nullptr;
 VideoRefreshThread::VideoRefreshThread()
 {
     pPlayerContext = NULL;
+    pHandler = NULL;
     bVideoFreeRun = 0;
     needStop = 0;
     framedrop = -1;
@@ -34,9 +35,13 @@ VideoRefreshThread::~VideoRefreshThread()
     SAFE_DELETE(pMessageQueue);
 }
 
-void VideoRefreshThread::init(PlayerContext *playerContext)
+bool VideoRefreshThread::init(PlayerContext *playerContext, EventHandler *handler)
 {
+    if (NULL == handler || NULL == playerContext)
+        return false;
+    pHandler = handler;
     pPlayerContext = playerContext;
+    return true;
 }
 
 void VideoRefreshThread::setView(void *view)
@@ -119,10 +124,17 @@ void VideoRefreshThread::run()
         // 从消息队列中获取一个消息
         if (pMessageQueue != NULL) {
             pMessageQueue->message_dequeue(pCurMessage);
-            if (MESSAGE_CMD_PAUSE == pCurMessage.cmd)
+            if (MESSAGE_CMD_PAUSE == pCurMessage.cmd) {
+                // 发送暂停状态的消息
+                if (NULL != pHandler)
+                    pHandler->sendOnPause();
                 pPause = true;
-            else if(MESSAGE_CMD_START == pCurMessage.cmd)
+            } else if(MESSAGE_CMD_START == pCurMessage.cmd) {
+                // 发送开始播放的消息
+                if (NULL != pHandler)
+                    pHandler->sendOnStart();
                 pPause = false;
+            }
         }
         
         if (!pPlayerContext)

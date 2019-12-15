@@ -18,7 +18,7 @@ VideoDecodeThread* VideoDecodeThread::p_Decoder = nullptr;
 
 VideoDecodeThread::VideoDecodeThread()
 {
-    
+    pHandler = NULL;
 }
 
 VideoDecodeThread::~VideoDecodeThread()
@@ -107,10 +107,12 @@ int VideoDecodeThread::decoder_decode_frame(const AVPacket *VideoPkt, AVFrame *f
     return ret;
 }
 
-bool VideoDecodeThread::init(PlayerContext *playerContext)
+bool VideoDecodeThread::init(PlayerContext *playerContext, EventHandler *handler)
 {
+    if (NULL == handler || NULL == playerContext)
+        return false;
     pPlayerContext = playerContext;
-        
+    pHandler = handler;
     if(pPlayerContext->videoPacketQueueFunc == NULL)
     {
         printf("pPlayerContext videoPacketQueueFunc is NULL \n");

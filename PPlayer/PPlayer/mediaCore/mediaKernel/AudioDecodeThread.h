@@ -10,6 +10,8 @@
 #define AudioDecodeThread_H
 #include "MediaDefineInfo.h"
 #include <thread>
+#include "EventHandler.h"
+
 NS_MEDIA_BEGIN
 
 class AudioDecodeThread : public std::thread
@@ -35,7 +37,7 @@ public:
     /*
      * Audio解码线程的初始化过程
      */
-    bool init(PlayerContext *playerContext);
+    bool init(PlayerContext *playerContext, EventHandler *handler);
     
     /*
      * Audio解码线程的主要运行代码
@@ -82,6 +84,7 @@ private:
     static AudioDecodeThread *p_Decoder;
     static SDL_mutex *mutex;
     PlayerContext *pPlayerContext;
+    EventHandler *pHandler;
     int needStop;
 };
 

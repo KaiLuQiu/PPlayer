@@ -25,15 +25,36 @@ public:
 	virtual ~EventHandler();
     void setMediaPlayer(PPlayer *player);
 
+    void sendOnStart();
+    
+    void sendOnPause();
+    
+    void sendOnPrepared();
+    
+    void sendOnCompletion();
+    
+    void sendOnSeekCompletion();
+    
+    void sendOnSeekFail();
+    
+    void sendOnError(int what, int arg1);
+    
+    void sendOnInfo(int what, int arg1);
+    
 	bool sendMessageAtTime(Message& msg, long uptimeMillis);
+    
 	bool sendMessage(Message& msg);
+    
 	bool sendEmptyMessage(int what);
+    
 	bool sendEmptyMessage(int what, long uptimeMillis);
 
 	bool post(Message::Function f);
+    
 	bool postAtTime(Message::Function f, long uptimeMillis);
 
 	void removeMessages(int what);
+    
 	void removeCallbackAndMessages();
 
 	void stopSafty(bool stopSafty);

@@ -11,6 +11,7 @@
 #include <thread>
 #include "MediaDefineInfo.h"
 #include "PacketQueueFunc.h"
+#include "EventHandler.h"
 
 NS_MEDIA_BEGIN
 // 15M
@@ -45,8 +46,8 @@ public:
     /*
      * demux线程的初始化过程
      */
-    void init(PlayerContext *playerContext);
-    
+    bool init(PlayerContext *playerContext, EventHandler *handler);
+
     /*
      * demux线程主要运行的代码
      */
@@ -83,6 +84,7 @@ private:
     static SDL_mutex *mutex;
     static DemuxThread* pDemuxer;
     bool pNeedStop;
+    EventHandler *pHandler;
     // 存储demuxer出来的未解码的序列帧
     PacketQueue *videoRingBuffer;
     // 存储demuxer出来的未解码的序列帧

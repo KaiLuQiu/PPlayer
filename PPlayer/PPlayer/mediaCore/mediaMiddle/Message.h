@@ -31,6 +31,7 @@ public:
 	Message(int what, int arg1);
 	Message(int what, int arg1, int arg2);
 	Message(int what, int arg1, int arg2,long uptimeMillis);
+    
 	virtual ~Message();
 
 	Message& operator=(const Message& msg);

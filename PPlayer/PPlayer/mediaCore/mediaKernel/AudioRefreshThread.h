@@ -11,6 +11,8 @@
 #include "MediaDefineInfo.h"
 #include <thread>
 #include "stdint.h"
+#include "EventHandler.h"
+
 NS_MEDIA_BEGIN
 
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
@@ -78,7 +80,7 @@ public:
     /*
      * Audio输出现场初始化过程
      */
-    int init(PlayerContext *pPlayer);
+    bool init(PlayerContext *pPlayer, EventHandler *handler);
     
     /*
      * 启动Audio输出
@@ -138,7 +140,7 @@ private:
 
     bool pPause;                               // 当前是否是pause状态
     bool pSeek;
-
+    EventHandler *pHandler;
     double audio_clock;
     int audio_clock_serial;
     int audio_hw_buf_size;                      // audio设置的hardWareSize大小

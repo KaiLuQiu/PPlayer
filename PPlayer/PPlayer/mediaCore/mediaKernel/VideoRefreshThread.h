@@ -9,6 +9,7 @@
 #ifndef VideoRefreshThread_H
 #define VideoRefreshThread_H
 #include "MediaDefineInfo.h"
+#include "EventHandler.h"
 #include <thread>
 extern "C" {
 #include "render_frame.h"
@@ -48,7 +49,7 @@ public:
     /*
      * Video输出线程的初始化过程
      */
-    void init(PlayerContext *playerContext);
+    bool init(PlayerContext *playerContext, EventHandler *handler);
     
     /*
      * Video输出线程的初始化过程
@@ -124,6 +125,7 @@ private:
     int framedrop;
     bool pPause;                          // 当前是否是pause状态
     static VideoRefreshThread* p_VideoOut;
+    EventHandler *pHandler;
     static SDL_mutex *mutex;
 };
 

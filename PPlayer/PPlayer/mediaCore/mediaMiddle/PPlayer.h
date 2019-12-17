@@ -17,7 +17,6 @@
 #include "VideoRefreshThread.h"
 #include "AudioRefreshThread.h"
 #include "EventHandler.h"
-#include "Message.h"
 
 NS_MEDIA_BEGIN
 
@@ -49,8 +48,8 @@ public:
     /*
      * 执行播放器的prepareAsync状态，此过程会开启demuxer, audiodecode videodecode等线程。做好初始化工作。
      */
-    void prepareAsync();
-    
+    bool prepareAsync();
+
     void prepare();
     
     /*
@@ -127,10 +126,9 @@ public:
     }
     PPlayer();
     
-    /*
-     * mEventHandler
-     */
-    void mEventHandler(Message& msg);
+    void pp_get_msg(Message& msg);
+    
+    void setHandle(EventHandler *handle);
     /*
      * 获析构函数一定不能私有话，否则可能导致内存泄漏
      */

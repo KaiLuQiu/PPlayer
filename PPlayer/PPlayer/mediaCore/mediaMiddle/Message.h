@@ -10,7 +10,6 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 #include "MediaCommon.h"
-
 #include <chrono>
 #include <functional>
 NS_MEDIA_BEGIN

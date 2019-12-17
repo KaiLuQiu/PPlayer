@@ -224,6 +224,7 @@
 		36C7A740238C0C6C003250C1 /* render_frame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = render_frame.m; sourceTree = "<group>"; };
 		36C7A741238C0C6C003250C1 /* OpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenGLView.m; sourceTree = "<group>"; };
 		36C7A742238C0C6C003250C1 /* render_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render_frame.h; sourceTree = "<group>"; };
+		36FAD14B23A85741007B4144 /* PPlayer_C_Interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPlayer_C_Interface.h; sourceTree = "<group>"; };
 		643A2D042377F9DD000426FB /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		643A2D052377F9DD000426FB /* buffersrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersrc.h; sourceTree = "<group>"; };
 		643A2D062377F9DD000426FB /* buffersink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersink.h; sourceTree = "<group>"; };
@@ -662,10 +663,10 @@
 				369BDCF1237FAE68001A9EBC /* MediaDefineInfo.h */,
 				369BDCED237FAE68001A9EBC /* DemuxThread.h */,
 				369BDCF3237FAE68001A9EBC /* DemuxThread.cpp */,
+				369BDCF5237FAE68001A9EBC /* mediaCore.h */,
 				369BDCEE237FAE68001A9EBC /* mediaCore.cpp */,
 				3625584A2380C3CE00BB843F /* PacketQueueFunc.cpp */,
 				3625584B2380C3CE00BB843F /* PacketQueueFunc.h */,
-				369BDCF5237FAE68001A9EBC /* mediaCore.h */,
 				369BDCEF237FAE68001A9EBC /* VideoDecodeThread.cpp */,
 				369BDCF0237FAE68001A9EBC /* VideoDecodeThread.h */,
 				369BDCF2237FAE68001A9EBC /* AvSyncClock.h */,
@@ -683,6 +684,7 @@
 		369BDCFC237FAE68001A9EBC /* mediaMiddle */ = {
 			isa = PBXGroup;
 			children = (
+				36FAD14B23A85741007B4144 /* PPlayer_C_Interface.h */,
 				36504E3523A4A414002036C5 /* EventHandler.cpp */,
 				36504E3423A4A414002036C5 /* EventHandler.h */,
 				36504E3723A4A415002036C5 /* Message.cpp */,

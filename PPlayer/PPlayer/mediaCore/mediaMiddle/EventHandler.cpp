@@ -12,7 +12,7 @@
 #include <iostream>
 #include "EventHandler.h"
 #include "Message.h"
-#include "PPlayer.h"
+#include "PPlayer_C_Interface.h"
 
 NS_MEDIA_BEGIN
 #define LOGENTER (std::cout << "This is FUNCTION " << __func__<<  std::endl)
@@ -64,7 +64,7 @@ EventHandler::~EventHandler()
 
 }
 
-void EventHandler::setMediaPlayer(PPlayer *player)
+void EventHandler::setMediaPlayer(void *player)
 {
     mediaPlayer = player;
 }
@@ -72,7 +72,7 @@ void EventHandler::setMediaPlayer(PPlayer *player)
 void EventHandler::handleMessage(Message& msg)
 {
     if(NULL != mediaPlayer) {
-        mediaPlayer->mEventHandler(msg);
+        msg_loop(mediaPlayer, msg);
     }
     printf("in Hander %d\n!!!", msg.m_what);
 }

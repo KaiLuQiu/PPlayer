@@ -17,13 +17,14 @@
 #include "Message.h"
 
 NS_MEDIA_BEGIN
-class PPlayer;
+//class PPlayer;
 
 class EventHandler{
 public:
 	EventHandler();
 	virtual ~EventHandler();
-    void setMediaPlayer(PPlayer *player);
+
+    void setMediaPlayer(void *player);
 
     void sendOnStart();
     
@@ -77,8 +78,8 @@ public:
 
 private:
 	std::vector<Message> msg_Q;
-    PPlayer *mediaPlayer;
     std::mutex queue_mutex;
+    void *mediaPlayer;
 	std::condition_variable condition;
 	std::thread looper;
 	bool stop;

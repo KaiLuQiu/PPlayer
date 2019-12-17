@@ -8,10 +8,12 @@
 
 #import "PPlayerMidlle.h"
 #include "PPlayer.h"
-
-
+#include "PPlayer_C_Interface.h"
+#include "EventHandler.h"
+#include "Message.h"
 @interface PPlayerMidlle ()
-
+    @property media::EventHandler *pHandler;
+    -(int) media_player_msg_loop:(media::Message &)msg;
 @end
 
 
@@ -21,7 +23,13 @@
     if(!(self = [super init])) {
         return nil;
     }
+    
     media::PPlayer::getInstance()->setDataSource(URL);
+    
+//    self.pHandler = new (std::nothrow)media::EventHandler();
+//    if (NULL == self.pHandler) {
+//        printf("new handler fail!!! \n");
+//    }
     return self;
 }
 
@@ -86,6 +94,62 @@
     media::PPlayer::getInstance()->setVolume(value);
 }
 
+-(void)dealloc {
+//    SAFE_DELETE(self.pHandler);
+}
+
+int msg_loop (void *self, media::Message &pParameter)
+{
+    // 通过将self指针桥接为oc 对象来调用oc方法
+    return [(__bridge id)self media_player_msg_loop:pParameter];
+    return 0;
+}
+
+-(int) media_player_msg_loop:(media::Message &)msg
+{
+//    media::PPlayer::getInstance()->pp_get_msg(msg);
+//       switch(msg.m_what)
+//       {
+//       case PLAYER_MEDIA_NOP:
+//           break;
+//
+//       case PLAYER_MEDIA_SEEK:
+//           break;
+//
+//       case PLAYER_MEDIA_PREPARED:
+//           break;
+//
+//       case PLAYER_MEDIA_SEEK_COMPLETE:
+//           break;
+//
+//       case PLAYER_MEDIA_SEEK_FAIL:
+//           break;
+//
+//       case PLAYER_MEDIA_PLAYBACK_COMPLETE:
+//           break;
+//
+//       case PLAYER_MEDIA_SET_VIDEO_SIZE:
+//
+//           break;
+//       case PLAYER_MEDIA_ERROR:
+//           break;
+//
+//       case PLAYER_MEDIA_INFO:
+//           break;
+//
+//       case PLAYER_MEDIA_PAUSE:
+//
+//           break;
+//       case PLAYER_MEDIA_START:
+//
+//           break;
+//       default:
+//           break;
+//       }
+//        printf("in hander mssage %d\n", msg.m_what);
+    return 0;
+}
+
 -(void)setOnPreparedListener:(id<OnPreparedListener>)listener {
     self.pPreparedListener = listener;
 }
@@ -105,5 +169,6 @@
 -(void)setOnInfoListener:(id<OnInfoListener>)listener {
     self.pInfoListener = listener;
 }
+
 
 @end

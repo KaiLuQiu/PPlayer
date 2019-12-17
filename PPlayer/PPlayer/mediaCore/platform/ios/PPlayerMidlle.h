@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "PPlayerDelegate.h"
+
 #ifndef PPlayerMidlle_H
 #define PPlayerMidlle_H
 
@@ -21,6 +22,7 @@
 @property (nonatomic, assign) id <OnSeekCompletionListener> pSeekCompletionListener;
 @property (nonatomic, assign) id <OnErrorListener> pErrorListener;
 @property (nonatomic, assign) id <OnInfoListener> pInfoListener;
+
 
 -(id) initPlayer:(const char*)URL;
 
@@ -46,6 +48,7 @@
 
 -(void)setVolume:(float)value;
 
+-(void)dealloc;
 
 /*
  * 设置准备完成监听器
@@ -73,6 +76,5 @@
 -(void)setOnInfoListener:(id<OnInfoListener>)listener;
 
 @end
-
 
 #endif

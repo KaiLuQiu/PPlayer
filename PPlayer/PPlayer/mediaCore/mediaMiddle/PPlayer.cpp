@@ -16,24 +16,25 @@ SDL_mutex* PPlayer::mutex = SDL_CreateMutex();
 
 PPlayer::PPlayer()
 {
-    
+    pHandler = NULL;
     pPlayerContext = new (std::nothrow)PlayerContext();
     if (NULL == pPlayerContext) {
         printf("new player fail!!! \n");
     }
-    pHandler = new (std::nothrow)EventHandler();
-    if (NULL == pHandler) {
-        printf("new handler fail!!! \n");
-    }
-    pHandler->setMediaPlayer(this);
+
     pPlayerContext->volumeValue = 50.0;
 }
 
 PPlayer::~PPlayer()
 {
     SAFE_DELETE(pPlayerContext);
-    SAFE_DELETE(pHandler);
 }
+
+void PPlayer::setHandle(EventHandler *handle)
+{
+    pHandler = handle;
+}
+
 
 // 这边暂时只保留url信息
 void PPlayer::setDataSource(std::string url)
@@ -47,8 +48,12 @@ int PPlayer::setView(void *view)
     return 1;
 }
 
-void PPlayer::prepareAsync()
+bool PPlayer::prepareAsync()
 {
+    if (NULL != pHandler && NULL != pPlayerContext) {
+        printf("prepareAsync error pHandler or pPlayerContext is NULL!!!\n");
+        return false;
+    }
     mediaCore::getIntanse()->Init(pPlayerContext, pHandler);
     // avformat和avcodec都打开了
     bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
@@ -69,6 +74,7 @@ void PPlayer::prepareAsync()
     }
     // 这边一般要render第一帧之后才能上发prepared消息
     pHandler->sendOnPrepared();
+    return true;
 }
 
 void PPlayer::prepare()
@@ -207,7 +213,7 @@ void PPlayer::setVolume(float value)
     }
 }
 
-void PPlayer::mEventHandler(Message& msg)
+void PPlayer::pp_get_msg(Message& msg)
 {
     switch(msg.m_what){
     case PLAYER_MEDIA_NOP:

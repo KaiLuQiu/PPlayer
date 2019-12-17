@@ -156,10 +156,8 @@ void DemuxThread::run()
             printf("ringbuffer is full\n");
             continue;
         }
-
         
         int ret = av_read_frame(pPlayerContext->ic, &pkt);
-
         if(ret < 0)
         {
             if ((ret == AVERROR_EOF || avio_feof(pPlayerContext->ic->pb)) && !pPlayerContext->eof) {

@@ -72,6 +72,11 @@
     _pVolumeText.textColor = [UIColor orangeColor];
     _pVolumeText.textAlignment = NSTextAlignmentCenter;
     [self.view addSubview:_pVolumeText];
+    
+    _pSeekText = [[UILabel alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 40, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 1)];
+    _pSeekText.textColor = [UIColor orangeColor];
+    _pSeekText.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:_pSeekText];
 }
 
 #pragma mark 初始化文本控件
@@ -91,6 +96,13 @@
     _pVolumeSilder.maximumValue = 100;
     [_pVolumeSilder addTarget:self action:@selector(VolumeSlider:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:_pVolumeSilder];
+    
+    _pSeekSilder = [[UISlider alloc] initWithFrame:CGRectMake(SCREENWIDTH_D40 * 10, SCREENHEIGHT_D40 * 37, SCREENWIDTH_D40 * 20, SCREENHEIGHT_D40 * 2)];
+    _pSeekSilder.continuous = NO;
+    _pSeekSilder.minimumValue = 0;
+    _pSeekSilder.maximumValue = 100;
+    [_pSeekSilder addTarget:self action:@selector(SeekSlider:) forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:_pSeekSilder];
 }
 #pragma mark 初始化按钮控件
 - (void) InitButton {
@@ -174,6 +186,13 @@
     _pVolumeText.text = [NSString stringWithFormat:@"%.0f", slider.value];
     float value = slider.value;
     [_player setVolume:value];
+}
+
+- (void)SeekSlider:(id)sender {
+    UISlider *slider = (UISlider *)sender;
+    _pSeekText.text = [NSString stringWithFormat:@"%.0f", slider.value];
+    float value = slider.value / 100.f;
+    [_player seek:value];
 }
 
 - (void)GetPlayerTimeInfo {

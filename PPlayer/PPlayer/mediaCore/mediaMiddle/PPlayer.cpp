@@ -35,7 +35,6 @@ void PPlayer::setHandle(EventHandler *handle)
     pHandler = handle;
 }
 
-
 // 这边暂时只保留url信息
 void PPlayer::setDataSource(std::string url)
 {
@@ -50,7 +49,7 @@ int PPlayer::setView(void *view)
 
 bool PPlayer::prepareAsync()
 {
-    if (NULL != pHandler && NULL != pPlayerContext) {
+    if (NULL == pHandler && NULL == pPlayerContext) {
         printf("prepareAsync error pHandler or pPlayerContext is NULL!!!\n");
         return false;
     }
@@ -257,7 +256,5 @@ void PPlayer::pp_get_msg(Message& msg)
     default:
         break;
     }
-
-    printf("in hander mssage %d\n", msg.m_what);
 }
 NS_MEDIA_END

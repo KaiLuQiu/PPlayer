@@ -10,6 +10,6 @@
 #define PPlayer_C_Interface_H
 #include "Message.h"
 NS_MEDIA_BEGIN
-int msg_loop (void *self, media::Message &pParameter);
+typedef void (*msg_loop) (void* playerInstance, Message &msg);
 NS_MEDIA_END
 #endif

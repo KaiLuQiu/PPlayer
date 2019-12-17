@@ -5,14 +5,10 @@
 //  Created by 邱开禄 on 2019/12/13.
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
-
-
 #include <chrono>
 #include <algorithm>
 #include <iostream>
 #include "EventHandler.h"
-#include "Message.h"
-#include "PPlayer_C_Interface.h"
 
 NS_MEDIA_BEGIN
 #define LOGENTER (std::cout << "This is FUNCTION " << __func__<<  std::endl)
@@ -20,6 +16,7 @@ EventHandler::EventHandler():stop(false),stopWhenEmpty(false)
 {
     // lamda表达式，创建一个looper线程
     mediaPlayer = NULL;
+    msgLoopCallBack = NULL;
 	looper = std::thread( [this]() -> void{
 			for(;;)
 			{
@@ -64,15 +61,16 @@ EventHandler::~EventHandler()
 
 }
 
-void EventHandler::setMediaPlayer(void *player)
+void EventHandler::setMediaPlayer(void *playerInstance, msg_loop callback)
 {
-    mediaPlayer = player;
+    mediaPlayer = playerInstance;
+    msgLoopCallBack = callback;
 }
 
 void EventHandler::handleMessage(Message& msg)
 {
-    if(NULL != mediaPlayer) {
-        msg_loop(mediaPlayer, msg);
+    if(NULL != mediaPlayer && NULL != msgLoopCallBack) {
+        msgLoopCallBack(mediaPlayer, msg);
     }
     printf("in Hander %d\n!!!", msg.m_what);
 }

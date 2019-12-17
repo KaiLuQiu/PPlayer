@@ -13,9 +13,9 @@
 #include "Message.h"
 @interface PPlayerMidlle ()
     @property media::EventHandler *pHandler;
+    @property media::msg_loop pMsgLoopCallback;
     -(int) media_player_msg_loop:(media::Message &)msg;
 @end
-
 
 @implementation PPlayerMidlle
 
@@ -23,20 +23,21 @@
     if(!(self = [super init])) {
         return nil;
     }
-    
     media::PPlayer::getInstance()->setDataSource(URL);
     
-//    self.pHandler = new (std::nothrow)media::EventHandler();
-//    if (NULL == self.pHandler) {
-//        printf("new handler fail!!! \n");
-//    }
+    self.pMsgLoopCallback = msg_loop;
+    
+    self.pHandler = new (std::nothrow)media::EventHandler();
+    if (NULL == self.pHandler) {
+        printf("new handler fail!!! \n");
+    }
+    self.pHandler->setMediaPlayer((__bridge void*)self, self.pMsgLoopCallback);
+    media::PPlayer::getInstance()->setHandle(self.pHandler);
     return self;
 }
 
 -(void) prepareAsync {
     media::PPlayer::getInstance()->prepareAsync();
-    if (self.pPreparedListener)
-        [self.pPreparedListener onPrepared];
 }
 
 -(void) setView:(void *)view
@@ -95,58 +96,67 @@
 }
 
 -(void)dealloc {
-//    SAFE_DELETE(self.pHandler);
+    SAFE_DELETE(self.pHandler);
 }
 
-int msg_loop (void *self, media::Message &pParameter)
+
+void msg_loop(void* playerInstance, media::Message & msg)
 {
     // 通过将self指针桥接为oc 对象来调用oc方法
-    return [(__bridge id)self media_player_msg_loop:pParameter];
-    return 0;
+    [(__bridge id)playerInstance media_player_msg_loop:msg];
 }
 
 -(int) media_player_msg_loop:(media::Message &)msg
 {
-//    media::PPlayer::getInstance()->pp_get_msg(msg);
-//       switch(msg.m_what)
-//       {
-//       case PLAYER_MEDIA_NOP:
-//           break;
-//
-//       case PLAYER_MEDIA_SEEK:
-//           break;
-//
-//       case PLAYER_MEDIA_PREPARED:
-//           break;
-//
-//       case PLAYER_MEDIA_SEEK_COMPLETE:
-//           break;
-//
-//       case PLAYER_MEDIA_SEEK_FAIL:
-//           break;
-//
-//       case PLAYER_MEDIA_PLAYBACK_COMPLETE:
-//           break;
-//
-//       case PLAYER_MEDIA_SET_VIDEO_SIZE:
-//
-//           break;
-//       case PLAYER_MEDIA_ERROR:
-//           break;
-//
-//       case PLAYER_MEDIA_INFO:
-//           break;
-//
-//       case PLAYER_MEDIA_PAUSE:
-//
-//           break;
-//       case PLAYER_MEDIA_START:
-//
-//           break;
-//       default:
-//           break;
-//       }
-//        printf("in hander mssage %d\n", msg.m_what);
+    media::PPlayer::getInstance()->pp_get_msg(msg);
+    switch(msg.m_what)
+    {
+        case PLAYER_MEDIA_NOP:
+            break;
+
+        case PLAYER_MEDIA_SEEK:
+            break;
+
+        case PLAYER_MEDIA_PREPARED:
+            if (self.pPreparedListener)
+                [self.pPreparedListener onPrepared];
+            break;
+
+        case PLAYER_MEDIA_SEEK_COMPLETE:
+            if (self.pSeekCompletionListener)
+                [self.pSeekCompletionListener onCompletion];
+            break;
+
+        case PLAYER_MEDIA_SEEK_FAIL:
+            break;
+
+        case PLAYER_MEDIA_PLAYBACK_COMPLETE:
+            if (self.pCompletionListener)
+                [self.pCompletionListener onCompletion];
+            break;
+
+        case PLAYER_MEDIA_SET_VIDEO_SIZE:
+
+            break;
+        case PLAYER_MEDIA_ERROR:
+            if (self.pErrorListener)
+                [self.pErrorListener onCompletion];
+            break;
+
+        case PLAYER_MEDIA_INFO:
+            if (self.pInfoListener)
+                [self.pInfoListener onCompletion];
+            break;
+
+        case PLAYER_MEDIA_PAUSE:
+
+            break;
+        case PLAYER_MEDIA_START:
+
+            break;
+        default:
+            break;
+    }
     return 0;
 }
 

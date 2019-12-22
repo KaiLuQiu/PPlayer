@@ -104,6 +104,7 @@
     [_pSeekSilder addTarget:self action:@selector(SeekSlider:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:_pSeekSilder];
 }
+
 #pragma mark 初始化按钮控件
 - (void) InitButton {
     _pStartButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -204,6 +205,7 @@
             _pCurPos.text = [self timeToStr:curPos];
             int64_t duration = [_player getDuration];
             _pCurDuration.text = [self timeToStr:duration];
+            _pSeekSilder.value = ((float) curPos / duration) * 100;
         });
     });
     dispatch_resume(_timer);

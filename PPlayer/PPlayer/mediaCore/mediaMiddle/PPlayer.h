@@ -28,14 +28,14 @@ public:
      */
     static PPlayer *getInstance() {
         if(NULL == p_Player) {
-            SDL_LockMutex(pMutex);
+            SDL_LockMutex(p_Mutex);
             if(NULL == p_Player) {
                 p_Player = new (std::nothrow)PPlayer();
                 if(p_Player == NULL) {
                     printf("PPlayer getInstance is NULL!\n");
                 }
             }
-            SDL_UnlockMutex(pMutex);
+            SDL_UnlockMutex(p_Mutex);
         }
         return p_Player;
     }

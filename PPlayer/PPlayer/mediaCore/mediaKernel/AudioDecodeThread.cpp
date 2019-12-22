@@ -6,16 +6,11 @@
 //  Copyright © 2019 邱开禄. All rights reserved.
 //
 #include "AudioRefreshThread.h"
-
 #include "AudioDecodeThread.h"
-#include "mediaCore.h"
 #include "FrameQueueFunc.h"
 #include "AvSyncClock.h"
 
 NS_MEDIA_BEGIN
-SDL_mutex *AudioDecodeThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
-AudioDecodeThread* AudioDecodeThread::p_Decoder = nullptr;
-
 AudioDecodeThread::~AudioDecodeThread()
 {
     
@@ -27,12 +22,13 @@ AudioDecodeThread::AudioDecodeThread()
     pHandler = NULL;
 }
 
-bool AudioDecodeThread::init(PlayerContext *playerContext, EventHandler *handler)
+bool AudioDecodeThread::init(PlayerContext *playerContext, EventHandler *handler, mediaCore *p_Core)
 {
-    if (NULL == handler || NULL == playerContext)
+    if (NULL == handler || NULL == playerContext || NULL == p_Core)
         return false;
     pHandler = handler;
     pPlayerContext = playerContext;
+    pMediaCore = p_Core;
     if(pPlayerContext->audioPacketQueueFunc == NULL)
     {
         printf("pPlayerContext videoPacketQueueFunc is NULL \n");
@@ -107,7 +103,7 @@ int AudioDecodeThread::get_audio_frame(AVFrame *frame)
 
 int AudioDecodeThread::decoder_decode_frame(const AVPacket *AudioPkt, AVFrame *frame)
 {
-    int ret = mediaCore::getIntanse()->Decode(AudioPkt, frame);
+    int ret = pMediaCore->Decode(AudioPkt, frame);
     return ret;
 }
 

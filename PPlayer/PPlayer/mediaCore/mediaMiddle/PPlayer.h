@@ -139,6 +139,12 @@ private:
     static SDL_mutex *mutex;
     EventHandler *pHandler;
     std::string pUrl;
+    VideoRefreshThread  *p_VideoOut;
+    VideoDecodeThread   *p_VideoDecoder;
+    DemuxThread         *p_Demuxer;
+    AudioRefreshThread  *p_AudioOut;
+    AudioDecodeThread   *p_AudioDecoder;
+    mediaCore           *p_MediaCore;
 };
 
 NS_MEDIA_END

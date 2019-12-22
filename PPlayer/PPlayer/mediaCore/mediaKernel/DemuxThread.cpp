@@ -7,15 +7,10 @@
 //
 
 #include "Demuxthread.h"
-#include "mediaCore.h"
 #include "AudioRefreshThread.h"
 
 
 NS_MEDIA_BEGIN
-
-// 类的静态指针需要在此初始化
-SDL_mutex *DemuxThread::mutex = SDL_CreateMutex();
-DemuxThread* DemuxThread::pDemuxer = nullptr;
 
 // 对于packetQueue中我们需要在一个向队列中先放置一个flush_pkt，主要用来作为非连续的两端数据的“分界”标记
 // 大概是为了每次seek操作后插入flush_pkt，更新serial，开启新的播放序列
@@ -33,19 +28,25 @@ DemuxThread::DemuxThread()
     if (NULL == pMessageQueue) {
         printf("message is NULL!!!\n");
     }
+    pMutex = SDL_CreateMutex();
 }
 
 DemuxThread::~DemuxThread()
 {
     SAFE_DELETE(pMessageQueue);
+    if (pMutex) {
+        SDL_DestroyMutex(pMutex);
+        pMutex = NULL;
+    }
 }
 
-bool DemuxThread::init(PlayerContext *playerContext, EventHandler *handler)
+bool DemuxThread::init(PlayerContext *playerContext, EventHandler *handler, mediaCore *p_Core)
 {
-    if (NULL == handler || NULL == playerContext)
+    if (NULL == handler || NULL == playerContext || NULL == p_Core)
         return false;
     pHandler = handler;
     pPlayerContext = playerContext;
+    pMediaCore = p_Core;
     videoRingBuffer = &playerContext->videoRingBuffer;
     audioRingBuffer = &playerContext->audioRingBuffer;
 
@@ -122,7 +123,7 @@ void DemuxThread::run()
         }
         if (true == pSeek) {
             if (pSeekPos != -1) {
-                ret = mediaCore::getIntanse()->Seek(pSeekPos, AVSEEK_FLAG_BACKWARD);
+                ret = pMediaCore->Seek(pSeekPos, AVSEEK_FLAG_BACKWARD);
                 if (ret >= 0) {
                     // 清空audio packet队列
                     audioPackeQueueFunc->packet_queue_flush(audioRingBuffer);
@@ -131,7 +132,7 @@ void DemuxThread::run()
                     videoPackeQueueFunc->packet_queue_flush(videoRingBuffer);
                     videoPackeQueueFunc->packet_queue_put(videoRingBuffer, pPlayerContext->video_flush_pkt);
                     // 清空PCMBuffer
-                    AudioRefreshThread::getIntanse()->flush();
+//                    AudioRefreshThread::getIntanse()->flush();
                     // 发送seek完成的消息
                     if (NULL != pHandler)
                         pHandler->sendOnSeekCompletion();
@@ -169,12 +170,12 @@ void DemuxThread::run()
             }
             if (pPlayerContext->ic->pb && pPlayerContext->ic->pb->error)
                 break;
-            //让线程等待10ms
-            SDL_LockMutex(mutex);
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            SDL_UnlockMutex(mutex);
-            continue;
-        }
+                //让线程等待10ms
+                SDL_LockMutex(pMutex);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                SDL_UnlockMutex(pMutex);
+                continue;
+            }
         else
         {
             pPlayerContext->eof = 0;

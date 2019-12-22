@@ -11,6 +11,8 @@
 #include "MediaDefineInfo.h"
 #include "EventHandler.h"
 #include <thread>
+#include "mediaCore.h"
+
 extern "C" {
 #include "render_frame.h"
 }
@@ -28,28 +30,14 @@ enum FrameState{
 class VideoRefreshThread : public std::thread
 {
 public:
-    /*
-     * Video输出线程的单例模式：饿汉模式
-     */
-    static VideoRefreshThread *getIntanse()
-    {
-        if(NULL == p_VideoOut) {
-            SDL_LockMutex(mutex);
-            if(NULL == p_VideoOut) {
-                p_VideoOut = new (std::nothrow)VideoRefreshThread();
-                if(p_VideoOut == NULL) {
-                    printf("VideoDecodeThread getInstance is NULL!\n");
-                }
-            }
-            SDL_UnlockMutex(mutex);
-        }
-        return p_VideoOut;
-    }
+    VideoRefreshThread();
+    
+    virtual ~VideoRefreshThread();
     
     /*
      * Video输出线程的初始化过程
      */
-    bool init(PlayerContext *playerContext, EventHandler *handler);
+    bool init(PlayerContext *playerContext, EventHandler *handler, mediaCore *p_Core);
     
     /*
      * Video输出线程的初始化过程
@@ -113,20 +101,19 @@ public:
      * 将msg指令入队列
      */
     bool queueMessage(msgInfo msg);
-    VideoRefreshThread();
-    virtual ~VideoRefreshThread();
+
 private:
     void *glView;
     bool bVideoFreeRun;                   // 不进行avsync，让video自由播放
-    PlayerContext *pPlayerContext;
     message *pMessageQueue;               // 当前的message信息
     msgInfo pCurMessage;               // 当前的播放状态
     bool needStop;
     int framedrop;
     bool pPause;                          // 当前是否是pause状态
-    static VideoRefreshThread* p_VideoOut;
-    EventHandler *pHandler;
-    static SDL_mutex *mutex;
+    PlayerContext   *pPlayerContext;
+    EventHandler    *pHandler;
+    mediaCore       *pMediaCore;
+
 };
 
 

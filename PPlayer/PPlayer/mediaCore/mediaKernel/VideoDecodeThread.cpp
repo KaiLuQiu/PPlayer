@@ -8,13 +8,10 @@
 
 
 #include "VideoDecodeThread.h"
-#include "mediaCore.h"
 #include "FrameQueueFunc.h"
 #include "AvSyncClock.h"
 
 NS_MEDIA_BEGIN
-SDL_mutex *VideoDecodeThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
-VideoDecodeThread* VideoDecodeThread::p_Decoder = nullptr;
 
 VideoDecodeThread::VideoDecodeThread()
 {
@@ -103,16 +100,17 @@ int VideoDecodeThread::get_video_frame(AVFrame *frame)
 
 int VideoDecodeThread::decoder_decode_frame(const AVPacket *VideoPkt, AVFrame *frame)
 {
-    int ret = mediaCore::getIntanse()->Decode(VideoPkt, frame);
+    int ret = pMediaCore->Decode(VideoPkt, frame);
     return ret;
 }
 
-bool VideoDecodeThread::init(PlayerContext *playerContext, EventHandler *handler)
+bool VideoDecodeThread::init(PlayerContext *playerContext, EventHandler *handler, mediaCore *p_Core)
 {
-    if (NULL == handler || NULL == playerContext)
+    if (NULL == handler || NULL == playerContext || NULL == p_Core)
         return false;
     pPlayerContext = playerContext;
     pHandler = handler;
+    pMediaCore = p_Core;
     if(pPlayerContext->videoPacketQueueFunc == NULL)
     {
         printf("pPlayerContext videoPacketQueueFunc is NULL \n");

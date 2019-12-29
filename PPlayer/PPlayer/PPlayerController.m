@@ -16,9 +16,10 @@
 #include "render_frame.h"
 
 @interface PPlayerController ()<OnPreparedListener, OnCompletionListener, OnSeekCompletionListener, OnErrorListener, OnInfoListener> {
-    PPlayerMidlle *_player;
-    OpenGLView *playerView;
-    dispatch_source_t _timer;
+    PPlayerMidlle               *_player;
+    OpenGLView                  *playerView;
+    dispatch_source_t           _timer;
+    NSMutableArray              *_videoUrlArray;
 }
 
 @end
@@ -49,6 +50,11 @@
     [self PrepareAsync];
     
     [self GetPlayerTimeInfo];
+}
+
+-(void)passViewController:(NSMutableArray *)urlArray
+{
+    _videoUrlArray = urlArray;
 }
 
 #pragma mark 初始化GLView

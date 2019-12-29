@@ -45,6 +45,12 @@
 		36C7A73D238C0C14003250C1 /* OpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C7A73C238C0C14003250C1 /* OpenGLView.m */; };
 		36C7A743238C0C6D003250C1 /* render_frame.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C7A740238C0C6C003250C1 /* render_frame.m */; };
 		36C7A744238C0C6D003250C1 /* OpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C7A741238C0C6C003250C1 /* OpenGLView.m */; };
+		36FAD2BC23B89A38007B4144 /* image in Resources */ = {isa = PBXBuildFile; fileRef = 36FAD2BB23B89A38007B4144 /* image */; };
+		36FAD2CF23B89A66007B4144 /* myPhotoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 36FAD2C023B89A66007B4144 /* myPhotoCell.m */; };
+		36FAD2D023B89A66007B4144 /* WPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36FAD2C123B89A66007B4144 /* WPhotoViewController.m */; };
+		36FAD2D123B89A66007B4144 /* NavView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36FAD2C223B89A66007B4144 /* NavView.m */; };
+		36FAD2D523B89A66007B4144 /* WPFunctionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36FAD2CD23B89A66007B4144 /* WPFunctionView.m */; };
+		36FAD2D623B89A66007B4144 /* UIImage+fixOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 36FAD2CE23B89A66007B4144 /* UIImage+fixOrientation.m */; };
 		643A2D832377F9DD000426FB /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 643A2D7C2377F9DD000426FB /* libavutil.a */; };
 		643A2D842377F9DD000426FB /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 643A2D7D2377F9DD000426FB /* libavfilter.a */; };
 		643A2D852377F9DD000426FB /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 643A2D7E2377F9DD000426FB /* libavcodec.a */; };
@@ -225,6 +231,18 @@
 		36C7A741238C0C6C003250C1 /* OpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenGLView.m; sourceTree = "<group>"; };
 		36C7A742238C0C6C003250C1 /* render_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render_frame.h; sourceTree = "<group>"; };
 		36FAD14B23A85741007B4144 /* PPlayer_C_Interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPlayer_C_Interface.h; sourceTree = "<group>"; };
+		36FAD2BB23B89A38007B4144 /* image */ = {isa = PBXFileReference; lastKnownFileType = folder; path = image; sourceTree = "<group>"; };
+		36FAD2C023B89A66007B4144 /* myPhotoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = myPhotoCell.m; sourceTree = "<group>"; };
+		36FAD2C123B89A66007B4144 /* WPhotoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPhotoViewController.m; sourceTree = "<group>"; };
+		36FAD2C223B89A66007B4144 /* NavView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavView.m; sourceTree = "<group>"; };
+		36FAD2C723B89A66007B4144 /* WPFunctionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPFunctionView.h; sourceTree = "<group>"; };
+		36FAD2C823B89A66007B4144 /* UIImage+fixOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+fixOrientation.h"; sourceTree = "<group>"; };
+		36FAD2C923B89A66007B4144 /* myPhotoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myPhotoCell.h; sourceTree = "<group>"; };
+		36FAD2CA23B89A66007B4144 /* WPMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPMacros.h; sourceTree = "<group>"; };
+		36FAD2CB23B89A66007B4144 /* NavView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavView.h; sourceTree = "<group>"; };
+		36FAD2CC23B89A66007B4144 /* WPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WPhotoViewController.h; sourceTree = "<group>"; };
+		36FAD2CD23B89A66007B4144 /* WPFunctionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WPFunctionView.m; sourceTree = "<group>"; };
+		36FAD2CE23B89A66007B4144 /* UIImage+fixOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+fixOrientation.m"; sourceTree = "<group>"; };
 		643A2D042377F9DD000426FB /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		643A2D052377F9DD000426FB /* buffersrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersrc.h; sourceTree = "<group>"; };
 		643A2D062377F9DD000426FB /* buffersink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersink.h; sourceTree = "<group>"; };
@@ -421,9 +439,11 @@
 			children = (
 				36C7A73E238C0C6C003250C1 /* OpenGL */,
 				365936E423880DA300C98247 /* GLES2 */,
+				36FAD2BB23B89A38007B4144 /* image */,
 				3604E91D23801C6300E693D4 /* video */,
 				369BDCE8237FAE68001A9EBC /* mediaCore */,
 				646E8CBE23763BB300311AAA /* fdk-aac-ios */,
+				36FAD2BF23B89A66007B4144 /* WPhoto */,
 				646E8CB723763B9200311AAA /* x264-iOS */,
 				19200D9F216F675800EF7D6F /* SDL2 */,
 				643A2D012377F9DD000426FB /* FFmpeg-iOS */,
@@ -716,6 +736,24 @@
 			name = OpenGL;
 			path = PPlayer/OpenGL;
 			sourceTree = SOURCE_ROOT;
+		};
+		36FAD2BF23B89A66007B4144 /* WPhoto */ = {
+			isa = PBXGroup;
+			children = (
+				36FAD2C023B89A66007B4144 /* myPhotoCell.m */,
+				36FAD2C123B89A66007B4144 /* WPhotoViewController.m */,
+				36FAD2C223B89A66007B4144 /* NavView.m */,
+				36FAD2C723B89A66007B4144 /* WPFunctionView.h */,
+				36FAD2C823B89A66007B4144 /* UIImage+fixOrientation.h */,
+				36FAD2C923B89A66007B4144 /* myPhotoCell.h */,
+				36FAD2CA23B89A66007B4144 /* WPMacros.h */,
+				36FAD2CB23B89A66007B4144 /* NavView.h */,
+				36FAD2CC23B89A66007B4144 /* WPhotoViewController.h */,
+				36FAD2CD23B89A66007B4144 /* WPFunctionView.m */,
+				36FAD2CE23B89A66007B4144 /* UIImage+fixOrientation.m */,
+			);
+			path = WPhoto;
+			sourceTree = "<group>";
 		};
 		643A2D012377F9DD000426FB /* FFmpeg-iOS */ = {
 			isa = PBXGroup;
@@ -1089,6 +1127,7 @@
 				19200BD8216F65B200EF7D6F /* Assets.xcassets in Resources */,
 				365936ED23880DA300C98247 /* mvp_vsh.glsl in Resources */,
 				19200BD6216F65B100EF7D6F /* Main.storyboard in Resources */,
+				36FAD2BC23B89A38007B4144 /* image in Resources */,
 				19200DF9216F677C00EF7D6F /* SDL_config.h.cmake in Resources */,
 				19200DFA216F677C00EF7D6F /* SDL_config.h.in in Resources */,
 			);
@@ -1116,8 +1155,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				369BDD07237FAE68001A9EBC /* AudioRefreshThread.cpp in Sources */,
+				36FAD2D023B89A66007B4144 /* WPhotoViewController.m in Sources */,
 				369BDD02237FAE68001A9EBC /* DemuxThread.cpp in Sources */,
 				197EF9A4221AAF850015F02F /* PPlayerController.m in Sources */,
+				36FAD2CF23B89A66007B4144 /* myPhotoCell.m in Sources */,
+				36FAD2D123B89A66007B4144 /* NavView.m in Sources */,
 				369BDD03237FAE68001A9EBC /* AudioDecodeThread.cpp in Sources */,
 				369BDD01237FAE68001A9EBC /* VideoDecodeThread.cpp in Sources */,
 				369BDD06237FAE68001A9EBC /* AvSyncClock.cpp in Sources */,
@@ -1132,6 +1174,7 @@
 				36C7A743238C0C6D003250C1 /* render_frame.m in Sources */,
 				369BDD05237FAE68001A9EBC /* VideoRefreshThread.cpp in Sources */,
 				369BDD08237FAE68001A9EBC /* PPlayer.cpp in Sources */,
+				36FAD2D623B89A66007B4144 /* UIImage+fixOrientation.m in Sources */,
 				36504E3923A4A415002036C5 /* Message.cpp in Sources */,
 				3625584C2380C3CF00BB843F /* PacketQueueFunc.cpp in Sources */,
 				365936EC23880DA300C98247 /* compileShaderTool.m in Sources */,
@@ -1139,6 +1182,7 @@
 				369BDD04237FAE68001A9EBC /* FrameQueueFunc.cpp in Sources */,
 				368610C223A0A78500900CD0 /* mediaListener.cpp in Sources */,
 				36C7A73D238C0C14003250C1 /* OpenGLView.m in Sources */,
+				36FAD2D523B89A66007B4144 /* WPFunctionView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1317,7 +1361,7 @@
 					"$(PROJECT_DIR)/PPlayer/fdk-aac-ios/include",
 				);
 				INFOPLIST_FILE = PPlayer/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1350,7 +1394,7 @@
 					"$(PROJECT_DIR)/PPlayer/fdk-aac-ios/include",
 				);
 				INFOPLIST_FILE = PPlayer/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

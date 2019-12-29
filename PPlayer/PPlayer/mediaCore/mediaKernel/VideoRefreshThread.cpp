@@ -19,9 +19,9 @@ VideoRefreshThread::VideoRefreshThread()
     needStop = 0;
     framedrop = -1;
     pPause = false;
-    pMessageQueue = new message();
+    pMessageQueue = new (std::nothrow)message();
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!\n");
+        printf("VideoRefreshThread: message is NULL!!!\n");
     }
     pCurMessage.cmd = MESSAGE_CMD_NONE;
     pCurMessage.data = -1;

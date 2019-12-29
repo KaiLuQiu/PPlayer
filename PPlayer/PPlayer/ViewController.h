@@ -10,6 +10,12 @@
 
 @interface ViewController : UIViewController
 
+#define SCREENWIDTH         ([UIScreen mainScreen].bounds.size.width)
+#define SCREENHEIGHT        ([UIScreen mainScreen].bounds.size.height)
+#define SCREENWIDTH_D40     (SCREENWIDTH / 40)
+#define SCREENHEIGHT_D40    (SCREENHEIGHT / 40)
+
+@property (nonatomic, strong) UIButton*         pOpenVideoButton;
 
 @end
 

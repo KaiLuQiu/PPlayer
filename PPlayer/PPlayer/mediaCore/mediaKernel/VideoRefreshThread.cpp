@@ -11,9 +11,6 @@
 #include "AvSyncClock.h"
 
 NS_MEDIA_BEGIN
-SDL_mutex *VideoRefreshThread::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
-VideoRefreshThread* VideoRefreshThread::p_VideoOut = nullptr;
-
 VideoRefreshThread::VideoRefreshThread()
 {
     pPlayerContext = NULL;
@@ -22,9 +19,9 @@ VideoRefreshThread::VideoRefreshThread()
     needStop = 0;
     framedrop = -1;
     pPause = false;
-    pMessageQueue = new message();
+    pMessageQueue = new (std::nothrow)message();
     if (NULL == pMessageQueue) {
-        printf("message is NULL!!!\n");
+        printf("VideoRefreshThread: message is NULL!!!\n");
     }
     pCurMessage.cmd = MESSAGE_CMD_NONE;
     pCurMessage.data = -1;
@@ -35,12 +32,13 @@ VideoRefreshThread::~VideoRefreshThread()
     SAFE_DELETE(pMessageQueue);
 }
 
-bool VideoRefreshThread::init(PlayerContext *playerContext, EventHandler *handler)
+bool VideoRefreshThread::init(PlayerContext *playerContext, EventHandler *handler, mediaCore *p_Core)
 {
-    if (NULL == handler || NULL == playerContext)
+    if (NULL == handler || NULL == playerContext || NULL == p_Core)
         return false;
     pHandler = handler;
     pPlayerContext = playerContext;
+    pMediaCore = p_Core;
     return true;
 }
 

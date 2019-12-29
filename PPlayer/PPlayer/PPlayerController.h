@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic)         UILabel*          pVolumeText;
 @property (nonatomic)         UILabel*          pSeekText;
 
-
+-(void)passViewController:(NSMutableArray *)urlArray;
 @end
 
 NS_ASSUME_NONNULL_END

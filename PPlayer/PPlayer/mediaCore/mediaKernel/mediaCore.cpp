@@ -17,22 +17,26 @@ NS_MEDIA_BEGIN
 // 输入流InputStream下的pts和dts以AV_TIME_BASE为单位(微秒)，至于为什么要转化为微秒，可能是为了避免使用浮点数.
 // 输出流OutputStream涉及音视频同步，结构和InputStream不同，暂时只作记录，不分析。
 
-
-mediaCore* mediaCore::p_Core = nullptr;
-SDL_mutex *mediaCore::mutex = SDL_CreateMutex();      //类的静态指针需要在此初始化
-
 mediaCore::mediaCore()
 {
-    avFormatContext = NULL;
     pHandler = NULL;
     swr_ctx = NULL;
-    av_register_all();      // 挂载demuxer filter muxer decoder等
+    // 挂载demuxer filter muxer decoder等
+    av_register_all();
     avformat_network_init();
+    pMutex = SDL_CreateMutex();
 }
 
 mediaCore::~mediaCore()
 {
-
+    if (pMutex) {
+        SDL_DestroyMutex(pMutex);
+        pMutex = NULL;
+    }
+    if(swr_ctx) {
+        swr_free(&swr_ctx);
+        swr_ctx = NULL;
+    }
 }
 
 bool mediaCore::Init(PlayerContext *playerContext, EventHandler *handler)
@@ -183,15 +187,15 @@ bool mediaCore::OpenAudioDecode(int streamIndex)
 int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 {
     DecoderContext *codecContext;
-    SDL_LockMutex(mutex);
+    SDL_LockMutex(pMutex);
     
     if (!p_PlayerContext->ic || pkt == NULL || frame == NULL) {
-        SDL_UnlockMutex(mutex);
+        SDL_UnlockMutex(pMutex);
         return -1;
     }
     
     if (pkt->stream_index != p_PlayerContext->audioStreamIndex && pkt->stream_index != p_PlayerContext->videoStreamIndex) {
-        SDL_UnlockMutex(mutex);
+        SDL_UnlockMutex(pMutex);
         return -1;
     }
     
@@ -216,13 +220,13 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 //        AVERROR_EOF：已经刷新×××，没有新的包可以被刷新
 //        AVERROR(EINVAL)：没有打开×××，或者这是一个编码器，或者要求刷新
 //        AVERRO(ENOMEN)：无法添加包到内部队列
-        SDL_UnlockMutex(mutex);
+        SDL_UnlockMutex(pMutex);
         return ret;
     }
     
     ret = avcodec_receive_frame(codecContext->codecContext, frame);
     if (ret < 0) {
-        SDL_UnlockMutex(mutex);
+        SDL_UnlockMutex(pMutex);
         return ret;
     }
     
@@ -243,7 +247,7 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
         frame->pts = frame->best_effort_timestamp;
     }
 
-    SDL_UnlockMutex(mutex);
+    SDL_UnlockMutex(pMutex);
     
     return 1;
 }
@@ -251,9 +255,9 @@ int mediaCore::Decode(const AVPacket *pkt, AVFrame *frame)
 int mediaCore::Seek(float pos, int type)
 {
     int ret = -1;
-    SDL_LockMutex(mutex);
+    SDL_LockMutex(pMutex);
     if (!p_PlayerContext->ic) {
-        SDL_UnlockMutex(mutex);
+        SDL_UnlockMutex(pMutex);
         return false;
     }
     int64_t seek_min    = INT64_MIN;
@@ -265,7 +269,7 @@ int mediaCore::Seek(float pos, int type)
         av_log(NULL, AV_LOG_ERROR,
                        "%s: error while seeking\n", p_PlayerContext->ic->filename);
     }
-    SDL_UnlockMutex(mutex);
+    SDL_UnlockMutex(pMutex);
     return ret;
 }
 
@@ -335,3 +339,4 @@ int mediaCore::audioResample(uint8_t **out, int out_samples, AVFrame* frame)
     
 }
 NS_MEDIA_END
+

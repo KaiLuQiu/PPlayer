@@ -12,27 +12,62 @@ NS_MEDIA_BEGIN
 
 PPlayer* PPlayer::p_Player = nullptr;
 // 类的静态指针需要在此初始化
-SDL_mutex* PPlayer::mutex = SDL_CreateMutex();
+SDL_mutex* PPlayer::p_Mutex = SDL_CreateMutex();
 
 PPlayer::PPlayer()
 {
-    pHandler = NULL;
+    p_Handler = NULL;
     pPlayerContext = new (std::nothrow)PlayerContext();
     if (NULL == pPlayerContext) {
-        printf("new player fail!!! \n");
+        printf("PPlayer: new playerInfo fail!!! \n");
     }
-
     pPlayerContext->volumeValue = 50.0;
+    
+    p_VideoOutThread = new (std::nothrow)VideoRefreshThread();
+    if (NULL == p_VideoOutThread) {
+        printf("PPlayer: new VideoRefreshThread fail!!! \n");
+    }
+    
+    p_VideoDecoderThread = new (std::nothrow)VideoDecodeThread();
+    if (NULL == p_VideoDecoderThread) {
+        printf("PPlayer: new VideoDecodeThread fail!!! \n");
+    }
+    
+    p_DemuxerThread = new (std::nothrow)DemuxThread();
+    if (NULL == p_DemuxerThread) {
+        printf("PPlayer: new DemuxThread fail!!! \n");
+    }
+    
+    p_AudioOutThread = new (std::nothrow)AudioRefreshThread();
+    if (NULL == p_AudioOutThread) {
+        printf("PPlayer: new AudioRefreshThread fail!!! \n");
+    }
+    
+    p_AudioDecoderThread = new (std::nothrow)AudioDecodeThread();
+    if (NULL == p_AudioDecoderThread) {
+        printf("PPlayer: new AudioDecodeThread fail!!! \n");
+    }
+    
+    p_MediaCore = new (std::nothrow)mediaCore();
+    if (NULL == p_MediaCore) {
+        printf("PPlayer: new mediaCore fail!!! \n");
+    }
 }
 
 PPlayer::~PPlayer()
 {
     SAFE_DELETE(pPlayerContext);
+    SAFE_DELETE(p_VideoOutThread);
+    SAFE_DELETE(p_VideoDecoderThread);
+    SAFE_DELETE(p_DemuxerThread);
+    SAFE_DELETE(p_AudioOutThread);
+    SAFE_DELETE(p_AudioDecoderThread);
+    SAFE_DELETE(p_MediaCore);
 }
 
 void PPlayer::setHandle(EventHandler *handle)
 {
-    pHandler = handle;
+    p_Handler = handle;
 }
 
 // 这边暂时只保留url信息
@@ -43,36 +78,45 @@ void PPlayer::setDataSource(std::string url)
 
 int PPlayer::setView(void *view)
 {
-    VideoRefreshThread::getIntanse()->setView(view);
+    if (NULL == p_VideoOutThread) {
+        printf("PPlayer: p_VideoOut is NULL\n");
+        return -1;
+    }
+    p_VideoOutThread->setView(view);
     return 1;
 }
 
 bool PPlayer::prepareAsync()
 {
-    if (NULL == pHandler && NULL == pPlayerContext) {
-        printf("prepareAsync error pHandler or pPlayerContext is NULL!!!\n");
+    if (NULL == p_Handler && NULL == pPlayerContext) {
+        printf("PPlayer: prepareAsync error pHandler or pPlayerContext is NULL!!!\n");
         return false;
     }
-    mediaCore::getIntanse()->Init(pPlayerContext, pHandler);
+    if (NULL == p_MediaCore || NULL == p_DemuxerThread || NULL == p_VideoDecoderThread ||
+        NULL == p_VideoOutThread || NULL == p_AudioOutThread || NULL == p_AudioDecoderThread) {
+        printf("PPlayer: p_Core or p_Demuxer or p_VideoDecoder or p_VideoOut or p_AudioOut or p_AudioDecoder is NULL\n");
+        return false;
+    }
+    p_MediaCore->Init(pPlayerContext, p_Handler);
     // avformat和avcodec都打开了
-    bool ret = mediaCore::getIntanse()->StreamOpen(pUrl);
+    bool ret = p_MediaCore->StreamOpen(pUrl);
     if(ret == true)
     {
-        DemuxThread::getIntanse()->init(pPlayerContext, pHandler);
+        p_DemuxerThread->init(pPlayerContext, p_Handler, p_MediaCore);
         // 初始化videodecoder，主要是startPacketQueue
-        VideoDecodeThread::getIntanse()->init(pPlayerContext, pHandler);
-        VideoRefreshThread::getIntanse()->init(pPlayerContext, pHandler);
-        AudioRefreshThread::getIntanse()->init(pPlayerContext, pHandler);
+        p_VideoDecoderThread->init(pPlayerContext, p_Handler, p_MediaCore);
+        p_VideoOutThread->init(pPlayerContext, p_Handler, p_MediaCore);
+        p_AudioOutThread->init(pPlayerContext, p_Handler, p_MediaCore);
         // 初始化videodecoder，主要是startPacketQueue
-        AudioDecodeThread::getIntanse()->init(pPlayerContext, pHandler);
+        p_AudioDecoderThread->init(pPlayerContext, p_Handler, p_MediaCore);
         // 开启demuxer线程读取数据包
-        DemuxThread::getIntanse()->start();
+        p_DemuxerThread->start();
         // videoDecode和audioDecode可以在prepareAsync的时候就开启，当显示线程则不可。为了加快第一帧的show
-        VideoDecodeThread::getIntanse()->start();
-        AudioDecodeThread::getIntanse()->start();
+        p_VideoDecoderThread->start();
+        p_AudioDecoderThread->start();
     }
     // 这边一般要render第一帧之后才能上发prepared消息
-    pHandler->sendOnPrepared();
+    p_Handler->sendOnPrepared();
     return true;
 }
 
@@ -83,22 +127,30 @@ void PPlayer::prepare()
 
 bool PPlayer::start()
 {
-    VideoRefreshThread::getIntanse()->start();
-    AudioRefreshThread::getIntanse()->start();
-    pHandler->sendOnStart();
+    if (NULL == p_VideoOutThread || NULL == p_AudioOutThread) {
+        printf("PPlayer:p_VideoOut or p_AudioOut is NULL\n");
+        return false;
+    }
+    p_VideoOutThread->start();
+    p_AudioOutThread->start();
+    p_Handler->sendOnStart();
     return true;
 }
 
 bool PPlayer::pause(bool state)
 {
+    if (NULL == p_VideoOutThread || NULL == p_AudioOutThread || NULL == p_DemuxerThread) {
+        printf("PPlayer:p_VideoOut or p_AudioOut or p_Demuxer is NULL\n");
+        return false;
+    }
     msgInfo msg;
     // 暂停播放
     if(true == state) {
         msg.cmd = MESSAGE_CMD_PAUSE;
         msg.data = -1;
-        VideoRefreshThread::getIntanse()->queueMessage(msg);
-        AudioRefreshThread::getIntanse()->queueMessage(msg);
-        DemuxThread::getIntanse()->queueMessage(msg);
+        p_VideoOutThread->queueMessage(msg);
+        p_AudioOutThread->queueMessage(msg);
+        p_DemuxerThread->queueMessage(msg);
         pPlayerContext->AudioClock.paused = 1;
         pPlayerContext->VideoClock.paused = 1;
     }
@@ -108,9 +160,9 @@ bool PPlayer::pause(bool state)
         // 更新frame_timer;  因为暂停过程中系统时间是一直在走的，last_updated是暂停时刻的系统时间
         pPlayerContext->frame_timer += av_gettime_relative() / 1000000.0 - pPlayerContext->VideoClock.last_updated;
         AvSyncClock::set_clock(&pPlayerContext->VideoClock, AvSyncClock::get_clock(&pPlayerContext->VideoClock), pPlayerContext->VideoClock.serial);
-        VideoRefreshThread::getIntanse()->queueMessage(msg);
-        AudioRefreshThread::getIntanse()->queueMessage(msg);
-        DemuxThread::getIntanse()->queueMessage(msg);
+        p_VideoOutThread->queueMessage(msg);
+        p_AudioOutThread->queueMessage(msg);
+        p_DemuxerThread->queueMessage(msg);
         pPlayerContext->AudioClock.paused = 0;
         pPlayerContext->VideoClock.paused = 0;
     }
@@ -121,12 +173,16 @@ bool PPlayer::pause(bool state)
 int PPlayer::seek(float pos)
 {
     int ret;
+    if (NULL == p_DemuxerThread) {
+        printf("PPlayer: p_Demuxer is NULL\n");
+        return -1;
+    }
     if (PLAYER_MEDIA_NOP != pPlayerContext->playerState) {
         msgInfo msg;
         msg.cmd = MESSAGE_CMD_SEEK;
         msg.data = pos;
         // seek到当前位置的后一个I frame
-        DemuxThread::getIntanse()->queueMessage(msg);
+        p_DemuxerThread->queueMessage(msg);
     } else {
         ret = -1;
     }
@@ -227,8 +283,10 @@ void PPlayer::pp_get_msg(Message& msg)
         break;
 
     case PLAYER_MEDIA_SEEK_COMPLETE:
-        break;
+        // 这边将PCMBuffer中的数据给flush掉
+        p_AudioOutThread->flush();
 
+        break;
     case PLAYER_MEDIA_SEEK_FAIL:
         break;
 

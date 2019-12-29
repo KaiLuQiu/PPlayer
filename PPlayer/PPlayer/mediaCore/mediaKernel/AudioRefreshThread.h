@@ -12,6 +12,7 @@
 #include <thread>
 #include "stdint.h"
 #include "EventHandler.h"
+#include "mediaCore.h"
 
 NS_MEDIA_BEGIN
 
@@ -59,28 +60,14 @@ typedef struct PCMBufferQueue_T {
 
 class AudioRefreshThread : public std::thread {
 public:
-    /*
-     * Audio输出现场的单例模式：饿汉模式
-     */
-    static AudioRefreshThread* getIntanse() {
-        if(NULL == p_AudioOut) {
-            SDL_LockMutex(mutex);
-            if(NULL == p_AudioOut) {
-                p_AudioOut = new (std::nothrow)AudioRefreshThread();
-                if(p_AudioOut == NULL) {
-                    printf("AudioDecodeThread getInstance is NULL! \n");
-                }
-            }
-            SDL_UnlockMutex(mutex);
-        }
-        return p_AudioOut;
-    }
     AudioRefreshThread();
     
+    virtual ~AudioRefreshThread();
+
     /*
      * Audio输出现场初始化过程
      */
-    bool init(PlayerContext *pPlayer, EventHandler *handler);
+    bool init(PlayerContext *pPlayer, EventHandler *handler, mediaCore *p_Core);
     
     /*
      * 启动Audio输出
@@ -110,8 +97,7 @@ public:
      /*
       * 将msg指令入队列
       */
-     bool queueMessage(msgInfo msg);
-    virtual ~AudioRefreshThread();
+    bool queueMessage(msgInfo msg);
     int bFirstFrame;
 private:
     /*
@@ -129,9 +115,8 @@ private:
      */
     PCMBuffer *GetOneValidPCMBuffer();
 private:
-    static AudioRefreshThread *p_AudioOut;
-    static SDL_mutex *mutex;
-    PlayerContext *pPlayerContext;
+
+
     PCMBuffer PCMBuffers[PCM_QUEUE_SIZE];
     PCMBufferQueue pPCMBufferQueue;
     int needStop;
@@ -140,12 +125,15 @@ private:
 
     bool pPause;                               // 当前是否是pause状态
     bool pSeek;
-    EventHandler *pHandler;
+
     double audio_clock;
     int audio_clock_serial;
     int audio_hw_buf_size;                      // audio设置的hardWareSize大小
     int buffer_size_index;                      // 表示当前已经的读取的索引大小
     
+    EventHandler    *pHandler;
+    PlayerContext   *pPlayerContext;
+    mediaCore       *pMediaCore;
 };
 
 NS_MEDIA_END

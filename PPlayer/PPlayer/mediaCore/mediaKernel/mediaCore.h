@@ -19,23 +19,6 @@ public:
     /*
      * mediaCore单例
      */
-    static mediaCore* getIntanse() {
-        if(NULL == p_Core) {
-            SDL_LockMutex(mutex);
-            if(NULL == p_Core) {
-                p_Core = new (std::nothrow)mediaCore();
-                if(p_Core == NULL) {
-                    printf("mediaCore getInstance is NULL!\n");
-                }
-            }
-            SDL_UnlockMutex(mutex);
-        }
-        return p_Core;
-    }
-    
-    /*
-     * mediaCore单例
-     */
     static double r2d(AVRational r)
     {
         return r.num == 0 || r.den == 0 ? 0. : (double)r.num / (double)r.den;
@@ -96,14 +79,14 @@ private:
      * 开启audio解码器
      */
     bool OpenAudioDecode(int streamIndex);
-    EventHandler *pHandler;
-    static mediaCore *p_Core;
-    static SDL_mutex *mutex;
-    AVFormatContext *avFormatContext;
-    PlayerContext *p_PlayerContext;
     AVDictionary  *codec_opts;
     // 音视频转码上下文
     SwrContext *swr_ctx;
+    
+    EventHandler        *pHandler;
+    PlayerContext       *p_PlayerContext;
+    SDL_mutex           *pMutex;
+
 };
 
 NS_MEDIA_END

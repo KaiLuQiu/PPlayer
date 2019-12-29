@@ -28,14 +28,14 @@ public:
      */
     static PPlayer *getInstance() {
         if(NULL == p_Player) {
-            SDL_LockMutex(mutex);
+            SDL_LockMutex(p_Mutex);
             if(NULL == p_Player) {
                 p_Player = new (std::nothrow)PPlayer();
                 if(p_Player == NULL) {
                     printf("PPlayer getInstance is NULL!\n");
                 }
             }
-            SDL_UnlockMutex(mutex);
+            SDL_UnlockMutex(p_Mutex);
         }
         return p_Player;
     }
@@ -134,11 +134,17 @@ public:
      */
     virtual ~PPlayer();
 private:
-    PlayerContext *pPlayerContext;
-    static PPlayer *p_Player;
-    static SDL_mutex *mutex;
-    EventHandler *pHandler;
     std::string pUrl;
+    static SDL_mutex    *p_Mutex;
+    PlayerContext       *pPlayerContext;
+    static PPlayer      *p_Player;
+    EventHandler        *p_Handler;
+    mediaCore           *p_MediaCore;
+    VideoRefreshThread  *p_VideoOutThread;
+    VideoDecodeThread   *p_VideoDecoderThread;
+    DemuxThread         *p_DemuxerThread;
+    AudioRefreshThread  *p_AudioOutThread;
+    AudioDecodeThread   *p_AudioDecoderThread;
 };
 
 NS_MEDIA_END

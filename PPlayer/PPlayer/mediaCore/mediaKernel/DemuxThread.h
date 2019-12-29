@@ -12,6 +12,7 @@
 #include "MediaDefineInfo.h"
 #include "PacketQueueFunc.h"
 #include "EventHandler.h"
+#include "mediaCore.h"
 
 NS_MEDIA_BEGIN
 // 15M
@@ -19,23 +20,10 @@ NS_MEDIA_BEGIN
 
 class DemuxThread : public std::thread {
 public:
-    /*
-     * demux线程的单例模式：饿汉模式
-     */
-    static DemuxThread* getIntanse() {
-        if(NULL == pDemuxer) {
-            SDL_LockMutex(mutex);
-            if(NULL == pDemuxer) {
-                pDemuxer = new (std::nothrow)DemuxThread();
-                if(pDemuxer == NULL) {
-                    printf("DemuxThread getInstance is NULL!\n");
-                }
-            }
-            SDL_UnlockMutex(mutex);
-        }
-        return pDemuxer;
-    }
+    DemuxThread();
     
+    virtual ~DemuxThread();
+
     /*
      * demux线程的单例模式：饿汉模式
      */
@@ -46,7 +34,7 @@ public:
     /*
      * demux线程的初始化过程
      */
-    bool init(PlayerContext *playerContext, EventHandler *handler);
+    bool init(PlayerContext *playerContext, EventHandler *handler, mediaCore *p_Core);
 
     /*
      * demux线程主要运行的代码
@@ -77,19 +65,13 @@ public:
      * 将msg指令入队列
      */
     bool queueMessage(msgInfo msg);
-    virtual ~DemuxThread();
-    DemuxThread();
 
 private:
-    static SDL_mutex *mutex;
-    static DemuxThread* pDemuxer;
     bool pNeedStop;
-    EventHandler *pHandler;
     // 存储demuxer出来的未解码的序列帧
     PacketQueue *videoRingBuffer;
     // 存储demuxer出来的未解码的序列帧
     PacketQueue *audioRingBuffer;
-    PlayerContext *pPlayerContext;
     PacketQueueFunc *videoPackeQueueFunc;
     PacketQueueFunc *audioPackeQueueFunc;
     // 当前的message信息
@@ -106,6 +88,12 @@ private:
     int start_time = AV_NOPTS_VALUE;
     // 流seek的方式有by byte也有by time
     int seek_by_bytes;
+    
+    PlayerContext       *pPlayerContext;
+    EventHandler        *pHandler;
+    mediaCore           *pMediaCore;
+    SDL_mutex           *pMutex;
+    
 };
 
 

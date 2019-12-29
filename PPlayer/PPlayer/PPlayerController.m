@@ -16,9 +16,10 @@
 #include "render_frame.h"
 
 @interface PPlayerController ()<OnPreparedListener, OnCompletionListener, OnSeekCompletionListener, OnErrorListener, OnInfoListener> {
-    PPlayerMidlle *_player;
-    OpenGLView *playerView;
-    dispatch_source_t _timer;
+    PPlayerMidlle               *_player;
+    OpenGLView                  *playerView;
+    dispatch_source_t           _timer;
+    NSMutableArray              *_videoUrlArray;
 }
 
 @end
@@ -49,6 +50,11 @@
     [self PrepareAsync];
     
     [self GetPlayerTimeInfo];
+}
+
+-(void)passViewController:(NSMutableArray *)urlArray
+{
+    _videoUrlArray = urlArray;
 }
 
 #pragma mark 初始化GLView
@@ -104,6 +110,7 @@
     [_pSeekSilder addTarget:self action:@selector(SeekSlider:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:_pSeekSilder];
 }
+
 #pragma mark 初始化按钮控件
 - (void) InitButton {
     _pStartButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -204,6 +211,7 @@
             _pCurPos.text = [self timeToStr:curPos];
             int64_t duration = [_player getDuration];
             _pCurDuration.text = [self timeToStr:duration];
+            _pSeekSilder.value = ((float) curPos / duration) * 100;
         });
     });
     dispatch_resume(_timer);

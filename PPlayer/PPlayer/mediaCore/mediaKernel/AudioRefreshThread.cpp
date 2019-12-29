@@ -8,15 +8,10 @@
 
 #include "AudioRefreshThread.h"
 #include "FrameQueueFunc.h"
-#include "mediaCore.h"
 #include "math.h"
 #include "AvSyncClock.h"
 
 NS_MEDIA_BEGIN
-// 类的静态指针需要在此初始化
-SDL_mutex *AudioRefreshThread::mutex = SDL_CreateMutex();
-AudioRefreshThread* AudioRefreshThread::p_AudioOut = nullptr;
-
 void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int len) {
     AudioRefreshThread *pART = (AudioRefreshThread *)udata;
     // 获取当前时间
@@ -130,11 +125,12 @@ void AudioRefreshThread::audio_callback(void *udata, unsigned char *stream, int 
     }
 }
 
-bool AudioRefreshThread::init(PlayerContext *pPlayer, EventHandler *handler) {
-    if (NULL == handler || NULL == pPlayer)
+bool AudioRefreshThread::init(PlayerContext *pPlayer, EventHandler *handler, mediaCore *p_Core) {
+    if (NULL == handler || NULL == pPlayer || NULL == p_Core)
         return -1;
     pHandler = handler;
     pPlayerContext = pPlayer;
+    pMediaCore = p_Core;
     buffer_size_index = 0;
     audio_clock = NAN;
     // 初始化为PCMBuffers分配空间
@@ -379,7 +375,7 @@ void AudioRefreshThread::run() {
             dec_channel_layout       != pPlayerContext->audioInfo.channel_layout ||
             pFrame->frame->sample_rate   != pPlayerContext->audioInfo.freq) {
             // 根据pFrame的信息更新重采样器
-            if(mediaCore::getIntanse()->ResSampleInit(pFrame, dec_channel_layout) < 0) {
+            if(pMediaCore->ResSampleInit(pFrame, dec_channel_layout) < 0) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 continue;
             }
@@ -387,7 +383,7 @@ void AudioRefreshThread::run() {
         
         // 判断重采样器是否创建成功
         // 如果初始化了重采样，则对这一帧数据重采样输出
-        if (mediaCore::getIntanse()->getSwrContext()) {
+        if (pMediaCore->getSwrContext()) {
             // 使用前先将之前的buffer内存给释放了
             SAFE_AV_FREE(pPCMBuffer->bufferAddr);
             // 进行重采样过程
@@ -403,7 +399,7 @@ void AudioRefreshThread::run() {
                 continue;
             }
             // 音频重采样
-            pPCMBuffer->bufferSize = mediaCore::getIntanse()->audioResample(&pPCMBuffer->bufferAddr, out_count, pFrame->frame);
+            pPCMBuffer->bufferSize = pMediaCore->audioResample(&pPCMBuffer->bufferAddr, out_count, pFrame->frame);
             if (pPCMBuffer->bufferSize == 0) {
                 av_frame_unref(pFrame->frame);
                 continue;
@@ -472,6 +468,7 @@ AudioRefreshThread::~AudioRefreshThread() {
         PCMBuffers[i].sample_rate = 0;
         PCMBuffers[i].nb_samples = 0;
     }
+    
 }
 
 void AudioRefreshThread::deinit() {

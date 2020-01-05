@@ -185,7 +185,10 @@ void VideoDecodeThread::run()
         double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         int64_t pos = frame->pkt_pos;
         queue_picture(frame, pts, duration, pos, pPlayerContext->videoDecoder->pkt_serial);
-        av_frame_unref(frame);
+    }
+    if (frame) {
+        av_frame_free(&frame);
+        frame = NULL;
     }
 }
 

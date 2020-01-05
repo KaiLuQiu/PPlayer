@@ -103,13 +103,13 @@ public:
     bool queueMessage(msgInfo msg);
 
 private:
-    void *glView;
-    bool bVideoFreeRun;                   // 不进行avsync，让video自由播放
-    message *pMessageQueue;               // 当前的message信息
-    msgInfo pCurMessage;               // 当前的播放状态
-    bool needStop;
-    int framedrop;
-    bool pPause;                          // 当前是否是pause状态
+    void            *glView;
+    bool            bVideoFreeRun;                   // 不进行avsync，让video自由播放
+    message         *pMessageQueue;               // 当前的message信息
+    msgInfo         pCurMessage;                    // 当前的播放状态
+    bool            needStop;
+    int             framedrop;
+    bool            pPause;                          // 当前是否是pause状态
     PlayerContext   *pPlayerContext;
     EventHandler    *pHandler;
     mediaCore       *pMediaCore;
